@@ -8,10 +8,10 @@
 
 | Name             | Role / Focus Area                                       |
 | :--------------- | :------------------------------------------------------ |
-| **Aquino**       | Project Manager / Research Dev / QA |
+| **Aquino**       | Project Manager / Research Developer / Quality Assurance |
 | **Alba**      | Lead Backend Developer / Frontend Dev                  |
 | **Santiago**     | Lead Frontend Developer / UI/UX Designer                     |
-| **Mejia**       | Lead Research Developer / Database Manager                     |
+| **Mejia**       | Backend Developer / Research Developer / Database Manager                     |
 | **Yoingco**   | Frontend Developer / UI/UX Designer                      |
 
 ## Tech Stack (TBD)
