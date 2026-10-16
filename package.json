@@ -5,7 +5,7 @@
   "workspaces": ["backend", "Frontend"],
   "engines": { "node": ">=24 <25" },
   "scripts": {
-    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm run dev --workspace backend\" \"npm run dev --workspace Frontend\"",
+    "dev": "concurrently -k -n Vertwell_backend,Vertwell_frontend -c blue,green \"npm run dev --workspace backend\" \"npm run dev --workspace Frontend\"",
     "dev:backend": "npm run dev --workspace backend",
     "dev:frontend": "npm run dev --workspace Frontend",
     "build": "npm run build --workspaces",
