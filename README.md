@@ -1,17 +1,34 @@
 # Vertwell
 # System Fundamentals Project - BSCS 3A
 
-> **Status:** Frontend prototype ready; backend scaffold ready
+> **Status:** Backend phase started; database design and local foundation implemented
 > Separate frontend and backend applications for Vertwell's inventory and sales management system.
 
-## Current checkpoint — October 17 GitHub save complete
+## Current checkpoint — October 17 Backend database priority
+
+The Backend phase is now authorized. Database design, permission rules and a
+column dictionary are in [backend/supabase/DESIGN.md](backend/supabase/DESIGN.md).
+Three numbered migrations implement the foundation with 25 restricted tables,
+stock/history safeguards and a guarded development seed. They are applied and
+verified in the user-created Vertwell Supabase development project. PostgreSQL
+tests cover migration replay, constraints, access denial and persistence after
+reopening; 12 rollback checks also pass against the hosted database.
+See [database setup](backend/supabase/README.md) for commands and limitations.
+
+**Keep backend work local until all backend tasks are finished: no commits,
+pushes or GitHub saves for this phase yet.** P2 database setup is verified. P2A
+frontend integration preparation is next. Real
+authentication, enforced role permissions, protected CRUD and checkout follow in
+the order recorded in [HandsOff.md](HandsOff.md).
+
+## Previous checkpoint — October 17 GitHub save complete
 
 The completed frontend and existing backend scaffold are saved in
 [`Huuujji/Vertwell`](https://github.com/Huuujji/Vertwell) on `main`, checkpoint
 [`f08f7b7`](https://github.com/Huuujji/Vertwell/commit/f08f7b79932168954d670b5de9c2490a90db37db).
 The push and exact remote SHA were independently verified. [HandsOff.md](HandsOff.md)
-records the full save and validation scope. **P0 is complete; stop for the user's
-review.** Backend implementation and deployment await a later request. Older
+records the full save and validation scope. **P0 is complete.** The later user
+request has now started Backend; deployment remains separate work. Older
 uncommitted/no-commit statements below describe their historical checkpoints.
 
 P0 validation: root typecheck/build pass for both workspaces; **5 API scaffold tests
@@ -260,7 +277,7 @@ repo/
       routes/         # Health and authenticated user endpoints
       app.ts          # Express app exported for Vercel
       server.ts       # Local server entry point
-    supabase/         # Database design guidance; future migrations belong here
+    supabase/         # Database design, numbered migrations and guarded dev seed
     tests/            # API smoke and authentication-boundary tests
     .env.example
     package.json
@@ -482,7 +499,8 @@ are present, not whether a database connection has been tested.
 6. Restart the development processes after editing environment variables.
 
 The frontend includes `signIn` and `signOut` helpers, a login screen, and a password-reset
-preview. Server role policies and the business database schema have not yet been implemented.
+preview. The database foundation is applied and verified in Vertwell development;
+server role policies, real account lifecycle and protected workflow commands remain pending.
 The backend verifies access tokens with Supabase Auth rather than trusting client-provided identities.
 
 Only publishable keys belong in `VITE_*` variables: Vite includes these values in the browser bundle.
@@ -511,7 +529,10 @@ npm run test:e2e --workspace Frontend
 ```
 
 The API tests cover health, unauthorized requests, missing routes, malformed JSON, and CORS rejection.
-They do not need live Supabase credentials. Actual login and database access require a configured project.
+Database tests execute the migrations in embedded PostgreSQL and verify constraints,
+restricted access, ledger/audit rollback, immutable history and disk persistence.
+They do not need live Supabase credentials. Actual login and Data API access require
+a configured Supabase development project and the later role policies.
 
 The frontend browser tests cover checkout and void traceability, duplicate GCash references,
 stock batches, account-wizard validation, staff navigation, CSV export, mobile overflow,
@@ -606,11 +627,11 @@ Add preview frontend origins explicitly to backend CORS if using Vercel preview 
 The frontend rewrite supports client-side routes; production API requests use the backend origin.
 No Vercel or Supabase resources are provisioned by this scaffold.
 
-## Next Implementation Steps — after P0 and user review
+## Next Implementation Steps — Backend phase
 
-- P0 is saved and verified on GitHub. Stop for user review. October 17 and earlier frontend requests are implemented; see HandsOff.md for the current checkpoint and preserved original messages.
-- Only after a later request, begin the ordered backend priorities in HandsOff.md: P1 database/permission design, P2 database setup, P2A frontend integration preparation, then P3 authentication, P4 roles and P5 protected CRUD.
-- Design the PostgreSQL schema and Row Level Security policies.
+- P0 is saved and verified on GitHub. Backend work now stays local until all backend tasks are finished. HandsOff.md preserves the complete original requests.
+- P1 design and P2 database setup are complete and verified in the Vertwell Supabase development project. Next: P2A frontend integration preparation, then P3 authentication, P4 roles and P5 protected CRUD.
+- Add and verify the permission policies and protected transaction commands before granting application access.
 - Add login and owner-managed accounts, then role authorization and Owner daily-sales review persistence.
 - Implement atomic checkout and stock movements, void approval, and reconciliation.
 - Connect the existing inventory and report screens to durable data and movement records.

@@ -1,16 +1,175 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. P0 is complete: the completed frontend phase and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. Stop for the user's review; backend work requires a later request. Database design/setup follows that review, then frontend integration after database setup, with Authentication and Roles enforced before protected actions go live. See the P0 checkpoint below for the commit and validation scope. The October 17, October 16, October 15 and October 5 frontend requests remain preserved verbatim with their completed checkpoints and verification limits.
+Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1 design and P2 database setup are complete and verified in the user-created Vertwell Supabase development project. P2A frontend integration preparation is next.** Authentication and Roles must be enforced before protected actions go live. Original user messages and historical checkpoints remain preserved below.
 
 ## New — current state and continuation
 
-### Current checkpoint — P0 GitHub save complete; stop for user review (October 17, 2026)
+### Current checkpoint — Backend database priority applied and verified (October 17, 2026)
 
-**Status: P0 GitHub save complete and remotely verified; all backend priorities below are pending.** The user explicitly supplied https://github.com/Huuujji/Vertwell and requested saving the whole current system there before moving to Backend. The current instruction is to do only this priority and stop for their review. The completed frontend and existing backend scaffold are preserved; this task did not implement backend code, create database tables, provision services or deploy anything.
+**The new user request supersedes the P0 stop-for-review instruction.** Start with
+the database, following the original messages and actual frontend behavior, not
+just an older continuation script. **No Backend commits, pushes, PRs or GitHub
+saves while Backend tasks remain unfinished.** The P0 save was a completed
+frontend bridge; its one-time authorization does not carry into this phase.
 
-**Focus rule:** finish **P0 before any backend implementation, then stop for the user's review**. After a later request authorizes backend work, follow **P1 database design → P2 database setup → P2A frontend integration preparation → P3 Authentication → P4 Roles → P5 protected CRUD/integration completion** as the first backend milestone. The user explicitly places backend-dependent frontend integration after completed database setup. Begin its data/API mapping and request-state wiring at P2A; complete real identity routing in P3 and protected actions after P4. Agree the permission model while designing the database. P6 through P9 are subsequent work and must not displace the first milestone. Tests and verification belong to each priority, not only to a final phase.
+#### Original October 17 Backend-start user message — verbatim
 
-The newest direction here supersedes the old blanket frontend-only continuation instructions for the next backend task. P0 is the explicitly requested commit/push checkpoint for the frontend-to-backend transition; older statements excluding commits do not cancel this new bridge task. Older checkpoints remain evidence of their own completed frontend scope; they do not mean the backend is implemented. Deployment, real payment-provider integration and production data changes remain separate work.
+```text
+Read HandsOff.md and implement the October 17 highest-priority. Follow my full original message, not just the continuation script.
+now that the system is saved next thing we do is the database Priority task first
+
+also now that we are in phase Backend we will not save it in the github unless we have finish all the task in the backend add this in the handsoff
+
+we are now starting the phase Backend
+```
+
+#### Database checkpoint — implementation and hosted completion
+
+- **P1 complete:** `backend/supabase/DESIGN.md` maps the actual frontend workflows,
+  all four stock models, independent modifier copies, signed recipe omissions,
+  fixed bundle options/nesting, SKU ownership, batch dates/units, preserved sale
+  snapshots, every database column and the Owner/Admin/Staff permission matrix.
+  Explicitly deferred accounting/refund/costing/revenue decisions remain open.
+- **P2 foundation applied and verified:** three ordered transactional migrations under
+  `backend/supabase/migrations/` create 25 tables, exact numeric domains, Auth-linked
+  profiles without passwords/email, a case-insensitive SKU namespace, relational
+  configurations, sales/payments/usage, stock/cash movements, reviews/requests,
+  audit and alert settings. No Item Code, real Auth identities or sample sales.
+- **Access remains restricted:** RLS on every application table; explicit revokes
+  for PUBLIC/anon/authenticated/service_role; no public RPC or privileged helper
+  execution. P3/P4 permissions and account protections are not yet implemented.
+- **History/stock:** deferred SKU/bundle graph checks, compatible-unit and date
+  checks, append-only history/delete/TRUNCATE guards, separate archive states and
+  canonical stock snapshots. A movement locks its batch, rejects negative physical
+  stock or expired/unsellable consumption, and appends its audit event atomically.
+  Balances derive from movements; review/void do not implicitly restore/deduct.
+  Full-cart checkout and real multi-connection concurrency remain P6 work.
+- **Development data:** `seeds/development.sql` requires an explicit session opt-in
+  and creates only catalogue examples/empty batches. No profiles, Auth credentials,
+  payments, sales or invented opening balances. Test identities exist only in the
+  disposable test bootstrap.
+- **Verification tooling:** PGlite is a backend dev dependency, used to execute
+  PostgreSQL SQL directly. `npm run test:database --workspace backend` runs the
+  database suite; root `npm test` includes it plus the five existing API checks.
+  Tests cover clean migrations/replay, durable close/reopen, access/RLS denial,
+  keys/relationships, stock models/units/dates, independent copies, bundle cycles,
+  idempotency/reference uniqueness, snapshots, ledger/audit rollback and reviews.
+- **Live boundary / next unfinished priority:** the user-created Vertwell hosted
+  development database is applied and verified; see the connection checkpoint
+  below. Live checks cover schema/constraints, role/privilege denial, transactional
+  rollback, exact migration history and advisors. Real Auth login/provisioning,
+  PostgREST requests, API/frontend integration and simultaneous full-cart checkout
+  are not verified. **P2A integration preparation is next**, then P3 → P4 → P5.
+- **Save boundary:** all changes remain local and uncommitted; no GitHub write or
+  deployment. README and database README carry the same Backend no-save rule.
+
+#### Supabase connection and hosted verification — October 17
+
+**Hosted setup choice:** the user selected option **1 — new hosted Supabase
+development project**, rather than reusing a project or installing local Supabase.
+The user then connected and created the organization and project named **Vertwell**
+(the earlier suggested `vertwell-dev` name was not used). This authorizes continuing
+database setup in that new project. The no-GitHub-save rule still applies.
+
+- **Organization:** Vertwell, ID `lhbospoeusmomtbxmwqk`.
+- **Project:** Vertwell, reference `izdemgzdywtxhvgvsian`;
+  [dashboard](https://supabase.com/dashboard/project/izdemgzdywtxhvgvsian),
+  API URL `https://izdemgzdywtxhvgvsian.supabase.co`.
+- **Environment:** Singapore / `ap-southeast-1`, PostgreSQL **17.11**, healthy,
+  user-created Free project. Supabase labels its default main branch PRODUCTION;
+  this new empty project is being used for **development**, with no production
+  deployment/cutover. It has no GitHub repository connected.
+- **Password saved locally:** the user supplied the database password and asked
+  that it be retained for handoff. Its value is stored in the ignored
+  `backend/.env.database.local` as `VERTWELL_DEV_DATABASE_PASSWORD`, with the
+  project/session-pooler administration settings. This handoff records the location
+  instead of copying the credential into a tracked file destined for a future
+  GitHub save. Do not print it in logs, SQL, documentation or browser screenshots;
+  never copy it to Frontend or any `VITE_*` variable. No passwords were changed.
+- **Connection:** dashboard-confirmed session pooler host
+  `aws-0-ap-southeast-1.pooler.supabase.com`, port 5432,
+  username `postgres.izdemgzdywtxhvgvsian`. TLS certificate verification succeeds
+  using the official dashboard CA in `backend/supabase/certs/`; no insecure TLS
+  override or machine-wide certificate change was used.
+- **Migration state:** three files applied and recorded in
+  `supabase_migrations.schema_migrations`; repeated apply skips matching files
+  and rejects hash drift. The original first two files remain unchanged after
+  application. A CLI-generated third migration adds five unit-FK indexes found
+  by verification; its generated timestamp was normalized to Manila before
+  application to follow the initial legacy-numbered October 17 migrations.
+  The dashboard lists all three versions. Its date cells show Unknown for the
+  first two legacy 12-digit versions; their version/name/content hashes are
+  verified. Do not rename applied migrations merely to change that display.
+- **Applied hashes:** `202610170001_foundation.sql` =
+  `e805402321cff17dacf4b419a558e361f3d65efe2bccef6741373c3218f5e821`;
+  `202610170002_integrity.sql` =
+  `ad3423675155db2bdfa594d67119e4d9a21d66eccc7e50df439ed8c93367c057`;
+  `20261017015959_unit_reference_indexes.sql` =
+  `a21203ea1a06a77f44b47e8e8b9f6423e1d28c3625ba4f24a1b32901975f2628`.
+- **Live schema verification:** all **25** business tables have RLS; zero
+  application table grants, zero private-helper execution grants, zero unindexed
+  foreign keys. The six unit constants are the only reference data inserted.
+  No development seed, illustrative sale, real account or opening stock was saved.
+- **Live smoke verification:** **12 checks passed** using a single transaction
+  rolled back afterward. Tests cover the real Auth PK relationship (synthetic
+  SQL fixture only), SKU uniqueness/link ownership, stock limits/counts/idempotency,
+  immutable snapshots/audit, atomic rollback, archival, Manila dates, void stock
+  preservation, all three database-role denials and RLS after a temporary grant.
+  All application/Auth row counts and temporary grants were restored. This is
+  not evidence of real Auth login, email delivery or account provisioning.
+- **Advisors:** security and performance each show **0 errors / 0 warnings**.
+  Security has 25 informational RLS-enabled/no-policy notices: access is
+  deliberately closed until P4. Performance has unused-index informational
+  notices in this empty database; retain the relationship/query indexes and
+  reassess with real workload later. Do not add permissive policies to hide notices.
+- **Tooling:** `backend/scripts/database.ts` provides `db:inspect`, `db:apply`
+  (requires matching `--project-ref`) and `db:verify`; `db:smoke` runs the rolled-back
+  live checks. All use the ignored local settings and verified TLS. These privileged
+  administration helpers are separate from the existing caller-scoped Express
+  Supabase client. Runtime/frontend `.env` files remain unconfigured for P3.
+- **Research:** current changelog and migration/connection docs were checked,
+  including the PostgreSQL 17.11 and HTTP TLS deprecation notices. The schema uses
+  none of the affected ltree/legacy encryption/custom-operator features; modern
+  Node TLS is used. Supabase CLI **2.121.0** generated the follow-up migration.
+- **Final-source validation after hosted setup:** root `npm test` **27/27 passed,
+  exit 0 (9.7s)**, including replay of all three migrations; root typecheck and
+  build passed for both workspaces, with administration scripts typechecked too.
+  Final `db:verify` reconfirmed exact hashes, zero extra grants and zero users,
+  profiles, sales or movements after smoke rollback. The credential-free report
+  is in local `.review/october-17-hosted-verification.log`. Original-message audit
+  passes; 225 publishable files were scanned without finding the saved password.
+  The local password file and Supabase CLI temporary directory are Git-ignored.
+  No existing frontend/Express runtime source changed; no commit/push occurred.
+
+#### Database validation — local baseline (before hosted setup)
+
+- Root `npm test`: **27/27 passed, exit 0 (11.6s)** — 22 PostgreSQL database
+  checks and all five existing Express API scaffold checks. Database checks
+  include two fresh migration applications and a durable close/reopen cycle.
+- Root `npm run typecheck`: **passed, exit 0**, both workspaces, now also checking
+  backend test source through `backend/tsconfig.tests.json`.
+- Root `npm run build`: **passed, exit 0**, both workspaces. No existing frontend
+  or Express runtime source changed; no new frontend browser acceptance is claimed.
+- The first database run found that a BEFORE UPDATE sale guard compared the
+  not-yet-populated generated business date. The guard now freezes the source
+  timestamp and excludes its generated field; the void/history regression passes.
+  Final added stock SKU/name/unit snapshots and canonical-usage checks also pass.
+- A sandboxed whole backend run could not connect to its localhost API test server
+  (`EACCES`); the approved full rerun passed. PGlite itself needed no sockets or
+  live credentials. Initial dependency download was network-restricted; approved
+  installation succeeded. No live-service verification is implied by either run.
+- The six pre-existing full original-message blocks are checked against HEAD after
+  newline normalization by the local `.review/october-17-backend-audit.mjs` helper;
+  a seventh block preserves this Backend-start request. The audit JSON records
+  hashes and confirms existing runtime source remains unchanged.
+
+### Previous checkpoint — P0 GitHub save complete (October 17, 2026; historical)
+
+**Historical status: P0 GitHub save complete and remotely verified.** The user explicitly supplied https://github.com/Huuujji/Vertwell and requested saving the whole current system there before moving to Backend. That task did only P0 and stopped for review. The completed frontend and existing backend scaffold were preserved; P0 did not implement backend code, create database tables, provision services or deploy anything. The later Backend-start request and current checkpoint above now govern work.
+
+**Current focus rule:** P0 is complete and the user has now authorized Backend. Follow **P1 database design → P2 database setup → P2A frontend integration preparation → P3 Authentication → P4 Roles → P5 protected CRUD/integration completion** as the first backend milestone. The user explicitly places backend-dependent frontend integration after completed database setup. Begin its data/API mapping and request-state wiring at P2A; complete real identity routing in P3 and protected actions after P4. Agree the permission model while designing the database. P6 through P9 are subsequent work and must not displace the first milestone. Tests and verification belong to each priority, not only to a final phase. All Backend work stays local until the Backend task list is finished.
+
+The Backend-start request supersedes old blanket frontend-only and stop-for-review continuation instructions. P0's explicitly requested commit/push was a completed one-time transition checkpoint; it does not authorize saving unfinished Backend changes. Older checkpoints remain evidence of their own completed scope. Deployment, real payment-provider integration and production data changes remain separate work.
 
 #### Latest user decisions — frontend scope and transition
 
@@ -18,11 +177,11 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 - **Remove Figma comparison from the remaining task list.** Exhaustive Figma comparison is no longer required for frontend completion or the transition to backend. Preserve historical evidence without scheduling this review again.
 - **Remove physical-printing verification from the remaining task list.** Native viewer/OS/paper printing verification is no longer a completion requirement. Keep the existing Print/export functionality and matching generated-PDF behavior; the user removed the verification task, not those features.
 - **Place backend-dependent frontend integration after database setup.** P2 must finish before P2A starts. Authentication/profile routing and protected CRUD are completed with their P3–P5 dependencies; checkout/review/report integration follows its P6–P8 workflows.
-- **Save the system in GitHub first, then stop for review.** This is the bridge between the frontend phase and backend phase and the top priority, P0. Save the completed frontend, existing scaffold, tests, assets/licenses, configuration, lockfile and relevant documentation to the user's confirmed repository. Record the verified GitHub checkpoint; P1/backend implementation waits for the user's next request.
+- **GitHub bridge completed; Backend now stays local.** P0 saved the frontend and scaffold and stopped for review. The user's next request has now started Backend, database first. Do not repeat P0 or commit/push backend changes while Backend tasks remain unfinished.
 
 #### P0 — top priority: save the frontend phase in GitHub before backend work
 
-**Status: complete; checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` is verified on `origin/main`.** The following save checklist is fulfilled. Stop for the user's review before any database/backend changes:
+**Status: complete; checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` was verified on `origin/main`.** The following historical save checklist is fulfilled. Its review stop was satisfied by the later Backend-start request:
 
 1. Inspect the current repository, branch, remotes and all existing tracked/untracked changes. Identify the existing intended GitHub destination from the repository configuration; do not invent a destination or overwrite unrelated work. Preserve the current scaffold and frontend changes.
 2. Review what will be saved: application source, tests, assets/licenses, configuration, lockfile and relevant documentation, including this handoff and README. Check ignore rules and the staged changes so `.env` credentials, dependency folders, generated builds and local `.review` artifacts are not accidentally published. Environment example files may be saved when they contain placeholders only.
@@ -30,7 +189,7 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 4. Commit the reviewed frontend-phase checkpoint and push it to the existing intended GitHub repository/branch through the normal workflow. Preserve the history and current work; resolve ordinary conflicts carefully. Update the handoff's P0 status and checkpoint details as part of the saved documentation.
 5. Verify the frontend checkpoint commit exists on the intended remote branch and record the commit SHA, remote repository/branch and validation scope. Do not mark P0 complete merely because a local commit was created; the requested result is saved in GitHub.
 
-**P0 completion gate:** the reviewed frontend-phase snapshot is confirmed in the intended GitHub repository, with an identifiable commit and recorded validation scope. Then stop for the user's review; backend work requires a later request. If the destination or access cannot be established, report that exact blocker and preserve the prepared work rather than marking the bridge complete.
+**Historical P0 completion gate (fulfilled):** the reviewed frontend snapshot is confirmed on GitHub with an identifiable commit and validation scope; stop for review until a later Backend request. That later request has now arrived. Do not repeat this save or apply it to unfinished Backend work.
 
 #### P0 checkpoint — October 17 GitHub save
 
@@ -41,7 +200,7 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 - **Validation:** root `npm run typecheck` and root `npm run build` passed for both workspaces. Existing API scaffold tests passed, **5/5**, without live Supabase credentials. The first sandboxed API test attempt was blocked by localhost `EACCES`; the approved rerun passed without source changes. The complete frontend run finished with **208 passed and 2 failed (8.8m)**; both failures were outdated test assumptions. Final focused verification passed **2/2 (11.9s), exit 0**, covering both corrected tests. All 210 existing cases are therefore covered across the broad run and focused rerun; this is not a single clean 210-pass run.
 - **Test-only corrections:** the older discount/checkout test now enters/searches/asserts SKU and verifies Item Code is absent, retaining all price/discount/checkout/report assertions. The long-range stock test now derives tomorrow in Asia/Manila instead of assuming October 17 is always in the future. No application or backend source changes were made. Historical October 17 role/editor checks at five sizes remain the direct evidence for Owner-only alert settings and SKU-only editors.
 - **Verified remote checkpoint:** [`f08f7b79932168954d670b5de9c2490a90db37db`](https://github.com/Huuujji/Vertwell/commit/f08f7b79932168954d670b5de9c2490a90db37db), **Save completed frontend and existing system scaffold**, was pushed to `main`. An independent `git ls-remote origin refs/heads/main` returned that exact SHA; local `origin/main` matched, and the working tree was clean before this documentation-only completion update. The initial dry-run push failed with HTTP 403 under `Degenerate1456`. The user then explicitly selected `Huuujji`; its dry run and actual push succeeded. Repository-local GitHub username routing selects `Huuujji`, without changing global credentials or settings.
-- **Stop point:** P0 is complete. P1 and all later backend priorities remain pending until the user reviews this saved system and requests the next phase.
+- **Historical stop point:** P0 completed and stopped. The user has since requested Backend; the current database checkpoint at the top supersedes that wait.
 - **Local evidence:** workspace-parent `.review/october-17-p0-*` audit/baseline files and validation logs. These local files are excluded from the GitHub snapshot.
 
 #### Decisions and intent carried forward from this chat
@@ -51,16 +210,16 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 - **Use Supabase Auth for credentials.** It manages password hashes and sessions. The application profile table must not contain a plaintext password, a copied password hash, or a password field exposed to the Users page. Link the application profile to the Auth user; retrieve email through an authorized backend response.
 - **Use database relationships for repeated records.** One sale has multiple sale-item rows; one stock item can have multiple receipt batches; a modifier group has multiple options and stock inputs. Do not replace these relationships with comma-separated text in `items` or `modifiers` columns.
 - **Keep the existing frontend model and history.** Internal tables support the existing Products/Ingredients/Modifiers interfaces; they do not authorize reintroducing an obsolete stock-management panel. Keep retail SKUs without a POS listing accessible. Separate manual product enablement from computed availability based on usable stock. Manufacturing/expiry/physical quantity belong to receipt batches; visible stock/expiry/reorder statuses are derived consistently.
-- **The discussed schema is a proposal to refine in P1.** Table names and draft columns from this discussion are a starting point, not already applied migrations or a fully reviewed data dictionary. Resolve types, nullability, keys, constraints, archival rules and edge cases against the actual frontend before implementation. No live schema has been verified by this documentation task.
+- **The discussed proposal has now been refined in P1 and applied in P2.** `backend/supabase/DESIGN.md` contains the dictionary, frontend mapping, keys/constraints, archival rules and remaining business decisions. Three migrations are applied and verified in Vertwell development. Database setup is complete; live Auth, permissions, integration and checkout are still their later priorities.
 
 #### Ordered bridge and backend priorities and completion criteria
 
 | Priority | Task | Status | Completion criterion |
 | --- | --- | --- | --- |
-| **P0 — top priority / bridge** | Save the frontend phase in the existing GitHub repository | **Complete — verified on main** | Checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` is committed, pushed and independently verified on GitHub; validation scope is recorded above. Stop for user review. |
-| **P1 — after P0** | Finalize database design and role rules together | Pending | Schema/relationships and a column-by-column data dictionary cover the actual frontend; permission matrix and historical-record rules are explicit. |
-| **P2** | Implement the database foundation | Pending | Reviewed numbered migrations reproduce the development schema, constraints and protected access; development-only seeds and stock/history relationships validate. |
-| **P2A — after database setup** | Begin backend-dependent frontend integration preparation | Pending / depends on P2 | Actual database/API shapes are mapped to frontend workflows and loading/error handling; authenticated/protected operations remain dependent on P3–P5. |
+| **P0 — bridge** | Save the frontend phase in the existing GitHub repository | **Complete — verified on main** | Checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` is committed, pushed and independently verified; user has since authorized Backend. No new GitHub save during unfinished Backend work. |
+| **P1 — database first** | Finalize database design and role rules together | **Complete locally** | `backend/supabase/DESIGN.md` covers actual frontend relationships, every column, permissions, archival/history rules and deferred decisions. |
+| **P2** | Implement the database foundation | **Complete — hosted development verified** | Three applied migrations match local hashes; 25 RLS tables, denied role access, indexed FKs, 12 rollback smoke checks and advisor review verified in Vertwell development. |
+| **P2A — after database setup** | Begin backend-dependent frontend integration preparation | **Pending — next; P2 dependency satisfied** | Actual database/API shapes are mapped to frontend workflows and loading/error handling; authenticated/protected operations remain dependent on P3–P5. |
 | **P3** | Complete real authentication and account lifecycle | Pending | Login/logout, session restoration/expiry, protected identity lookup, account provisioning and recovery work with real development accounts. |
 | **P4** | Enforce Owner/Admin/Staff permissions | Pending | Backend checks and database access policies reject unauthorized operations and record the authenticated actor; role/account protections pass. |
 | **P5 — finish the first milestone** | Protected CRUD and Users/Inventory integration | Pending | Authorized Users and Inventory changes persist across refresh/login and are visible to another permitted session; invalid and unauthorized actions change nothing. |
@@ -155,47 +314,33 @@ The October 17 fixes and the latest October 16 frontend requests are recorded as
 2. **Real-device/accessibility/browser verification:** actual phones/tablets, real screen readers, Safari and Firefox remain unverified; desktop Edge emulation does not establish these results. This remains a verification boundary and is not made a new P0 blocker by this documentation update.
 3. **Frontend work dependent on the backend — after database setup:** P2A starts after completed P2; real authentication/profile routing and protected Users/Inventory persistence are completed with P3–P5. Real checkout/reviews/reports follow under P6–P8. Sample behavior is not live integration. This is scheduled integration work, not an unresolved preview-design task.
 
-#### Current continuation — P0 complete; wait for user review before Backend
+#### Current continuation — Backend database first; keep work local
 
 ```text
-Resume in C:/Users/ASUS/Documents/Personal/Vertwell/repo for the frontend-to-backend
-transition. Read this October 17 P0/priority section and latest user decisions
-first, then the last completed
-October 17 frontend checkpoint, README.md, backend/supabase/README.md and any
-applicable AGENTS.md. Read the relevant actual frontend data/workflows before
-designing the database. Reuse the existing Express/Supabase scaffold.
-P0 is COMPLETE. The whole current system was saved to
-https://github.com/Huuujji/Vertwell on existing main as
-f08f7b79932168954d670b5de9c2490a90db37db and independently verified on the remote.
-Read the P0 checkpoint above for exact validation and the test-only corrections.
-STOP for the user's review. Do not repeat the completed save or start backend work
-automatically. All backend priorities remain pending until a later user request.
-Only after a later user request, start P1 schema/data dictionary and permission matrix, followed by P2 database
-setup. Begin backend-dependent frontend integration preparation at P2A only after
-database setup is complete. Finish P3 authentication, P4 enforced roles and P5
-protected Users/Inventory integration before enabling protected real operations.
-Verify each priority and finish the first milestone before P6–P9.
-Keep Daily Sales Values: the user's keep decision is final. Figma comparison and
-physical-printing verification are removed from the task list. Preserve existing
-Print/export features. Historical notes do not reopen these dropped tasks.
-Exclude Item Code from the new schema and keep SKU as the visible business code.
-Preserve stable internal IDs/stock links; stock_item_id is an internal relationship,
-not another input field. Password hashes remain managed by Supabase Auth, with
-application profiles linked to Auth identities. The discussed schema is a starting
-proposal to review, not applied migrations or a fully finalized column dictionary.
-Preserve existing uncommitted work, catalogue/receipt/dependency links, historical
-snapshots, current role policies, original assets/licenses, dirty-form protection,
-sample/reset notices and test-owned Vite startup/teardown. Legacy original user
-messages remain unchanged. Do not replay historical one-time edit helpers.
-The recorded backend direction supersedes earlier blanket frontend-only resume
-instructions when a later user request starts that phase. This P0 task saves the
-existing frontend and backend scaffold; it performs no backend implementation,
-database provisioning or deployment. P0 commit/push authorization supersedes older
-blanket no-commit notes, but does not authorize starting the backend phase.
-Deployment, production data changes and external payment-provider scope remain
-separate work.
-Record exact implementation, tests, live-service limitations and the first
-unfinished priority in this section when the backend task is performed.
+Resume in C:/Users/ASUS/Documents/Personal/Vertwell/repo in phase Backend.
+Read the FULL original October 17 Backend-start message and current checkpoint,
+all carried-forward database decisions, original frontend requests/checkpoints,
+README.md, backend/supabase/{README,DESIGN}.md and applicable AGENTS.md.
+The user authorized Backend after P0; the old stop-for-review is historical.
+Do not commit, push, create a PR or save to GitHub until ALL Backend tasks finish.
+P1 design and P2 database setup are complete. The user-created Vertwell project
+izdemgzdywtxhvgvsian in Singapore has three applied/hash-verified migrations,
+25 restricted tables and 12 passed rollback smoke checks on PostgreSQL 17.11.
+The database password is stored only in ignored backend/.env.database.local;
+the handoff records its location rather than the value. Keep it out of GitHub,
+logs, SQL, screenshots and VITE_* variables. Use the existing administration
+scripts with verified TLS; never edit applied SQL or reconnect GitHub.
+Do not claim real Auth login, email delivery, PostgREST, protected CRUD or
+multi-connection checkout from the database checks. No sample users/sales remain.
+P2A frontend integration preparation is NEXT; then P3 authentication, P4 permissions,
+P5 Users/Inventory CRUD precede P6 checkout, P7 reviews and P8 reports. P9 remains
+separately defined. Test each priority and record actual scope and limitations.
+Preserve SKU-only inputs, stable IDs, stock/recipe/variant/bundle relationships,
+independent modifiers, batch history, Owner-only settings, all original messages,
+assets/licenses, preview notices, dirty-form guards and test-owned Vite teardown.
+Keep Daily Sales Values; Figma comparison and physical-printing verification stay
+removed. Deployment, production data and external payment verification remain
+separate work. Preserve the working local changes and do not replay old helpers.
 ```
 
 ### Last completed frontend priority — Dashboard alert settings and Inventory Item Code (October 17, 2026)
