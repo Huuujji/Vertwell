@@ -1,12 +1,12 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. The current task is P0 only: save the completed frontend phase and existing scaffold in https://github.com/Huuujji/Vertwell, then stop for the user's review. Backend work requires a later request. Database design/setup follows that review, then frontend integration after database setup, with Authentication and Roles enforced before protected actions go live. See the P0 checkpoint below for actual save and validation status. The October 17, October 16, October 15 and October 5 frontend requests remain preserved verbatim with their completed checkpoints and verification limits.
+Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. P0 is complete: the completed frontend phase and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. Stop for the user's review; backend work requires a later request. Database design/setup follows that review, then frontend integration after database setup, with Authentication and Roles enforced before protected actions go live. See the P0 checkpoint below for the commit and validation scope. The October 17, October 16, October 15 and October 5 frontend requests remain preserved verbatim with their completed checkpoints and verification limits.
 
 ## New — current state and continuation
 
-### Current next task — P0 GitHub bridge, then Database, Authentication and Roles (October 17, 2026)
+### Current checkpoint — P0 GitHub save complete; stop for user review (October 17, 2026)
 
-**Status: P0 GitHub save in progress; all backend priorities below are pending.** The user explicitly supplied https://github.com/Huuujji/Vertwell and requested saving the whole current system there before moving to Backend. The current instruction is to do only this priority and stop for their review. Preserve the completed frontend and existing backend scaffold; do not implement backend code, create database tables, provision services or deploy anything in this task.
+**Status: P0 GitHub save complete and remotely verified; all backend priorities below are pending.** The user explicitly supplied https://github.com/Huuujji/Vertwell and requested saving the whole current system there before moving to Backend. The current instruction is to do only this priority and stop for their review. The completed frontend and existing backend scaffold are preserved; this task did not implement backend code, create database tables, provision services or deploy anything.
 
 **Focus rule:** finish **P0 before any backend implementation, then stop for the user's review**. After a later request authorizes backend work, follow **P1 database design → P2 database setup → P2A frontend integration preparation → P3 Authentication → P4 Roles → P5 protected CRUD/integration completion** as the first backend milestone. The user explicitly places backend-dependent frontend integration after completed database setup. Begin its data/API mapping and request-state wiring at P2A; complete real identity routing in P3 and protected actions after P4. Agree the permission model while designing the database. P6 through P9 are subsequent work and must not displace the first milestone. Tests and verification belong to each priority, not only to a final phase.
 
@@ -22,7 +22,7 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 
 #### P0 — top priority: save the frontend phase in GitHub before backend work
 
-**Status: in progress; not complete until the remote commit is verified.** Finish this bridge and stop for the user's review before any database/backend changes:
+**Status: complete; checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` is verified on `origin/main`.** The following save checklist is fulfilled. Stop for the user's review before any database/backend changes:
 
 1. Inspect the current repository, branch, remotes and all existing tracked/untracked changes. Identify the existing intended GitHub destination from the repository configuration; do not invent a destination or overwrite unrelated work. Preserve the current scaffold and frontend changes.
 2. Review what will be saved: application source, tests, assets/licenses, configuration, lockfile and relevant documentation, including this handoff and README. Check ignore rules and the staged changes so `.env` credentials, dependency folders, generated builds and local `.review` artifacts are not accidentally published. Environment example files may be saved when they contain placeholders only.
@@ -35,12 +35,13 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 #### P0 checkpoint — October 17 GitHub save
 
 - **Scope:** P0 only, followed by a stop for user review. No backend implementation or deployment is part of this task.
-- **Destination:** existing `origin` is `https://github.com/Huuujji/Vertwell.git`; existing local branch and remote default branch are `main`. Both started at `5eb122eec7ad570ed5aa307ff8de1b90c1eae9da`; preserve that history and use a normal push.
+- **Destination:** existing `origin` is `https://github.com/Huuujji/Vertwell.git`; existing local branch and remote default branch are `main`. Both started at `5eb122eec7ad570ed5aa307ff8de1b90c1eae9da`; the normal fast-forward push preserved that history.
 - **Snapshot review:** 214 project files, approximately 14.8 MB, include the completed frontend, existing Express/Supabase scaffold, tests, assets/licenses, design-reference archive/manifest, workspace configuration, lockfile, README and this handoff. Both environment examples contain blank credentials. Credential-pattern review found no matches in the publishable text files. All 105 design-reference manifest entries match their recorded sizes and SHA-256 hashes. All six historical verbatim user-message blocks are hashed and preserved.
 - **Ignore rules:** dependency folders, `.npm-cache`, builds, credentials, coverage, Playwright results/reports and logs remain excluded. Added `.review/` to exclude local QA artifacts inside the repository as well as the existing workspace-parent review directory.
 - **Validation:** root `npm run typecheck` and root `npm run build` passed for both workspaces. Existing API scaffold tests passed, **5/5**, without live Supabase credentials. The first sandboxed API test attempt was blocked by localhost `EACCES`; the approved rerun passed without source changes. The complete frontend run finished with **208 passed and 2 failed (8.8m)**; both failures were outdated test assumptions. Final focused verification passed **2/2 (11.9s), exit 0**, covering both corrected tests. All 210 existing cases are therefore covered across the broad run and focused rerun; this is not a single clean 210-pass run.
 - **Test-only corrections:** the older discount/checkout test now enters/searches/asserts SKU and verifies Item Code is absent, retaining all price/discount/checkout/report assertions. The long-range stock test now derives tomorrow in Asia/Manila instead of assuming October 17 is always in the future. No application or backend source changes were made. Historical October 17 role/editor checks at five sizes remain the direct evidence for Owner-only alert settings and SKU-only editors.
-- **Remote checkpoint:** ready to commit/push; remote snapshot not yet verified. The initial dry-run push failed with HTTP 403 under `Degenerate1456`. The user then explicitly selected `Huuujji`; its dry run succeeded. Repository-local GitHub username routing now selects `Huuujji`, without changing global credentials or settings. P0 remains in progress until the snapshot is confirmed on GitHub.
+- **Verified remote checkpoint:** [`f08f7b79932168954d670b5de9c2490a90db37db`](https://github.com/Huuujji/Vertwell/commit/f08f7b79932168954d670b5de9c2490a90db37db), **Save completed frontend and existing system scaffold**, was pushed to `main`. An independent `git ls-remote origin refs/heads/main` returned that exact SHA; local `origin/main` matched, and the working tree was clean before this documentation-only completion update. The initial dry-run push failed with HTTP 403 under `Degenerate1456`. The user then explicitly selected `Huuujji`; its dry run and actual push succeeded. Repository-local GitHub username routing selects `Huuujji`, without changing global credentials or settings.
+- **Stop point:** P0 is complete. P1 and all later backend priorities remain pending until the user reviews this saved system and requests the next phase.
 - **Local evidence:** workspace-parent `.review/october-17-p0-*` audit/baseline files and validation logs. These local files are excluded from the GitHub snapshot.
 
 #### Decisions and intent carried forward from this chat
@@ -56,7 +57,7 @@ The newest direction here supersedes the old blanket frontend-only continuation 
 
 | Priority | Task | Status | Completion criterion |
 | --- | --- | --- | --- |
-| **P0 — top priority / bridge** | Save the frontend phase in the existing GitHub repository | In progress | Reviewed checkpoint is committed, pushed and verified on the intended remote branch, with commit SHA and validation scope recorded; then stop for user review. |
+| **P0 — top priority / bridge** | Save the frontend phase in the existing GitHub repository | **Complete — verified on main** | Checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` is committed, pushed and independently verified on GitHub; validation scope is recorded above. Stop for user review. |
 | **P1 — after P0** | Finalize database design and role rules together | Pending | Schema/relationships and a column-by-column data dictionary cover the actual frontend; permission matrix and historical-record rules are explicit. |
 | **P2** | Implement the database foundation | Pending | Reviewed numbered migrations reproduce the development schema, constraints and protected access; development-only seeds and stock/history relationships validate. |
 | **P2A — after database setup** | Begin backend-dependent frontend integration preparation | Pending / depends on P2 | Actual database/API shapes are mapped to frontend workflows and loading/error handling; authenticated/protected operations remain dependent on P3–P5. |
@@ -154,7 +155,7 @@ The October 17 fixes and the latest October 16 frontend requests are recorded as
 2. **Real-device/accessibility/browser verification:** actual phones/tablets, real screen readers, Safari and Firefox remain unverified; desktop Edge emulation does not establish these results. This remains a verification boundary and is not made a new P0 blocker by this documentation update.
 3. **Frontend work dependent on the backend — after database setup:** P2A starts after completed P2; real authentication/profile routing and protected Users/Inventory persistence are completed with P3–P5. Real checkout/reviews/reports follow under P6–P8. Sample behavior is not live integration. This is scheduled integration work, not an unresolved preview-design task.
 
-#### Current continuation — P0 GitHub bridge before the backend milestone
+#### Current continuation — P0 complete; wait for user review before Backend
 
 ```text
 Resume in C:/Users/ASUS/Documents/Personal/Vertwell/repo for the frontend-to-backend
@@ -163,11 +164,12 @@ first, then the last completed
 October 17 frontend checkpoint, README.md, backend/supabase/README.md and any
 applicable AGENTS.md. Read the relevant actual frontend data/workflows before
 designing the database. Reuse the existing Express/Supabase scaffold.
-Read the P0 checkpoint above for the actual commit/push and validation status.
-The current request authorizes P0 only: save the whole current system to
-https://github.com/Huuujji/Vertwell on existing main, verify the remote commit,
-record its SHA and validation scope, and STOP for the user's review. Do not start
-backend work automatically after P0. All backend priorities remain pending.
+P0 is COMPLETE. The whole current system was saved to
+https://github.com/Huuujji/Vertwell on existing main as
+f08f7b79932168954d670b5de9c2490a90db37db and independently verified on the remote.
+Read the P0 checkpoint above for exact validation and the test-only corrections.
+STOP for the user's review. Do not repeat the completed save or start backend work
+automatically. All backend priorities remain pending until a later user request.
 Only after a later user request, start P1 schema/data dictionary and permission matrix, followed by P2 database
 setup. Begin backend-dependent frontend integration preparation at P2A only after
 database setup is complete. Finish P3 authentication, P4 enforced roles and P5

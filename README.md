@@ -4,14 +4,15 @@
 > **Status:** Frontend prototype ready; backend scaffold ready
 > Separate frontend and backend applications for Vertwell's inventory and sales management system.
 
-## Current priority — October 17 GitHub save (P0 only)
+## Current checkpoint — October 17 GitHub save complete
 
-Save the completed frontend and existing backend scaffold to the existing
-[`Huuujji/Vertwell`](https://github.com/Huuujji/Vertwell) repository on `main`, then
-stop for the user's review. The save is in progress; [HandsOff.md](HandsOff.md)
-records the actual remote checkpoint and validation status. Backend implementation
-and deployment await a later request. Older uncommitted/no-commit statements below
-describe their historical checkpoints.
+The completed frontend and existing backend scaffold are saved in
+[`Huuujji/Vertwell`](https://github.com/Huuujji/Vertwell) on `main`, checkpoint
+[`f08f7b7`](https://github.com/Huuujji/Vertwell/commit/f08f7b79932168954d670b5de9c2490a90db37db).
+The push and exact remote SHA were independently verified. [HandsOff.md](HandsOff.md)
+records the full save and validation scope. **P0 is complete; stop for the user's
+review.** Backend implementation and deployment await a later request. Older
+uncommitted/no-commit statements below describe their historical checkpoints.
 
 P0 validation: root typecheck/build pass for both workspaces; **5 API scaffold tests
 pass**. The full frontend run passed 208 cases; two outdated test assumptions were
@@ -607,7 +608,7 @@ No Vercel or Supabase resources are provisioned by this scaffold.
 
 ## Next Implementation Steps — after P0 and user review
 
-- Complete and verify the P0 GitHub save, then stop for user review. October 17 and earlier frontend requests are implemented; see HandsOff.md for the current checkpoint and preserved original messages.
+- P0 is saved and verified on GitHub. Stop for user review. October 17 and earlier frontend requests are implemented; see HandsOff.md for the current checkpoint and preserved original messages.
 - Only after a later request, begin the ordered backend priorities in HandsOff.md: P1 database/permission design, P2 database setup, P2A frontend integration preparation, then P3 authentication, P4 roles and P5 protected CRUD.
 - Design the PostgreSQL schema and Row Level Security policies.
 - Add login and owner-managed accounts, then role authorization and Owner daily-sales review persistence.
