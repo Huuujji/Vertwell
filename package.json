@@ -1,0 +1,16 @@
+{
+  "name": "vertwell",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["backend", "Frontend"],
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm run dev --workspace backend\" \"npm run dev --workspace Frontend\"",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace Frontend",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspace backend"
+  },
+  "devDependencies": { "concurrently": "^9.2.1" }
+}

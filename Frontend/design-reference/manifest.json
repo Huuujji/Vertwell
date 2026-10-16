@@ -1,0 +1,975 @@
+[
+  {
+    "original": "public/assets/0046f.svg",
+    "current": "public/assets/0046f.svg",
+    "archived": false,
+    "bytes": 350,
+    "sha256": "cabdad5f93adff3c99bcc0a6fd87cc9c7fc1a58da86911018437853bf30073ff",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/0153f.svg",
+    "current": "public/assets/0153f.svg",
+    "archived": false,
+    "bytes": 1753,
+    "sha256": "ff518ea4386ea4c9bc3083a031848b37c255b490cf62f8731cd8c42f25ddf20d",
+    "references": [
+      "repo/Frontend/src/pages/Login.tsx",
+      ".review/continue-edits.cjs"
+    ]
+  },
+  {
+    "original": "public/assets/024ff.svg",
+    "current": "design-reference/assets/024ff.svg",
+    "archived": true,
+    "bytes": 540,
+    "sha256": "9cdc45bf6011f4455865a79cb7d0a3cba2f213b7719de945661f85440f754683",
+    "references": []
+  },
+  {
+    "original": "public/assets/034fd.svg",
+    "current": "public/assets/034fd.svg",
+    "archived": false,
+    "bytes": 325,
+    "sha256": "78e20729a95a8dc1dff53eaaa6324c8a54b867cb1d1b5e3987db32d22f621775",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/055eb.svg",
+    "current": "design-reference/assets/055eb.svg",
+    "archived": true,
+    "bytes": 283,
+    "sha256": "90b8944a9b9dad2c59cab084e3591ea0f7d59b5bc9aaf575556e4ff4703344a1",
+    "references": []
+  },
+  {
+    "original": "public/assets/082b9.svg",
+    "current": "design-reference/assets/082b9.svg",
+    "archived": true,
+    "bytes": 652,
+    "sha256": "9d14a630a5076bd03374fad96cb7c4f045c773a532fad18decaab8c385c91c00",
+    "references": []
+  },
+  {
+    "original": "public/assets/09bab.svg",
+    "current": "public/assets/09bab.svg",
+    "archived": false,
+    "bytes": 1373,
+    "sha256": "c17511986de3e65d2d1e304e01487c1ab20337df1624769b9d7b09e41de9ef78",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/0dbfe.svg",
+    "current": "design-reference/assets/0dbfe.svg",
+    "archived": true,
+    "bytes": 299,
+    "sha256": "f37595f1922e474fd1633a8073985a7627f94566264740dbb90b91f271f9cd23",
+    "references": []
+  },
+  {
+    "original": "public/assets/0ea4c.svg",
+    "current": "public/assets/0ea4c.svg",
+    "archived": false,
+    "bytes": 325,
+    "sha256": "786c5fb4a72536265ecbe42959a562d3c320f7834f019d4ee4e6c5aa272f4da3",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/10ae6.svg",
+    "current": "public/assets/10ae6.svg",
+    "archived": false,
+    "bytes": 343,
+    "sha256": "17478164b937490419e331ba0852d16fb4b56c60a6cac41a1fffee78dbee7ef0",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/13a12.png",
+    "current": "public/assets/13a12.png",
+    "archived": false,
+    "bytes": 1199684,
+    "sha256": "bb4af277fe15399a30f658cbfabee691d95cc167b20e74a0c05e63f887f17ac2",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/193d6.svg",
+    "current": "design-reference/assets/193d6.svg",
+    "archived": true,
+    "bytes": 424,
+    "sha256": "c03881c38e7a6849b407edd2698f5e3f0c9d594c933a57072e241900dcfbe718",
+    "references": []
+  },
+  {
+    "original": "public/assets/1b5ca.svg",
+    "current": "public/assets/1b5ca.svg",
+    "archived": false,
+    "bytes": 372,
+    "sha256": "596367c5ab671e2fc7fe8482a021f573b88d5af1f363d626a35e18e862d0cb57",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/1c129.svg",
+    "current": "public/assets/1c129.svg",
+    "archived": false,
+    "bytes": 1267,
+    "sha256": "ca5d9798538f4b2ccaa2fa2c825dd6350d4870a721becbf791cfb8a55e606345",
+    "references": [
+      "repo/Frontend/src/pages/Pos.tsx",
+      ".review/update-handoff.cjs",
+      ".review/final-assets.cjs"
+    ]
+  },
+  {
+    "original": "public/assets/1d023.svg",
+    "current": "public/assets/1d023.svg",
+    "archived": false,
+    "bytes": 579,
+    "sha256": "9e05348bcf24afb4ee9e55e80b54712765bb752e65f4084731540f72ca3ef429",
+    "references": [
+      "repo/Frontend/src/pages/Users.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/21548.svg",
+    "current": "public/assets/21548.svg",
+    "archived": false,
+    "bytes": 343,
+    "sha256": "c9c9ed5b161772ec947b718f3842fdc9e4d58d27408c7ff6dfe17700738d4b8f",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/21a96.svg",
+    "current": "public/assets/21a96.svg",
+    "archived": false,
+    "bytes": 311,
+    "sha256": "c9374dd746f169b2cc949dd84e4bacb69eee2b843fcd374ae5a95f55c6e8d7d6",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/28033.png",
+    "current": "public/assets/28033.png",
+    "archived": false,
+    "bytes": 637570,
+    "sha256": "26dbef60d4596e39feb7698f161133eb667fb68ec5a3fac932f775f07674800e",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/2d3b9.svg",
+    "current": "public/assets/2d3b9.svg",
+    "archived": false,
+    "bytes": 409,
+    "sha256": "62038afba007c7fac6a4b5ae27b21652799b99f4ba52367bc55799d104790488",
+    "references": [
+      "repo/Frontend/src/screens.css"
+    ]
+  },
+  {
+    "original": "public/assets/318aa.svg",
+    "current": "design-reference/assets/318aa.svg",
+    "archived": true,
+    "bytes": 241,
+    "sha256": "8ae2f2401f60870e766e456f1fa9107a96ffb75e9061b04f775bdd8082deea07",
+    "references": []
+  },
+  {
+    "original": "public/assets/32ae9.png",
+    "current": "public/assets/32ae9.png",
+    "archived": false,
+    "bytes": 546,
+    "sha256": "692fb96dd2bd72037fe340cecde4ccd5cb2caa96dfae23a2140ee772f3739807",
+    "references": [
+      "repo/Frontend/src/pages/Pos.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/3459a.svg",
+    "current": "design-reference/assets/3459a.svg",
+    "archived": true,
+    "bytes": 313,
+    "sha256": "b7e0b2f12d1981779fa43d327006c6f092778c15add86d2a07b3c455ff0596f1",
+    "references": []
+  },
+  {
+    "original": "public/assets/352b1.svg",
+    "current": "design-reference/assets/352b1.svg",
+    "archived": true,
+    "bytes": 884,
+    "sha256": "490ac5dfc9a8ad89fbfd3ce3f12edd8796d9fe0754ded21e54cb7b57a8d17675",
+    "references": []
+  },
+  {
+    "original": "public/assets/36364.svg",
+    "current": "design-reference/assets/36364.svg",
+    "archived": true,
+    "bytes": 332,
+    "sha256": "5bc62b30905714b7b8883748ccb9876450a01d301a4ad825a66f5cf1ea52a61a",
+    "references": []
+  },
+  {
+    "original": "public/assets/36fe0.png",
+    "current": "public/assets/36fe0.png",
+    "archived": false,
+    "bytes": 256519,
+    "sha256": "d174e4524c2f0ec6c564738c33d3792fe3cceb9adc9c5e3354ee0fac10fdcffa",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/38fed.svg",
+    "current": "design-reference/assets/38fed.svg",
+    "archived": true,
+    "bytes": 758,
+    "sha256": "0a2fd3ce3dd096ceeb24c5da8320fef483342e600217e8e8b543eb35adc05aa2",
+    "references": []
+  },
+  {
+    "original": "public/assets/3a5d4.svg",
+    "current": "design-reference/assets/3a5d4.svg",
+    "archived": true,
+    "bytes": 206,
+    "sha256": "7dbe9f584a09181a616549b68add5000008f6393d6e77eff8ec9d25c9465df7c",
+    "references": []
+  },
+  {
+    "original": "public/assets/3c917.svg",
+    "current": "design-reference/assets/3c917.svg",
+    "archived": true,
+    "bytes": 380,
+    "sha256": "7a738ea121688fd8e741877edf2fd2c761f9db5fb353590141bef1c321ac58a4",
+    "references": []
+  },
+  {
+    "original": "public/assets/3cc8e.svg",
+    "current": "public/assets/3cc8e.svg",
+    "archived": false,
+    "bytes": 325,
+    "sha256": "56c6ee17194476f0e46b8d8a8bcf48c652acdaf8b4233bc56e80bfef5af43b00",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/3e574.svg",
+    "current": "public/assets/3e574.svg",
+    "archived": false,
+    "bytes": 1301,
+    "sha256": "429a099d1ab866c95a362e57781034f50571151767ec75d4c5d16b55ef9e316e",
+    "references": [
+      "repo/Frontend/src/pages/Login.tsx",
+      ".review/continue-edits.cjs"
+    ]
+  },
+  {
+    "original": "public/assets/3f2d8.svg",
+    "current": "public/assets/3f2d8.svg",
+    "archived": false,
+    "bytes": 334,
+    "sha256": "1a607b9ec6d826cfcc8ad5e8455da6b434a7628f354e5846938daa2804ceefe0",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/3fc4b.png",
+    "current": "design-reference/assets/3fc4b.png",
+    "archived": true,
+    "bytes": 821,
+    "sha256": "f837523192eb1d4ae29ba7b0987fd75bf664776c0dd24cce5970d55b1f254770",
+    "references": []
+  },
+  {
+    "original": "public/assets/410f5.svg",
+    "current": "design-reference/assets/410f5.svg",
+    "archived": true,
+    "bytes": 342,
+    "sha256": "05e361eb46728d0f7e71dfc42a4798898b80f9725e3a9b0d6d34bc020dd76000",
+    "references": []
+  },
+  {
+    "original": "public/assets/42746.svg",
+    "current": "design-reference/assets/42746.svg",
+    "archived": true,
+    "bytes": 696,
+    "sha256": "fc1d876f50b6a0d9f16d48447b35b4d490fdedb77ca09f6b2c1c647c3e46fa37",
+    "references": []
+  },
+  {
+    "original": "public/assets/42a54.svg",
+    "current": "design-reference/assets/42a54.svg",
+    "archived": true,
+    "bytes": 986,
+    "sha256": "a3e78a4898af48024dfb60275e5c142adffdefb92e1d636a0aa3150b7025a021",
+    "references": []
+  },
+  {
+    "original": "public/assets/42b3a.svg",
+    "current": "design-reference/assets/42b3a.svg",
+    "archived": true,
+    "bytes": 756,
+    "sha256": "7e667cc95c568f20da593feb1606309ac51db045ae1daad4101e380073c87e49",
+    "references": []
+  },
+  {
+    "original": "public/assets/43290.svg",
+    "current": "public/assets/43290.svg",
+    "archived": false,
+    "bytes": 1416,
+    "sha256": "49edac70c9bc6730453603a462fd9bfc9e425a42cc41fafc1c5989b0f3d94658",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/43ad6.png",
+    "current": "public/assets/43ad6.png",
+    "archived": false,
+    "bytes": 942652,
+    "sha256": "9739be37783fe3d1a87801402edc115058c65568a6aa3bc71d35fb9fd9779116",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/48264.svg",
+    "current": "public/assets/48264.svg",
+    "archived": false,
+    "bytes": 350,
+    "sha256": "73048caf5f47501c8e390791f9a1fa724eecf01abf9918ebd091d75ce6b5cc73",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/51660.svg",
+    "current": "public/assets/51660.svg",
+    "archived": false,
+    "bytes": 334,
+    "sha256": "7e102041e23d09fcc2b4fc38492d1561956e6177fa10bbd63f69bad12c4e89b7",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/51ace.svg",
+    "current": "public/assets/51ace.svg",
+    "archived": false,
+    "bytes": 350,
+    "sha256": "cdb0e7f6cfe6aa40fd0b58f8979b6b5e6943c25e89a51b5889971f4b40400226",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/52c5d.svg",
+    "current": "public/assets/52c5d.svg",
+    "archived": false,
+    "bytes": 1920,
+    "sha256": "83277527d36ea2224f3bd9799aff1b0b48fdc5588aa8113d48b032e7813eca2f",
+    "references": [
+      "repo/Frontend/src/pages/Login.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/596b7.svg",
+    "current": "design-reference/assets/596b7.svg",
+    "archived": true,
+    "bytes": 1748,
+    "sha256": "10926ea816152c5ba4ebb642036e8fd9443d73776cba4b66053560310aa6e571",
+    "references": []
+  },
+  {
+    "original": "public/assets/5ccba.png",
+    "current": "design-reference/assets/5ccba.png",
+    "archived": true,
+    "bytes": 134,
+    "sha256": "517facff7f131b1e06f78ce1014398b59626a7587a0c5176db612e95ab30ff21",
+    "references": []
+  },
+  {
+    "original": "public/assets/5e8a3.svg",
+    "current": "public/assets/5e8a3.svg",
+    "archived": false,
+    "bytes": 311,
+    "sha256": "f438bfb08fc5ceda10ba33fb910ea9d8b97e6c50083c839b0cdc5421b63ab3d7",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/6006e.svg",
+    "current": "public/assets/6006e.svg",
+    "archived": false,
+    "bytes": 350,
+    "sha256": "608b36ae1f5a9749f524ca9dee6a83d323b9a42ef4952c7e1fe0f73dae7ae275",
+    "references": [
+      "repo/Frontend/src/pages/Pos.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/61caa.svg",
+    "current": "public/assets/61caa.svg",
+    "archived": false,
+    "bytes": 986,
+    "sha256": "e657c49ca2d80b82060e1eb4ee4606e6e9e56a8989294036fa43cb35371996d1",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/6465f.svg",
+    "current": "public/assets/6465f.svg",
+    "archived": false,
+    "bytes": 406,
+    "sha256": "3aa83cefed804ac670a46f1591a44bed4e6fee95f83223636715edccc3405edb",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/64951.svg",
+    "current": "design-reference/assets/64951.svg",
+    "archived": true,
+    "bytes": 986,
+    "sha256": "e657c49ca2d80b82060e1eb4ee4606e6e9e56a8989294036fa43cb35371996d1",
+    "references": []
+  },
+  {
+    "original": "public/assets/6835e.svg",
+    "current": "public/assets/6835e.svg",
+    "archived": false,
+    "bytes": 325,
+    "sha256": "f491b7fc43a69f81b099732468531baf25fdd038f89c1df1a02c4ad7f29b713a",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/6aee6.svg",
+    "current": "design-reference/assets/6aee6.svg",
+    "archived": true,
+    "bytes": 1930,
+    "sha256": "fd4a2b6078d53fc5d7d6beed81c5125a1f7a4a298552902ff7676bdf9624ae1b",
+    "references": []
+  },
+  {
+    "original": "public/assets/6dc0f.svg",
+    "current": "design-reference/assets/6dc0f.svg",
+    "archived": true,
+    "bytes": 350,
+    "sha256": "43fbdcf164e21e9d2402c594dcaedac03590ebcea10240f8b04be306e801877c",
+    "references": []
+  },
+  {
+    "original": "public/assets/6dfe8.svg",
+    "current": "public/assets/6dfe8.svg",
+    "archived": false,
+    "bytes": 357,
+    "sha256": "bb5d0409fd0cec234d66d7b913445fe39a9c38e9d53f9c88214cfa1fe40784c0",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/6f622.png",
+    "current": "public/assets/6f622.png",
+    "archived": false,
+    "bytes": 311531,
+    "sha256": "b5077a21181b9f389f1453fd0dc4e7ad98c2bb1ae6cee008471cfddb702d243e",
+    "references": [
+      "repo/Frontend/tests/redesign.spec.ts",
+      "repo/Frontend/tests/frontend.spec.ts",
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/73b82.svg",
+    "current": "design-reference/assets/73b82.svg",
+    "archived": true,
+    "bytes": 540,
+    "sha256": "e95245a64cafd59809b26f1382c965ca90464977d94a0a8116fd7dc5768bdc8e",
+    "references": []
+  },
+  {
+    "original": "public/assets/7d203.svg",
+    "current": "public/assets/7d203.svg",
+    "archived": false,
+    "bytes": 1338,
+    "sha256": "c3f14b20406e9c425ceecf9e6da37a576a652fb671c7cb8d547f255e1e2944bf",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/7df07.svg",
+    "current": "public/assets/7df07.svg",
+    "archived": false,
+    "bytes": 387,
+    "sha256": "684500df041e1b3b8bd56100e739eb61cb206cea1bde595e91d571effc26ffe0",
+    "references": [
+      "repo/Frontend/src/screens.css"
+    ]
+  },
+  {
+    "original": "public/assets/8065c.svg",
+    "current": "design-reference/assets/8065c.svg",
+    "archived": true,
+    "bytes": 706,
+    "sha256": "ee31c64970eb11267e8493e92ffb7d7d9dba9e514972bd2542dc9eb86cfafefe",
+    "references": []
+  },
+  {
+    "original": "public/assets/845c1.png",
+    "current": "public/assets/845c1.png",
+    "archived": false,
+    "bytes": 5486566,
+    "sha256": "c63f41242e4ee3e03d1e060f0fb3668dc628335e43aec85e7f9dae52164ca695",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/845ef.svg",
+    "current": "design-reference/assets/845ef.svg",
+    "archived": true,
+    "bytes": 1129,
+    "sha256": "953004188fe341ce75133817d942af3e01fd301e458e1342137cde7238ab21f3",
+    "references": []
+  },
+  {
+    "original": "public/assets/8567d.svg",
+    "current": "design-reference/assets/8567d.svg",
+    "archived": true,
+    "bytes": 271,
+    "sha256": "b67e24a1ab05188961ca13aa475e73700f1a8ce33a30a4080470af98604fb6e2",
+    "references": []
+  },
+  {
+    "original": "public/assets/87cb5.png",
+    "current": "public/assets/87cb5.png",
+    "archived": false,
+    "bytes": 329490,
+    "sha256": "b02d307c443e02c2350bc2c28ff0865e5290fbd16f377c961ac9d89a75b36fdc",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/87fa4.svg",
+    "current": "design-reference/assets/87fa4.svg",
+    "archived": true,
+    "bytes": 748,
+    "sha256": "5ab4e4551ece21bbb305e1341053eb19fae9b9478e01b28070de9254236ecd1b",
+    "references": []
+  },
+  {
+    "original": "public/assets/8bd48.svg",
+    "current": "public/assets/8bd48.svg",
+    "archived": false,
+    "bytes": 1281,
+    "sha256": "9545c57516d5d68a78965554bd117c4113183c63480a479d71d3cf0d887ff164",
+    "references": [
+      "repo/Frontend/src/pages/Pos.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/8eddf.svg",
+    "current": "public/assets/8eddf.svg",
+    "archived": false,
+    "bytes": 1265,
+    "sha256": "63a66534076ec0da77ab3279f9f1b1830c8f2c5699333db38662e37116b9c702",
+    "references": [
+      ".review/final-assets.cjs"
+    ]
+  },
+  {
+    "original": "public/assets/99dc7.svg",
+    "current": "public/assets/99dc7.svg",
+    "archived": false,
+    "bytes": 350,
+    "sha256": "914de46b9b3ce1de26150147f03841c9f0e6c0d788bfb747c88b9c7ce5485101",
+    "references": [
+      "repo/Frontend/src/pages/Reports.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/9afe6.svg",
+    "current": "design-reference/assets/9afe6.svg",
+    "archived": true,
+    "bytes": 986,
+    "sha256": "e657c49ca2d80b82060e1eb4ee4606e6e9e56a8989294036fa43cb35371996d1",
+    "references": []
+  },
+  {
+    "original": "public/assets/9b1dc.png",
+    "current": "public/assets/9b1dc.png",
+    "archived": false,
+    "bytes": 116647,
+    "sha256": "d38d95a3c3c93ec2e045f3eaba13c000349f0dc7391e636b446f2eb13a741618",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/9bc9e.svg",
+    "current": "public/assets/9bc9e.svg",
+    "archived": false,
+    "bytes": 1462,
+    "sha256": "1413baf49e0cb258873ecd50b97c2a66b5e373513f9c8132dbbfdcebe11e26e7",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/a0f56.svg",
+    "current": "public/assets/a0f56.svg",
+    "archived": false,
+    "bytes": 1395,
+    "sha256": "9a003e7d6d71f41d5927dcf50734644f339ad41752448860b3e30d0247e328c1",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/a17ac.svg",
+    "current": "design-reference/assets/a17ac.svg",
+    "archived": true,
+    "bytes": 421,
+    "sha256": "15afd9ea153626cf412d73e212fcab723303117148cd92ae4d25362a863941b3",
+    "references": []
+  },
+  {
+    "original": "public/assets/a4a82.svg",
+    "current": "design-reference/assets/a4a82.svg",
+    "archived": true,
+    "bytes": 2664,
+    "sha256": "bc63023946ebddf65a2ecb4fbd669a2794ab5bc9cc44d021c51eaf8b31a4587b",
+    "references": []
+  },
+  {
+    "original": "public/assets/a54ed.png",
+    "current": "design-reference/assets/a54ed.png",
+    "archived": true,
+    "bytes": 18289,
+    "sha256": "8b0df5c292ff4e474e7715b53ed3fed893779cdd52d8360629c5cfdba11cdaba",
+    "references": []
+  },
+  {
+    "original": "public/assets/a638b.svg",
+    "current": "public/assets/a638b.svg",
+    "archived": false,
+    "bytes": 839,
+    "sha256": "e9d926853300a47625f0541fefa4b02b88f94fc30856cc08c13e53cfb3e8ad88",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx",
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/a76c0.svg",
+    "current": "public/assets/a76c0.svg",
+    "archived": false,
+    "bytes": 325,
+    "sha256": "0d2c327d7c32eb7bf46adc14d8f99d33587b7596599b22d3f47e73b150e6c022",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/ad3e5.png",
+    "current": "public/assets/ad3e5.png",
+    "archived": false,
+    "bytes": 398,
+    "sha256": "0d168d425b7396b8a7c78069e7d95098e496f81c9facc170c9da0fad25ff6c5d",
+    "references": [
+      "repo/Frontend/src/pages/Pos.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/ae135.svg",
+    "current": "design-reference/assets/ae135.svg",
+    "archived": true,
+    "bytes": 283,
+    "sha256": "55e488d12903bcf10d7c255a9b2ce97ac17dab3307be22cb5a405b59df17e3f3",
+    "references": []
+  },
+  {
+    "original": "public/assets/aecc8.svg",
+    "current": "public/assets/aecc8.svg",
+    "archived": false,
+    "bytes": 337,
+    "sha256": "0f671f97cdb3b8e65fbe629b87b28b871963b8c3ba4c48ba88ed3f98852b005e",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/af1c3.svg",
+    "current": "design-reference/assets/af1c3.svg",
+    "archived": true,
+    "bytes": 299,
+    "sha256": "647f274cdba103655d1a779daacccd4f2822a294cb90794cda520fe18cb1dfca",
+    "references": []
+  },
+  {
+    "original": "public/assets/af2a8.svg",
+    "current": "design-reference/assets/af2a8.svg",
+    "archived": true,
+    "bytes": 515,
+    "sha256": "a5bec71ddb95257844622da3d03f877ba9acd1024df46ea9d4a3fee5509fb166",
+    "references": []
+  },
+  {
+    "original": "public/assets/b2c8d.svg",
+    "current": "public/assets/b2c8d.svg",
+    "archived": false,
+    "bytes": 357,
+    "sha256": "8c95cc476fc93c0d9d7c4ac4ecbf13c709646c148ede4ca5b87a8a91bdefa25a",
+    "references": [
+      "repo/Frontend/src/pages/Pos.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/b6984.svg",
+    "current": "public/assets/b6984.svg",
+    "archived": false,
+    "bytes": 652,
+    "sha256": "9d14a630a5076bd03374fad96cb7c4f045c773a532fad18decaab8c385c91c00",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx",
+      "repo/Frontend/src/data/demo.ts",
+      ".review/hobby-icon-review.mjs"
+    ]
+  },
+  {
+    "original": "public/assets/b7909.png",
+    "current": "public/assets/b7909.png",
+    "archived": false,
+    "bytes": 1206366,
+    "sha256": "adca41c2eb69a1bb4afa94647814de41bff45f261d64cb0b4cac797a72ddd5f6",
+    "references": [
+      "repo/Frontend/src/data/demo.ts"
+    ]
+  },
+  {
+    "original": "public/assets/b8d69.svg",
+    "current": "design-reference/assets/b8d69.svg",
+    "archived": true,
+    "bytes": 837,
+    "sha256": "236bf936501a3505a197ea1ae7350fb2eccd35ea0258a6b3b04554004ce2e195",
+    "references": []
+  },
+  {
+    "original": "public/assets/b96e8.svg",
+    "current": "public/assets/b96e8.svg",
+    "archived": false,
+    "bytes": 325,
+    "sha256": "786c5fb4a72536265ecbe42959a562d3c320f7834f019d4ee4e6c5aa272f4da3",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/be809.png",
+    "current": "public/assets/be809.png",
+    "archived": false,
+    "bytes": 2023065,
+    "sha256": "710e0c93e2e84750ecbefb1d5186eaef0ca0bc86c91a93563305b46f08b54969",
+    "references": [
+      "repo/Frontend/index.html",
+      "repo/Frontend/src/pages/Login.tsx",
+      "repo/Frontend/src/components/Navigation.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/c2089.svg",
+    "current": "design-reference/assets/c2089.svg",
+    "archived": true,
+    "bytes": 540,
+    "sha256": "f21ca674f1ca2e690168b9b488b6d98bf3b527a827252b460525c1b69dc30681",
+    "references": []
+  },
+  {
+    "original": "public/assets/c9553.svg",
+    "current": "public/assets/c9553.svg",
+    "archived": false,
+    "bytes": 393,
+    "sha256": "f0f63a33b393525a0e6facb384a43d9270dd0a4493e82dc262f771ae1d7d2086",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/d1937.svg",
+    "current": "public/assets/d1937.svg",
+    "archived": false,
+    "bytes": 1416,
+    "sha256": "2c8f491f8fbf344bcea562beb0b517d9c1f9d6efced5a2712c6ef7d0f0258e92",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/da2ba.svg",
+    "current": "public/assets/da2ba.svg",
+    "archived": false,
+    "bytes": 884,
+    "sha256": "490ac5dfc9a8ad89fbfd3ce3f12edd8796d9fe0754ded21e54cb7b57a8d17675",
+    "references": [
+      "repo/Frontend/src/components/SearchField.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/dc390.svg",
+    "current": "public/assets/dc390.svg",
+    "archived": false,
+    "bytes": 403,
+    "sha256": "6b9b3ba30ab441b3b47336e22bedc607e85c81c9ed5748ddf242f04c95ab25bf",
+    "references": [
+      "repo/Frontend/src/screens.css"
+    ]
+  },
+  {
+    "original": "public/assets/e0c6a.svg",
+    "current": "public/assets/e0c6a.svg",
+    "archived": false,
+    "bytes": 334,
+    "sha256": "108b58134558ed7ce583f9f8895f25e27462edf47aac736059eac82e2cd6f8ac",
+    "references": [
+      "repo/Frontend/src/pages/Dashboard.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/ebba2.svg",
+    "current": "design-reference/assets/ebba2.svg",
+    "archived": true,
+    "bytes": 716,
+    "sha256": "a85766aa9e7ec555a1c2af5f23a76efe7c8fb1527bd4e19e3fbaa736d86710f8",
+    "references": []
+  },
+  {
+    "original": "public/assets/ec548.svg",
+    "current": "public/assets/ec548.svg",
+    "archived": false,
+    "bytes": 1373,
+    "sha256": "2b05c4feb3844c88ef15ea3ef11e1f9268e7d08c7dcc181d86b18e76db2a6502",
+    "references": [
+      "repo/Frontend/src/responsive.css"
+    ]
+  },
+  {
+    "original": "public/assets/ee006.svg",
+    "current": "design-reference/assets/ee006.svg",
+    "archived": true,
+    "bytes": 2646,
+    "sha256": "76ae3a5d80b309f50dca04c8c879f276c8312cb5a8826cc5badcf9a589f37191",
+    "references": []
+  },
+  {
+    "original": "public/assets/f22fb.svg",
+    "current": "public/assets/f22fb.svg",
+    "archived": false,
+    "bytes": 402,
+    "sha256": "3460e1465264bcb74f483b25d8bfdd02cda5e6426ffc2ee16f761e38f8713d26",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx"
+    ]
+  },
+  {
+    "original": "public/assets/f4c3f.svg",
+    "current": "design-reference/assets/f4c3f.svg",
+    "archived": true,
+    "bytes": 341,
+    "sha256": "4cbc6bf4960d8e27fa50833d7c4cd553ae4b0ba81ba59d0118424352f0db0b2a",
+    "references": []
+  },
+  {
+    "original": "public/assets/fda60.svg",
+    "current": "design-reference/assets/fda60.svg",
+    "archived": true,
+    "bytes": 1131,
+    "sha256": "ac337178a4c94ae363a6ea5dc33727b08a3f875d3fc6e12dca214889b9f3971d",
+    "references": []
+  },
+  {
+    "original": "public/assets/fdf7b.svg",
+    "current": "design-reference/assets/fdf7b.svg",
+    "archived": true,
+    "bytes": 523,
+    "sha256": "0b2f6df789c7402ef5be4998cf3313ac31953df57c138a5698c7c2ba062e9f4b",
+    "references": []
+  },
+  {
+    "original": "public/assets/hobby-solid.svg",
+    "current": "public/assets/hobby-solid.svg",
+    "archived": false,
+    "bytes": 538,
+    "sha256": "efc289cd89840319f80bec385f9d9f67c6e971183d96f9f6269c7067ded55f2a",
+    "references": [
+      "repo/Frontend/src/pages/Inventory.tsx",
+      "repo/Frontend/src/data/demo.ts",
+      ".review/hobby-icon-review.mjs"
+    ]
+  },
+  {
+    "original": "public/assets/material-icons-LICENSE.txt",
+    "current": "public/assets/material-icons-LICENSE.txt",
+    "archived": false,
+    "bytes": 11357,
+    "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+    "references": []
+  },
+  {
+    "original": "public/assets/material-icons-NOTICE.md",
+    "current": "public/assets/material-icons-NOTICE.md",
+    "archived": false,
+    "bytes": 363,
+    "sha256": "479ab8a9bab204704caa1d36223cde5ed363dee353e9758d91aeb559b57eafa8",
+    "references": []
+  },
+  {
+    "original": "public/assets/report-font-LICENSE.txt",
+    "current": "public/assets/report-font-LICENSE.txt",
+    "archived": false,
+    "bytes": 4981,
+    "sha256": "9cfc0ad5554a6e65002601d595f0af2912c448428d4ce4cb8bae09dbf6d51a3a",
+    "references": []
+  },
+  {
+    "original": "public/assets/report-font.ttf",
+    "current": "public/assets/report-font.ttf",
+    "archived": false,
+    "bytes": 757076,
+    "sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+    "references": [
+      "repo/Frontend/src/lib/report-export.ts"
+    ]
+  },
+  {
+    "original": "src/styles.css",
+    "current": "design-reference/styles.css",
+    "archived": true,
+    "bytes": 1993,
+    "sha256": "5dd87ecfede9fd1aada19c4ed2ed215e5e6e3b782419787234552335a19c6387",
+    "references": []
+  }
+]

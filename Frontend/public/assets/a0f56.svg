@@ -1,0 +1,21 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="110" height="68" viewBox="0 0 110 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Sales">
+<g filter="url(#filter0_i_0_16)">
+<path d="M0 17C0 7.61116 7.61116 0 17 0H93C102.389 0 110 7.61116 110 17V51C110 60.3888 102.389 68 93 68H17C7.61116 68 0 60.3888 0 51V17Z" fill="#F0E4D5"/>
+</g>
+<path d="M17 1H93C101.837 1 109 8.16344 109 17V51C109 59.8366 101.837 67 93 67H17C8.16344 67 1 59.8366 1 51V17C1 8.30155 7.94127 1.22398 16.5869 1.00488L17 1Z" stroke="#B08968" stroke-width="2"/>
+</g>
+<defs>
+<filter id="filter0_i_0_16" x="0" y="0" width="110" height="84" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feMorphology radius="8" operator="dilate" in="SourceAlpha" result="effect1_innerShadow_0_16"/>
+<feOffset dy="16"/>
+<feGaussianBlur stdDeviation="16"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0470588 0 0 0 0 0.0470588 0 0 0 0 0.0509804 0 0 0 0.4 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_0_16"/>
+</filter>
+</defs>
+</svg>
