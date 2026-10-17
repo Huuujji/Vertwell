@@ -47,7 +47,7 @@ export function decodeReceipt(value:unknown):CheckoutReceipt {
   const r=record(value);if(r.stockCommitted!==true||r.providerVerified!==false)invalidResponse('checkout receipt state');
   const occurredAt=text(r.occurredAt);if(!Number.isFinite(Date.parse(occurredAt)))invalidResponse('receipt time');
   return {...decodeTotals(value),saleId:id(r.saleId),operationId:id(r.operationId),orderNumber:text(r.orderNumber),occurredAt,
-    status:choice(text(r.status),['Completed','Pending']),reviewState:choice(text(r.reviewState),['Owner checkout','Awaiting Owner review']),
+    status:choice(text(r.status),['Completed','Pending','Voided']),reviewState:choice(text(r.reviewState),['Owner checkout','Awaiting Owner review','Reviewed']),
     stockCommitted:true,replayed:bool(r.replayed),method:choice(text(r.method),['Cash','GCash']),cashierName:text(r.cashierName),cashierRole:choice(text(r.cashierRole),['Owner','Admin','Staff']),
     reference:r.reference===null?null:text(r.reference),cashTendered:r.cashTendered===null?null:money(r.cashTendered),change:r.change===null?null:money(r.change),providerVerified:false};
 }

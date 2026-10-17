@@ -9,6 +9,7 @@
 // 20261017060000_inventory_revision_scope.sql: bc56df5ac87c86d92691efb15f233cf26ab7abe49fb043a2083e05bc3b1f0990
 // 20261017070000_nonretryable_business_conflicts.sql: 01eb62e5b42b8397df1a10590b6c9361a0d3da2d69f29d35e680701e869edeac
 // 20261017135332_atomic_checkout.sql: dfbe81cbe9d8817be5880e8f9048c016a4dc5ab5ec1ab40d1559d81cfd74ca9a
+// 20261017150033_durable_sales_workflows.sql: 6cdb4de6334e0e9ecb4d7bf0558f084be1ea4f7fbd52dc29282c3a079b4f8475
 // Decimal wire values are strings; conversion to display numbers is explicit.
 export const databaseSchema = {
   alert_settings: {
@@ -31,6 +32,7 @@ export const databaseSchema = {
     occurred_at: ['string', false],
     operation_id: ['string', false],
     created_at: ['string', false],
+    event_sequence: ['decimal', false],
   },
   bundle_component_modifiers: {
     component_id: ['string', false],
@@ -59,6 +61,7 @@ export const databaseSchema = {
     business_date: ['string', true],
     operation_id: ['string', false],
     created_at: ['string', false],
+    review_id: ['string', true],
   },
   daily_sales_review_items: {
     review_id: ['string', false],

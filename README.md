@@ -649,6 +649,8 @@ The backend's user-scoped database client forwards the caller's token so databas
 | GET | `/api/auth/me` | Bearer access token | Verified ID/email and active profile/role |
 | GET | `/api/auth/accounts` | Active Owner/Admin | Complete authorized profile/email list; Admin Staff plus self |
 | GET | `/api/inventory` | Active Owner/Admin | One coherent catalogue/batch/balance snapshot |
+| GET | `/api/sales-workflow` | Active Owner/Admin/Staff | Coherent saved sales/review/event pages; Staff own current-day scope |
+| POST | `/api/sales-workflow/commands` | Current database-authorized role | Exact receipt review, request, decision and single/bulk void commands |
 | POST | `/api/inventory/commands` | Active Owner/Admin | Revisioned aggregate saves, movements and archival |
 | POST | `/api/inventory/images` | Active Owner/Admin | Optional immutable raster upload |
 | POST | `/api/inventory/image-urls` | Active Owner/Admin | Bounded private signed image URLs |
@@ -774,7 +776,7 @@ No Vercel or Supabase resources are provisioned by this scaffold.
 - P1/P2/P2A/P3/P4/P5/P6 acceptance is recorded in HandsOff.md. P6 hosted verification is complete; checkout was disabled after the approved test window.
 - Preserve both original Owners, the two user-requested active Admin/Staff accounts and all acceptance history.
 - Preserve disabled checkout until the user requests activation for use; do not repeat completed P6 acceptance without a new reason.
-- Add P7 durable Owner daily-sales review, void decisions and audit workflows.
+- P7 durable reviews, void decisions and event history are implemented locally; the approved migration is applied/schema-verified. Broader hosted acceptance awaits recovery from SQL connection timeouts. Approval persists and checkout stays disabled. See `backend/supabase/SALES_WORKFLOWS.md` and HandsOff.md.
 - Connect P8 reports and exports to durable sales/movement reconciliation.
 - Define P9 payment verification, notifications and synchronization separately.
 

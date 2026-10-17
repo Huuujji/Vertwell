@@ -20,7 +20,37 @@ function pagination(query: Record<string, unknown>) {
 businessRouter.get('/access', requireAuth, async (_req, res) => {
   const { data, error } = await res.locals.database.rpc('business_access');
   if (error) businessError(error);
-  res.json({ ...data, services: { inventoryCrud: data?.services?.inventoryCrud === true, checkout: data?.services?.checkout === true, salesReview: false, reports: false } });
+  res.json({ ...data, services: { inventoryCrud: data?.services?.inventoryCrud === true, checkout: data?.services?.checkout === true, salesReview: data?.services?.salesReview === true, reports: false } });
+});
+
+businessRouter.get('/sales-workflow', requireAuth, requirePermission('sales.read'), async (req,res)=>{
+  const {data,error}=await res.locals.database.rpc('read_sales_workflow',pagination(req.query));
+  if(error)businessError(error);
+  res.json(data);
+});
+
+async function workflowCommand(command:unknown,res:import('express').Response) {
+  if(!command || typeof command!=='object' || Array.isArray(command)) throw new HttpError(422,'A sales workflow command is required.');
+  const {data,error}=await res.locals.database.rpc('sales_workflow_command',{command});
+  if(error)businessError(error);
+  res.json(data);
+}
+businessRouter.post('/sales-workflow/commands',requireAuth,requirePermission('sales.read'),async(req,res)=>{
+  await workflowCommand(req.body,res);
+});
+// SQL repeats current-role and receipt-scope checks under the account lock.
+// The preliminary read check allows an already committed void to reconcile.
+for(const [path,kind] of [['void-requests','void.request'],['void','sale.void'],['void-decision','void.decide']]) {
+  businessRouter.post(`/sales/:id/${path}`,requireAuth,requirePermission('sales.read','id'),async(req,res)=>{
+    if(kind!=='void.request'&&res.locals.profile.role==='Staff')throw new HttpError(403,'Business access is not permitted.');
+    if(req.body?.kind!==kind || !Array.isArray(req.body.targets) || req.body.targets.length!==1 || req.body.targets[0]?.saleId!==req.params.id)
+      throw new HttpError(422,'The command must match this receipt and action.');
+    await workflowCommand(req.body,res);
+  });
+}
+businessRouter.post('/daily-sales-reviews',requireAuth,requirePermission('review.confirm'),async(req,res)=>{
+  if(req.body?.kind!=='review.confirm')throw new HttpError(422,'A daily review command is required.');
+  await workflowCommand(req.body,res);
 });
 
 for (const path of ['/sales', '/sales/:id']) {
@@ -120,9 +150,6 @@ const pending: [string, string, BusinessAction, string?][] = [
   ['get', '/dashboard', 'dashboard.read'],
   ['post', '/inventory', 'inventory.write'], ['patch', '/inventory/:id', 'inventory.write'],
   ['delete', '/inventory/:id', 'inventory.write'], ['get', '/reports', 'reports.read'],
-  ['post', '/sales/:id/void-requests', 'void.request', 'id'],
-  ['post', '/sales/:id/void', 'sale.void', 'id'], ['post', '/sales/:id/void-decision', 'void.decide', 'id'],
-  ['post', '/daily-sales-reviews', 'review.confirm'],
 ];
 for (const [method, path, action, target] of pending) {
   const register = method === 'get' ? businessRouter.get.bind(businessRouter) : method === 'patch' ? businessRouter.patch.bind(businessRouter)

@@ -23,7 +23,7 @@ export async function integrationSchemaSource() {
       select table_name, column_name, data_type, is_nullable from information_schema.columns
       where table_schema = 'public' order by table_name, ordinal_position`);
     const types: Record<string, string> = { uuid: 'string', text: 'string', date: 'string',
-      'timestamp with time zone': 'string', boolean: 'boolean', integer: 'number', numeric: 'decimal', jsonb: 'json' };
+      'timestamp with time zone': 'string', boolean: 'boolean', integer: 'number', bigint: 'decimal', numeric: 'decimal', jsonb: 'json' };
     const tables = new Map<string, string[]>();
     for (const row of rows) {
       const kind = types[row.data_type];

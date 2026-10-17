@@ -1,10 +1,157 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4/P5/P6 are accepted. P6 hosted migration, real caller-token persistence and simultaneous checkout acceptance pass. The user-approved temporary activation ended disabled. P7 durable reviews/voids/audit is next; P8/P9 remain later work.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep both original Owners unchanged and keep the user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active. Original user messages and historical checkpoints remain preserved below.
+Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4/P5/P6 are accepted. P6 hosted migration, real caller-token persistence and simultaneous checkout acceptance pass. The user-approved temporary activation ended disabled. P7 is implemented and its approved migration is applied/schema-verified; broader hosted acceptance is incomplete after SQL connection failures. P8/P9 remain later work.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep both original Owners unchanged and keep the user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active. Original user messages and historical checkpoints remain preserved below.
 
 ## New — current state and continuation
 
-### Current checkpoint — P6 accepted; hosted persistence and concurrency verified (October 17, 2026)
+### Current checkpoint — P7 approved, applied and schema-verified; broader hosted acceptance incomplete (October 17, 2026)
+
+**The user explicitly answered "Approve P7 migration and verification on this exact
+project" for DualCounter `izdemgzdywtxhvgvsian`. This approval persists; do not ask
+for it again.** The earlier automatic approval rejection happened before execution
+and is resolved. The normal exact-project `db:apply` then applied only
+**`20261017150033_durable_sales_workflows.sql`**, SHA-256
+`6cdb4de6334e0e9ecb4d7bf0558f084be1ea4f7fbd52dc29282c3a079b4f8475`.
+All **eleven** applied SQL sources are now immutable. No commit, push, PR or
+deployment was made; the user's `da020a5`/`e7bea06`/`91a043f` commits are preserved.
+
+- Hosted **`db:verify` passes**: eleven exact migration hashes, all 25 RLS business
+  tables, the existing six SELECT-only table grants, nineteen narrowly granted
+  public functions, only two permitted private helpers, no table write grants,
+  expected policies and FK indexes. The new private operation table is inaccessible
+  to application roles. Application of P7 does not activate checkout.
+- Real HTTPS/PostgREST denies both new functions to anonymous and service-role
+  callers (**4/4 denial checks**). These are grant-denial checks, not authenticated
+  Owner/Admin/Staff persistence or simultaneous-decision acceptance.
+- **Hosted verification is incomplete because database connections stopped
+  completing SSL negotiation after successful apply/schema verification.** The
+  first `sales-workflow:verify` connection reset; a retry through the same project's
+  previously verified transaction-pooler port 6543 and a later 5432 inspect timed
+  out. All three DNS-resolved pooler addresses accept TCP but time out before SSL
+  negotiation/authentication. Direct TLS negotiation also times out. This machine
+  cannot route the project's DNS-confirmed direct IPv6 endpoint (`ENETUNREACH`).
+  Certificate validation, pinned CA, saved connection settings and security policy
+  were preserved. The browser tool also failed to create a dashboard tab; do not
+  represent this as a successful dashboard inspection or a confirmed provider outage.
+- No persistent P7 acceptance accounts or sales were created. No retained Owner
+  was signed in, password-tested, reset or edited; Jestine Admin / Jest and Aquino
+  Staff / Aquino remain retained. No explicit checkout activation was performed.
+  Any attempted SQL regression fixture work is inside rollback-only transactions;
+  no hosted P7 review/request/decision/void was accepted as a verified real write.
+- The last successful hosted baseline/schema inspection records **12 Auth/profiles
+  (four active), 11 sales/payments, 43 movements, 149 audits, inventory revision 64**,
+  zero review/request/cash-movement records and **checkoutEnabled: false**. Preserve
+  this newer baseline and all deliberate P5/P6 history. Do not revert it to older
+  P6 counts. A fresh independent final SQL fingerprint could not be obtained during
+  the connection problem, so it has not been claimed.
+- Local implementation evidence below remains valid: **125/125 root tests**, final
+  builds/typechecks/generated schema equality and **64/64 scoped browser checks**.
+  Current code additionally handles a dropped verifier connection without an
+  unhandled client error. Original messages, current Login wording and all eleven
+  applied hashes remain protected by the final source audit. No files are staged.
+- Evidence is workspace-parent `.review/october-17-p7-{approval.txt,apply.log,
+  hosted-db-verify.log,hosted-sales-workflow-verify.log,
+  hosted-final-sales-workflow-verify.log,hosted-reconnect.log,
+  https-checks.mts,https-checks.json,https-checks.log,audit.cjs,audit.json}`.
+  Read-only diagnostics use the `connectivity`, `pg-diagnostic`, `dns-diagnostic`,
+  `direct-tls-diagnostic` and `ipv6-diagnostic` `.mts` helpers there. Keep their failed
+  evidence; do not replay historical one-time mutation helpers.
+
+**Next:** restore a certificate-verified SQL connection to this exact project, then
+run the already approved `sales-workflow:verify` (15 rollback scenarios),
+`checkout:verify`, `inventory:verify`, `permissions:verify`, `db:smoke` and final
+`db:verify`. Inspect active/stuck requests if a connection permits it. Then finish
+isolated real Auth/caller-token persistence/retry/scope tests and forced-overlap
+duplicate/review-versus-void/competing-request-decision acceptance, retaining
+labeled development history and proving all original rows/accounts are preserved.
+Keep checkout disabled; do not enable it for use, edit/reapply frozen SQL, review
+or void the retained P6 receipts as disposable fixtures, ask again for the resolved
+P7 approval, start P8/P9 or save unfinished Backend work to GitHub. Daily Sales
+Values remains kept; Figma comparison and physical printing remain excluded.
+
+### Previous checkpoint — P7 implemented locally; hosted acceptance pending at that point (October 17, 2026)
+
+Read all seven full original user messages and the carried-forward decisions below.
+P7 implements durable Daily Sales Review, void requests/decisions and event history.
+It is **not yet accepted against hosted/caller-token/concurrent requirements**.
+All Backend work remains local. No commit, push, PR or deployment. The user's newer
+`e7bea06` (P6 done) and `da020a5` (Login wording) commits are preserved, in addition
+to the earlier `91a043f` snapshot. Current branch is `Backend_Phase`.
+
+- CLI-generated, Manila-normalized **`20261017150033_durable_sales_workflows.sql`**,
+  SHA-256 **`6cdb4de6334e0e9ecb4d7bf0558f084be1ea4f7fbd52dc29282c3a079b4f8475`**.
+  The ten applied SQL sources/hashes are unchanged. See
+  `backend/supabase/SALES_WORKFLOWS.md` for the complete reviewable contract.
+- Two caller-token RPCs provide coherent authorized sales/history pages and exact
+  receipt workflow commands. One private append-only operation receipt table,
+  a cash-movement review FK/index and an audit event sequence support durable
+  reconciliation/chronology. No new table grants, write policies or private-helper
+  execution grants. App roles cannot alter checkout activation.
+- Only Owner confirms an exact verified set of paid/fulfilled Pending receipts.
+  SQL recalculates expected Cash/GCash, validates exact-cent amounts and records
+  counted cash, opening/addition/removal/refund adjustments, verified amounts,
+  explanation, outcome, all receipt verifications and Owner identity/time. Positive
+  adjustments create explicitly entered reconciliation evidence linked to the review;
+  they do not execute provider refunds or invent historical occurrence times.
+- Staff requests remain own/current-day scoped. Owner/Admin can reject, approve
+  or directly void using their actual identity, without an Owner password for Admin.
+  Every original request and renewed request/decision survives with separate reasons.
+  Single stale decisions reject without writes; bulk void records one exact result
+  per selected receipt (`voided`, `stale`, `ineligible`) and a shared action ID.
+  Managers can reopen persisted bulk results including skipped IDs. Unexpected
+  failures roll back all updates, request decisions, audits and operation storage.
+- Commands resolve current roles under account → workflow → ordered sale locks;
+  they share the existing account serialization with checkout, inventory and role
+  changes. Actor/content-bound replay returns one saved result. Current permissions
+  and Staff day scope remain enforced on replay. PT409 avoids provider conflict loops.
+  Reviews and voids do not change stock, inventory revision, purchased snapshots or
+  payments. Voids never imply stock returns or refunds. GCash is recorded/manual
+  receipt evidence, never provider verification.
+- Connected live Dashboard review queue/View all requests and Audit Trail/Staff
+  history preserve filters, pagination, cross-page selections, exact receipt sets,
+  all request/decision chronology and final single/bulk void warnings. Admin can
+  inspect daily receipts but cannot verify/confirm. Current receipt reads show
+  reviewed/voided state alongside frozen purchased/original checkout state.
+  Live failures never fall back to sample data. P8 financial/report integration
+  remains deferred; the preview and Daily Sales Values stay preserved.
+- Dirty review/decision forms protect backdrop/Escape/X/Cancel/navigation. Failed
+  writes retain counts, checkboxes, explanations and selections. Before sending,
+  account-scoped session storage saves the exact command without tokens/passwords.
+  Lost responses block other actions and restore the same retry after refresh;
+  later failed retries cannot erase an earlier uncertain result. Closing a tab can
+  clear session storage, so inspect recorded history before recreating an action.
+- Local root tests pass **125/125** (103 backend/API/PostgreSQL, 22 frontend unit),
+  including fifteen shared workflow SQL scenarios and committed disk close/reopen.
+  Final typechecks/builds and generated-schema equality pass. The combined scoped
+  browser run passes **64/64 (3.2m), exit 0**, including six P7 cases, existing live
+  checkout/auth/management and affected preview review/void/export checks. This is
+  not a new full-suite run or proof of hosted Auth/PostgREST/concurrent acceptance.
+  Initial P7 browser failures were test locators (status versus region and duplicate
+  headings); test typing was corrected. Final captures at 1440×900, 820×400 and
+  320×568 have no measured page/dialog overflow; sampled visual inspection confirms
+  readable history and visible review headers. Physical devices/screen readers,
+  Figma comparison and physical printing have not been newly verified.
+- Read-only hosted preflight finds **ten matching hashes**, four active retained
+  accounts, **11 sales/payments, 43 movements, 149 audits, inventory revision 64**,
+  no review/request/cash-movement rows and **checkoutEnabled: false**. These counts
+  are newer than the P6 checkpoint: preserve the current state rather than restoring
+  historical 41/144/revision-62 values. Neither retained Owner was signed in,
+  password-tested, reset or edited. Jestine Admin / Jest and Aquino Staff / Aquino
+  remain active. Existing development history is not disposable test cleanup.
+- Evidence: workspace-parent `.review/october-17-p7-{before.mts,before.json,
+  before.log,unit-final.log,typecheck-final.log,build-final.log,
+  browser-regression.log,browser/}`. Hosted apply/acceptance status is recorded here
+  when resolved; do not infer acceptance from local tests or the read-only preflight.
+
+**Next:** apply the reviewed P7 source only through the exact-project `db:apply`
+workflow when authorized, verify hosted grants/schema and rolled-back regressions,
+then verify real caller-token persistence/retries/role scope and simultaneous
+review/void/request decisions. Keep checkout disabled: P7 acceptance does not
+require enabling new sales or reusing retained-account credentials. Use separately
+authorized isolated development fixtures and retain intentional labeled history.
+Do not start P8/P9 or save unfinished Backend work to GitHub.
+
+### Previous checkpoint — P6 accepted; hosted persistence and concurrency verified (October 17, 2026)
 
 **P6 is complete and accepted in hosted development. Checkout finishes disabled
 as the user requested.** Read all seven full original messages and carried-forward
@@ -1009,7 +1156,7 @@ The Backend-start request supersedes old blanket frontend-only and stop-for-revi
 | **P4** | Enforce Owner/Admin/Staff permissions | **Complete — approved migration applied; hosted verification passes** | Caller-scoped API checks, six restricted read grants, 25 SELECT policies, 11 hosted permission scenarios and 12 rollback smoke checks pass; both real Owners/settings remain unchanged. See current checkpoint for verification limits. |
 | **P5 — first milestone** | Protected CRUD and Users/Inventory integration | Complete — real acceptance, nine hosted hashes and final regressions pass | Real browser and Auth/PostgREST/Storage changes persist across refresh/login and another authorized account; denied/invalid actions change nothing. Nine migrations include two hosted-path fixes. |
 | **P6** | Transactional checkout, payments recorded and stock consumption | Complete — hosted/caller-token/concurrent acceptance passes; disabled after approved test window | Sale, purchased snapshots, batch deductions, movement records and audit events save together; duplicate/concurrent requests cannot oversell or deduct twice. |
-| **P7 — next** | Durable Daily Sales Review, voids and audit history | Pending | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
+| **P7 — current** | Durable Daily Sales Review, voids and audit history | Implemented; applied/schema-verified; broader hosted acceptance incomplete (SQL connectivity) | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
 | **P8** | Database-backed reports and reconciliation | Pending | Screen/PDF/CSV/Print scopes derive from durable records with matching filters, correct historical/current balances and explicit missing-history disclosures. |
 | **P9 — later** | External payment verification, notifications and additional integrations | Pending / details to define | Provider and notification scope, rules and verification are specified separately; existing sample QR/reference entry is not represented as payment verification. |
 

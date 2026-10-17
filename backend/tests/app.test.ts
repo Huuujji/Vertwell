@@ -122,6 +122,12 @@ async function businessTransport(run: (request: (path: string, method?: string, 
     if (url.includes('/rpc/read_inventory')) return Response.json({version:1,tables:{},balances:[],revision:'0'});
     if (url.includes('/rpc/read_managed_accounts')) return Response.json([]);
     if (url.includes('/rpc/read_business_sales')) return Response.json({version:1,items:[{id:ids.ownSale,total:'10.00'}],hasMore:false});
+    if (url.includes('/rpc/read_sales_workflow')) return Response.json({version:1,items:[{id:ids.ownSale,total:'10.00'}],hasMore:false});
+    if (url.includes('/rpc/sales_workflow_command')) {
+      if(state.role==='Staff'&&body.command?.kind!=='void.request'||state.role==='Admin'&&body.command?.kind==='review.confirm')return fail();
+      if(state.conflict)return Response.json({code:'PT409',message:'Private provider detail must not leak'},{status:409});
+      return body.command?.operationId?Response.json({version:1,operationId:body.command.operationId,replayed:true}):Response.json({code:'22023'},{status:422});
+    }
     if (url.includes('/rpc/read_pos_catalogue')) return Response.json({version:1,checkoutReady:false,items:[],hasMore:false});
     if (url.includes('/rpc/checkout')) return body.command?.operationId ? Response.json({saleId:ids.ownSale,replayed:false}) : Response.json({code:'22023',message:'Invalid checkout'},{status:422});
     if (url.includes('/rpc/quote_checkout')) return Response.json({version:1,total:'14.00'});
@@ -146,9 +152,9 @@ test('every business route enforces the complete three-role matrix before return
       ['GET','/dashboard','dashboard.read',501], ['GET','/inventory','inventory.read',200],
       ['POST','/inventory','inventory.write',501], ['PATCH',`/inventory/${ids.staff}`,'inventory.write',501],
       ['DELETE',`/inventory/${ids.staff}`,'inventory.write',501], ['GET','/reports','reports.read',501],
-      ['POST','/checkout','checkout.create',422], ['POST',`/sales/${ids.ownSale}/void-requests`,'void.request',501],
-      ['POST',`/sales/${ids.ownSale}/void`,'sale.void',501], ['POST',`/sales/${ids.ownSale}/void-decision`,'void.decide',501],
-      ['POST','/daily-sales-reviews','review.confirm',501], ['GET','/sales','sales.read',200],
+      ['POST','/checkout','checkout.create',422], ['POST',`/sales/${ids.ownSale}/void-requests`,'void.request',422],
+      ['POST',`/sales/${ids.ownSale}/void`,'sale.void',422], ['POST',`/sales/${ids.ownSale}/void-decision`,'void.decide',422],
+      ['POST','/daily-sales-reviews','review.confirm',422], ['GET','/sales','sales.read',200],
       ['GET',`/sales/${ids.ownSale}`,'sales.read',200], ['GET','/void-requests','sales.read',200],
       ['GET','/pos/catalogue','pos.read',200], ['GET','/alert-settings','alerts.read',200],
       ['GET','/auth/accounts','accounts.read',200],
@@ -179,6 +185,21 @@ test('Staff cannot widen sale scope or spoof identity; each business request use
     assert.equal((await request('/sales/not-a-uuid')).status,422);
     for (const path of ['/sales?offset=1&limit=2','/pos/catalogue?limit=1','/void-requests']) assert.equal((await request(path)).status,200);
     assert.ok(state.calls.filter(call=>call.path.includes('/rest/v1/')).every(call=>call.token==='Bearer session-token'));
+  });
+});
+
+test('P7 commands preserve exact retry content and caller tokens; scoped aliases, database denials and conflicts remain enforced',async()=>{
+  await businessTransport(async(request,state)=>{
+    const command={operationId:ids.otherSale,kind:'sale.void',targets:[{saleId:ids.ownSale,token:'a'.repeat(64)}],reason:'Reviewed receipt'};
+    const saved=await request(`/sales/${ids.ownSale}/void`,'POST',command);assert.equal(saved.status,200);assert.equal((await saved.json()).replayed,true);
+    const call=state.calls.filter(c=>c.path.endsWith('/rpc/sales_workflow_command')).at(-1)!;
+    assert.deepEqual(call.body,{command});assert.equal(call.token,'Bearer session-token');
+    assert.equal((await request(`/sales/${ids.otherSale}/void`,'POST',command)).status,422);
+    assert.equal((await request('/sales-workflow?role=Owner')).status,422);
+    state.role='Staff';assert.equal((await request('/sales-workflow/commands','POST',command)).status,403);
+    assert.equal((await request('/sales-workflow/commands','POST',{...command,kind:'void.request'})).status,200);
+    state.role='Owner';state.conflict=true;const conflict=await request('/sales-workflow/commands','POST',command);
+    assert.equal(conflict.status,409);assert.ok(!JSON.stringify(await conflict.json()).includes('Private provider detail'));
   });
 });
 

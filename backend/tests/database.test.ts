@@ -21,7 +21,7 @@ async function initialize(database: PGlite) {
 before(async () => {
   const files = (await readdir(new URL('migrations/', sqlRoot))).filter(name => name.endsWith('.sql')).sort();
   migrations = await Promise.all(files.map(name => readFile(new URL(`migrations/${name}`, sqlRoot), 'utf8')));
-  assert.equal(files.length, 10);
+  assert.equal(files.length, 11);
   db = new PGlite();
   await initialize(db);
 });
@@ -84,7 +84,7 @@ test('fresh migrations expose only scoped P4 reads and restricted functions, wit
   assert.deepEqual(grants.rows, ['alert_settings','payments','sale_item_modifiers','sale_items','sales','void_requests']
     .map(table_name => ({table_name,grantee:'authenticated',privilege_type:'SELECT'})));
   assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public'`), 17);
+    where n.nspname='public'`), 19);
   for (const role of ['anon', 'authenticated', 'service_role']) {
     assert.equal(await scalar(`select has_schema_privilege($1,'private','USAGE')`, [role]), role === 'authenticated');
     assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace

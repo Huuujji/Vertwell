@@ -1,5 +1,15 @@
 # Database workspace — Backend phase
 
+P7 is implemented/verified locally and its explicitly approved migration
+`20261017150033_durable_sales_workflows.sql` is applied and schema/grant-verified
+on DualCounter. All eleven applied sources are immutable. Broader hosted
+acceptance is incomplete because later SQL connections stall during SSL
+negotiation. The existing approval persists; checkout remains disabled.
+[SALES_WORKFLOWS.md](SALES_WORKFLOWS.md) describes exact receipt reviews, recorded
+cash adjustments, all void request/decision history, durable bulk results,
+caller-scoped reads and uncertain-response recovery. It does not enable checkout.
+See HandsOff.md for the final evidence and the precise next acceptance gate.
+
 P6 is applied and accepted in hosted development after explicit exact-project
 migration/verification approval. `20261017135332_atomic_checkout.sql` adds atomic
 checkout, server quotes/configuration availability, purchased receipt retrieval
@@ -7,7 +17,7 @@ and scoped POS image reads. All ten applied hashes match and sources are frozen.
 Real caller-token persistence, three forced-overlap races and final hosted
 regressions pass. The separately approved temporary test activation ended
 **disabled**; a future request is needed to leave checkout enabled for use.
-See [CHECKOUT.md](CHECKOUT.md). P7 review/void/audit is next. All Backend work
+See [CHECKOUT.md](CHECKOUT.md). P7 hosted acceptance is next. All Backend work
 remains local and off GitHub.
 
 The October 17 database priority now has a verified hosted development foundation.

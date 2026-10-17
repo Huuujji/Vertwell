@@ -138,6 +138,8 @@ async function verify(client: pg.Client) {
     {proname:'read_inventory',rolname:'authenticated'},
     {proname:'read_managed_accounts',rolname:'authenticated'},
     {proname:'read_pos_catalogue',rolname:'authenticated'},
+    {proname:'read_sales_workflow',rolname:'authenticated'},
+    {proname:'sales_workflow_command',rolname:'authenticated'},
     {proname:'update_account',rolname:'authenticated'},
     {proname:'update_alert_settings',rolname:'authenticated'},
   ];
