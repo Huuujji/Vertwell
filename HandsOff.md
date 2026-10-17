@@ -1,10 +1,191 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4/P5/P6 are accepted. P6 hosted migration, real caller-token persistence and simultaneous checkout acceptance pass. The user-approved temporary activation ended disabled. P7 is implemented and its approved migration is applied/schema-verified; broader hosted acceptance is incomplete after SQL connection failures. P8/P9 remain later work.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep both original Owners unchanged and keep the user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active. Original user messages and historical checkpoints remain preserved below.
+Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **Paused at the user's explicit request. Do not resume implementation until requested. The Backend phase has started; keep all Backend code/documentation local and do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4/P5/P6 are accepted. P7 is implemented and its approved migration is applied/schema-verified; broader hosted acceptance remains incomplete after SQL connection failures. The latest request authorizes checkout activation for the user's own testing and removal of P6 test accounts, superseding the older instruction to leave checkout disabled. Activation attempts timed out; enablement and account removal remain pending. The development notice was removed from source but is unverified. P8/P9 remain later work.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep both original Owners unchanged and keep the user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active. Original user messages and historical checkpoints remain preserved below.
 
 ## New — current state and continuation
 
-### Current checkpoint — P7 approved, applied and schema-verified; broader hosted acceptance incomplete (October 17, 2026)
+### Current checkpoint — stopped during requested checkout activation and workspace cleanup (October 17, 2026)
+
+**Implementation stopped immediately when the user requested this pause. The whole
+priority task is NOT complete.** Only this handoff and pause-record verification
+were worked on after the stop. The full request below is authoritative together
+with the seven unchanged historical original-message blocks, the carried-forward
+decisions and the Ordered bridge and backend priorities and completion criteria.
+Do not infer completion from a continuation script or a commit title.
+
+#### Full request from this chat — verbatim
+
+```text
+Read HandsOff.md and implement the October 17 highest-priority. Follow my full original message, not just the continuation script.
+
+but first enable the checkout so that I can try it myself also can you first answer my question what is the use of refresh data and I want you to remove the Panel with text "Development workspace · saved business data is shared with permitted accounts." along with the P6 accounts we already have the accounts I gave you for testing and since we already done with using the p6 we no longer need it.
+```
+
+#### Full stop/save instruction from this chat — verbatim
+
+```text
+Let’s stop for now. Stop implementation and update HandsOff.md to save the current progress.
+
+Preserve my full original priority requirements without summarizing or rewriting them. For each requirement, record whether it is completed, partially completed, or still pending, including any unverified work.
+
+Record the changes made, validation results, known issues, and anything interrupted. Update the continuation script to point to the original priority requirements and tell the next chat exactly where to resume.
+
+Do not mark the whole priority task complete unless every requirement is implemented and verified.
+```
+
+#### Requirement-by-requirement status at this pause
+
+These status annotations supplement the verbatim requirements; they do not replace
+or rewrite them. Previous completed frontend requirements remain in their original
+sections with their existing per-requirement checkpoints.
+
+| Requirement / original source | Status | Actual result and unverified work |
+| --- | --- | --- |
+| Read HandsOff.md and follow the full original priority requirements | Partially completed | Read the current checkpoint, ordered priorities and original Backend-start, October 17, October 16 and October 15 request blocks. Earlier original blocks remain preserved; the next chat must read every applicable original requirement, including the earlier October 5 block, before implementing its dependent workflows. |
+| First explain the use of Refresh data | Completed | Explained to the user: it reloads saved inventory and account data so another permitted account's changes can be seen without signing out; it does not save drafts or reset data. Source confirms both `inventory.reload()` and `accounts.reload()` run. The button is disabled for unsaved changes, a save in progress or the current resource loading. No button behavior was changed. |
+| First enable checkout so the user can try it | Still pending | Latest request explicitly authorizes activation for use; do not ask again merely because older handoffs say disabled. Exact-project activation through configured 5432 and same-project 6543 both ended `timeout expired`. Neither reached a confirmed database write. Last successfully verified state remains `checkoutEnabled: false`; no fresh SQL state confirmation was obtained. Do not claim checkout is enabled. |
+| Remove the panel with the exact development-workspace notice | Partially completed — source change only, unverified | Deleted the one `<p className="inventory-editor-note">` containing the exact requested sentence from `Frontend/src/components/ManagementWorkspace.tsx`. No other workspace element or Refresh data behavior changed. No fresh typecheck, build, browser or visual verification was run before the stop. |
+| Remove the P6 accounts; use the accounts already supplied for testing | Still pending | No account was deleted, hidden, archived, edited, signed in or reset in this chat. The eight P6 accounts were already inactive in the earlier accepted evidence, but `read_managed_accounts()` still lists inactive profiles. Removal from Users is not implemented. Preserve both original Owners and Jestine Admin / Jest and Aquino Staff / Aquino. Determine a history-preserving retirement mechanism before mutation; merely filtering names in the UI was not implemented or accepted. |
+| Implement the October 17 highest-priority Backend task, following the original requirements | Partially completed — inherited P7 implementation, hosted acceptance unfinished | P7 source and migration already existed when this chat started. This chat made no P7 workflow/API/SQL changes and ran no P7 acceptance tests. Resume the unfinished P7 hosted gates below after the user-requested checkout/cleanup work. P8/P9 stay pending. |
+| Original October 17 frontend requirement: Owner-only alert settings, hidden for Admin | Completed in prior accepted frontend checkpoint | Preserve the existing implementation and October 17 role/editor validation. No change or new verification in this chat. |
+| Original October 17 frontend requirement: remove Item Code and keep SKU | Completed in prior accepted frontend checkpoint | Preserve the existing implementation and validation; do not add `item_code` to the database or restore the input. No change or new verification in this chat. |
+| Backend-start requirement: database first; no GitHub save until Backend tasks finish | Completed for database foundation; restriction remains active | P1/P2 and their acceptance remain complete. This chat made no migration, commit, push, PR or deployment. The checkout/account-removal/P7 work remains unfinished and local. |
+
+P7's original behavioral requirements are in the preserved **P6–P9 — follow-on
+behavior to preserve and complete later** section and their full frontend source
+messages. Their individual status is carried forward explicitly:
+
+| P7 requirement / completion gate | Status | Evidence and remaining work |
+| --- | --- | --- |
+| Persist Owner receipt verification, expected/verified Cash and GCash, counted cash, opening/addition/removal/refund adjustments, explanations, outcome and exact included orders | Partially completed | Implemented and locally verified in the prior P7 checkpoint; migration applied/schema-verified. Real hosted authenticated persistence/relogin evidence remains pending. |
+| Owner review never consumes stock again; retain purchased/payment/stock facts | Partially completed | Prior local SQL coverage passes. Hosted rollback and real caller-token checks remain pending. Do not use retained P6 receipts as disposable fixtures. |
+| Preserve Staff requests, renewed requests, separate reasons, actual Admin/Owner attribution and durable event history | Partially completed | Implemented with prior local/browser coverage. Real hosted Auth persistence, Staff own/current-Manila-day scope and cross-account denial checks remain pending. |
+| Exact eligible single/bulk IDs, stale decisions, actor/content-bound retries and per-receipt bulk results | Partially completed | Implemented and locally verified, including lost-response recovery. Hosted retries, rejected writes and saved-result reopening remain pending. |
+| Concurrent duplicate/review-versus-void/competing request decisions and atomic rollback on partial/unexpected failure | Partially completed | Prior sequential local rollback coverage passes. Forced-overlap hosted races and hosted regression scenarios remain pending. |
+| Role-protected Dashboard/Audit workflows, dirty-form protection, final single/bulk warnings and persistent event history | Partially completed | Prior scoped browser coverage passes; this chat did not rerun it. Real hosted caller-token acceptance is still incomplete. |
+| Approved migration and schema/grant verification | Completed previously | Eleven immutable applied hashes and prior hosted `db:verify` pass. Four anonymous/service-role PostgREST denials pass. These checks do not establish full P7 acceptance. |
+| Hosted `sales-workflow:verify` and checkout/inventory/permission/smoke/final-schema regressions | Still pending for the P7 checkpoint | Prior attempts were interrupted by database connection failures. Earlier P6 passes remain historical evidence; no new regression pass was obtained here. |
+
+#### Changes, actual validation and interruption details
+
+- The working tree was clean at this chat's first `git status --short`. At pause,
+  the only application diff is the single notice-line deletion described above.
+  This handoff is the only additional tracked edit. No new migration, account
+  retirement field/filter, API behavior, credential or P7 fixture was created.
+- Existing HEAD at pause is the user's **`b124c5e` (`P7 done`)**. Preserve it and
+  the existing history. Its title is not evidence that the unfinished hosted
+  acceptance gates passed. The older `da020a5` references below describe earlier
+  checkpoints; this chat did not create or change any commit.
+- Initial sandboxed npm and direct `node --import tsx` activation attempts failed
+  during tsx initialization with `uv_os_get_passwd returned ENOMEM`, before any
+  database connection or write. The normal elevated npm activation on configured
+  5432 then ended `timeout expired`. A sequential activation retry with process-only
+  `VERTWELL_DEV_DATABASE_PORT=6543` also ended `timeout expired`. Both sessions
+  finished before the user's stop. No activation success was reported. Saved
+  database settings, pinned CA and certificate verification were not altered.
+- The existing read-only `.review/october-17-p7-connectivity.mts` diagnostic was
+  rerun: TCP connects on **5432 and 6543** and Auth settings HTTPS returns **200**.
+  This proves neither authenticated SQL nor a working checkout. The prior
+  pre-SSL-negotiation failure remains unresolved; no new provider-outage claim.
+- Browser inventory had no open tab. Creating a Supabase dashboard tab timed out
+  waiting for navigation. No dashboard contents or database settings were read
+  or changed. No user takeover/permission question was pending at the stop.
+- Account-removal investigation found `profiles.id -> auth.users.id ON DELETE
+  RESTRICT` and sale/movement/audit/workflow references to profiles. Hard-deleting
+  dependent profiles/history is not an acceptable default. The eight exact P6 IDs
+  are already recorded in `.review/october-17-p6-live.json` and
+  `.review/october-17-p6-live-lock-monitor-failed.json`; use those proven IDs rather
+  than deleting accounts by an unrestricted `p6` name match. The next retirement
+  design was only being investigated when interrupted; no schema design was
+  finalized and no account cleanup script was written or run.
+- Earlier baseline remains the last successful hosted inspection: **12
+  Auth/profiles (four active/eight inactive), 11 sales/payments, 43 movements,
+  149 audits, inventory revision 64**, zero review/request/cash-movement rows and
+  checkout disabled. This chat could not obtain a fresh independent SQL fingerprint.
+  Do not replace those values with older P6 41/144/revision-62 totals or claim
+  they were freshly rechecked.
+- **No new application test, typecheck, build, browser regression, visual QA or
+  hosted regression was run.** Prior **125/125 root tests**, builds/typechecks/schema
+  equality and **64/64 scoped browser checks** remain historical evidence for the
+  previous P7 source, not verification of this chat's notice deletion.
+- No development server was started by this chat. The pause check returned no
+  listening entries on 3001, 5173, 5180 or 5181. No checkout/verification tool
+  session remains running. No account secrets/tokens were printed or saved.
+- Pause-record audit passes: all **seven historical original-message blocks**
+  match HEAD, this chat's request and stop instruction are preserved verbatim,
+  all **eleven applied migration hashes** match the prior hosted verification,
+  and the only application diff is the exact requested notice-line deletion.
+  Whitespace checks pass; no staged files. This is source/document preservation
+  verification, not an application test or hosted acceptance. Evidence is
+  workspace-parent `.review/october-17-checkout-ui-pause-audit.{cjs,json}`.
+
+#### Current continuation script — resume only after a new user request
+
+```text
+Resume from C:/Users/ASUS/Documents/Personal/Vertwell/repo only when the user asks.
+The user explicitly stopped implementation on October 17; this is a saved pause,
+not completion. Read the full verbatim request and stop instruction in the current
+checkpoint. Read all seven preserved original user-message blocks, the carried-
+forward decisions, Ordered bridge and backend priorities and completion criteria,
+and the full P7 contract at backend/supabase/SALES_WORKFLOWS.md. The continuation
+script is only navigation; the original requirements control every implementation.
+Read applicable AGENTS.md/README without replaying historical one-time helpers.
+
+Preserve existing user HEAD b124c5e (P7 done), all local work, both original Owners,
+Jestine Admin / Jest, Aquino Staff / Aquino, their credentials/settings and all
+sales/movement/audit history. Do not commit, push, create a PR or deploy unfinished
+Backend work. All eleven already-applied SQL files remain immutable. Never relax
+TLS/certificate verification or edit saved connection settings to hide failures.
+
+Start at the interrupted checkout activation prerequisite: restore a certificate-
+verified SQL connection to exact DualCounter izdemgzdywtxhvgvsian. The configured
+5432 and verified alternate 6543 both timed out despite working TCP/Auth HTTPS.
+The latest user request already authorizes enabling checkout FOR THEIR USE and
+supersedes older leave-disabled instructions. Use the existing exact-project
+checkout:activate -- --project-ref izdemgzdywtxhvgvsian --enable workflow once the
+connection works, verify private.checkout_state and real permitted POS readiness,
+and provide a working local application URL. Do not automatically disable it
+after testing unless the user later asks. Do not claim activation from an attempt.
+
+Next verify the existing one-line development-notice removal in ManagementWorkspace
+with an appropriate fresh typecheck/build and a scoped rendered workspace check.
+Refresh data remains as implemented: it reloads inventory/accounts and protects
+unsaved changes. The user asked for its purpose; that answer has already been given.
+
+Finish removal of the eight exact P6 accounts from normal Users management while
+retaining referenced identities, receipts and audits. They were already inactive,
+but their removal is NOT implemented. Use the exact IDs in the two retained P6
+acceptance JSON files. Inspect current state first. Choose and verify a suitable
+history-preserving retirement mechanism; no new migration/filter/cleanup helper
+exists from this chat. Preserve the four retained accounts. Do not sign in/reset
+retained Owners or generate another disposable P6 account set for this cleanup.
+The user prefers the accounts already supplied for testing; do not silently
+substitute new test identities or run fixture mutations through retained accounts.
+
+Then finish current P7 acceptance, not P8/P9: sales-workflow:verify (15 rollback
+scenarios), checkout:verify, inventory:verify, permissions:verify, db:smoke and final
+db:verify, plus real Auth/caller-token persistence/retry/scope and forced-overlap
+duplicate/review-versus-void/competing-decision evidence. P7 migration approval
+persists; do not ask for the same approval again. Reconcile testing identity/fixture
+scope with the latest full request before any new test-account provisioning.
+Inspect active/stuck requests if a connection permits it. Retain labeled intended
+development history and prove preservation of all original rows/accounts.
+Never review/void retained P6 receipts as disposable fixtures. Owner review must
+not deduct stock; voids must not imply stock returns or refunds. GCash references
+remain manually recorded evidence, not provider verification. Keep Daily Sales
+Values; Figma comparison and physical printing verification remain excluded.
+
+Update requirement statuses with actual evidence. Do not call the whole priority
+complete until checkout access, notice removal, P6 account removal and every P7
+required gate are implemented and verified. Record any remaining connection or
+acceptance blocker honestly and keep all original full requirement blocks intact.
+```
+
+### Previous checkpoint — P7 approved, applied and schema-verified; broader hosted acceptance incomplete (October 17, 2026)
+
+This checkpoint predates the latest request to enable checkout for the user's use
+and remove P6 accounts. Its disabled-checkout instruction is historical and is
+superseded by the current checkpoint; its P7 evidence and unresolved gates remain.
 
 **The user explicitly answered "Approve P7 migration and verification on this exact
 project" for DualCounter `izdemgzdywtxhvgvsian`. This approval persists; do not ask

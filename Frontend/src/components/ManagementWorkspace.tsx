@@ -66,7 +66,6 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
     <main className="workspace-main">
       <div className="page-heading"><div><h1>Welcome, {identity.profile.full_name}</h1><p>Signed in as <strong>{role}</strong> · @{identity.profile.username}</p></div>
         {manager && managementPage && <button className="secondary" disabled={isDirty||isBusy||resource.status==='loading'} onClick={()=>{inventory.reload();accounts.reload();}}>Refresh data</button>}</div>
-      <p className="inventory-editor-note">Development workspace · saved business data is shared with permitted accounts.</p>
       {manager && managementPage && resource.status==='loading' && <p role="status">Loading {effectivePage==='Users'?'accounts':'inventory'}…</p>}
       {manager && managementPage && resource.error && <div role="alert" className="error"><p>{resource.error.message}</p><button className="secondary" disabled={isBusy||isDirty} onClick={resource.reload}>Retry loading</button></div>}
       {manager && effectivePage==='Inventory' && inventory.data && <Inventory persistent
