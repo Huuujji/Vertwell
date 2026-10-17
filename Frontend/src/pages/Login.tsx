@@ -67,7 +67,7 @@ export default function Login({ accounts, onPreview, recovery = false }: { accou
     <div className="login-panel">
       <aside className="login-brand" aria-label="Happy Hentie Café and Hobby Shop">
         <div className="auth-brand-lockup"><img src={asset('be809.png')} alt="Happy Hentie Hobbies" /><div><strong>Happy Hentie</strong><span>Café &amp; Hobby Shop</span></div></div>
-        <div className="auth-brand-story"><span className="auth-eyebrow">The daily workspace</span><h2>Your shop,<br />in one place.</h2><p>Keep track of inventory, sales and the people behind your shop.</p><div className="auth-brand-rule" /></div>
+        <div className="auth-brand-story"><span className="auth-eyebrow">HAPPY HENTIE CAFE &amp; HOBBY SHOP</span><h2>DualCounter: Inventory &amp; Sales Management System</h2><p>Two Shops one System</p><div className="auth-brand-rule" /></div>
         <p className="auth-brand-footer">Inventory <span>·</span> Sales <span>·</span> Team</p>
       </aside>
       <section className="auth-content" aria-label={step === 'login' ? 'Account login' : 'Password recovery'}>
