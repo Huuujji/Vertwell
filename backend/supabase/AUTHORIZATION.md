@@ -7,8 +7,10 @@ The existing exact-target migration tool applied only the sixth migration;
 the five earlier applied sources remain unchanged. All 11 hosted permission
 scenarios and 12 database smoke checks pass. Final private fingerprints and
 every table count confirm both retained real Owner accounts and settings are
-unchanged. P5 protected Users/Inventory is now implemented locally; see CRUD.md and
-HandsOff.md for the new migration, additional narrow RPCs and hosted acceptance.
+unchanged. P5 protected Users/Inventory is now accepted; see CRUD.md and
+HandsOff.md for nine immutable sources, additional narrow RPCs and real
+browser/Auth/API/Storage acceptance. PT409 represents deliberate business
+conflicts; 40001 is reserved for genuine database serialization failures.
 No GitHub save, commit, push, PR or deployment is authorized for unfinished Backend.
 
 ## Trusted identity and role matrix
@@ -71,7 +73,10 @@ HTTP projection and encodes monetary values as decimal strings. Pagination is
 bounded, deterministic, and reports `hasMore` explicitly. `read_pos_catalogue`
 is a narrowly projected definer function: active selling-card fields only, with
 no recipes, physical quantities, batches, stock links or library drafts.
-`checkoutReady: false` explicitly preserves P6's availability/checkout boundary.
+That P4 projection retains `checkoutReady: false`. P6 adds the separate protected
+checkout catalogue and database activation contract; hosted/caller-token and
+concurrent acceptance now pass. The approved test window ended disabled.
+See CHECKOUT.md for the current readiness and receipt boundaries.
 
 Settings updates are the sole new business mutation. The command serializes
 against account changes and other settings writers, rechecks active Owner,

@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json",
-    "test": "node --import tsx --test tests/app.test.ts tests/database.test.ts tests/permissions.test.ts tests/inventory.test.ts",
+    "test": "node --import tsx --test tests/app.test.ts tests/database.test.ts tests/permissions.test.ts tests/inventory.test.ts tests/checkout.test.ts",
     "test:database": "node --import tsx --test tests/database.test.ts",
     "integration:schema": "tsx scripts/integration-schema.ts",
     "db:inspect": "tsx scripts/database.ts inspect",
@@ -20,6 +20,8 @@
     "db:smoke": "tsx scripts/verify-development.ts",
     "permissions:verify": "tsx scripts/verify-permissions.ts",
     "inventory:verify": "tsx scripts/verify-inventory.ts",
+    "checkout:verify": "tsx scripts/verify-checkout.ts",
+    "checkout:activate": "tsx scripts/activate-checkout.ts",
     "auth:bootstrap": "tsx scripts/bootstrap-owner.ts",
     "auth:verify": "tsx scripts/verify-authentication.ts"
   },

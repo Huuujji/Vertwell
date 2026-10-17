@@ -10,6 +10,7 @@ import Navigation, { type Page } from './Navigation';
 import Inventory from '../pages/Inventory';
 import Users from '../pages/Users';
 import { Actions, Modal } from './ui';
+import LivePos from './LivePos';
 
 export default function ManagementWorkspace({identity}:{identity:IdentityResponse}) {
   const [service]=useState(()=>createManagementData(apiRequest));
@@ -18,6 +19,7 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
   const [page,setPage]=useState<Page>(manager?'Inventory':'POS');
   const views=useRef(new Map<string,unknown>());
   const dirty=useRef(false), busy=useRef(false);
+  const checkoutBusy=useRef(false),checkoutUncertain=useRef(false);
   const [isDirty,setDirty]=useState(false), [isBusy,setBusy]=useState(false);
   const [pending,setPending]=useState<(()=>void)|null>(null);
   const [toast,setToast]=useState('');
@@ -25,10 +27,17 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
   const loadAccounts=useCallback((signal:AbortSignal)=>service.accounts(signal),[service]);
   const inventory=useResource<InventoryData>(manager?`${scope}:inventory`:null,loadInventory);
   const accounts=useResource<AccountsData>(manager?`${scope}:accounts`:null,loadAccounts);
+  const loadAccess=useCallback((signal:AbortSignal)=>apiRequest<{services:{checkout:boolean}}>('/api/access',{signal}),[]);
+  const access=useResource(`${scope}:access`,loadAccess);
+  const [hasRecovery]=useState(()=>{try{return Boolean(sessionStorage.getItem(`vertwell-checkout:${identity.profile.id}`));}catch{return false;}});
+  const onCheckoutBusy=useCallback((value:boolean)=>{checkoutBusy.current=value;},[]);
+  const onCheckoutUncertain=useCallback((value:boolean)=>{checkoutUncertain.current=value;if(value)setPage('POS');},[]);
   const source=useRef(inventory.data), accountSource=useRef(accounts.data);
   source.current=inventory.data; accountSource.current=accounts.data;
   const onDirty=useCallback((value:boolean)=>{dirty.current=value;setDirty(value);},[]);
-  function leave(action:()=>void) {if(busy.current) return; if(dirty.current) setPending(()=>action);else action();}
+  function leave(action:()=>void) {if(busy.current||checkoutBusy.current) return;
+    if(checkoutUncertain.current){setToast('Retry the uncertain checkout to retrieve its receipt before leaving.');return;}
+    if(dirty.current) setPending(()=>action);else action();}
   async function mutate<T>(save:()=>Promise<T>):Promise<T> {
     if(busy.current) throw new ApiError('A save is already in progress.','conflict');
     busy.current=true;setBusy(true);
@@ -40,17 +49,17 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
   }
   async function logout() {try {await signOut();}catch(cause){setToast(cause instanceof Error?cause.message:'Unable to sign out.');}}
   useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(''),6000);return ()=>clearTimeout(timer);},[toast]);
-  const effectivePage=manager && !['Inventory','Users'].includes(page)?'Inventory':page;
+  const effectivePage=manager && !['Inventory','Users','POS'].includes(page)?'Inventory':page;
   const resource=effectivePage==='Users'?accounts:inventory;
   return <ViewState.Provider value={views.current}><div className={`workspace ${manager?'admin-workspace':'staff-workspace'}`}>
-    <Navigation persistent identity={{name:identity.profile.full_name,role}} destinations={manager?['Inventory','Users']:['POS']}
+    <Navigation persistent identity={{name:identity.profile.full_name,role}} destinations={manager?['Inventory','POS','Users']:['POS']}
       activePage={effectivePage} onNavigate={next=>leave(()=>setPage(next))} onLogout={()=>leave(()=>{void logout();})} />
     <main className="workspace-main">
       <div className="page-heading"><div><h1>Welcome, {identity.profile.full_name}</h1><p>Signed in as <strong>{role}</strong> · @{identity.profile.username}</p></div>
-        {manager && <button className="secondary" disabled={isDirty||isBusy||resource.status==='loading'} onClick={()=>{inventory.reload();accounts.reload();}}>Refresh data</button>}</div>
-      <p className="inventory-editor-note">Development workspace · inventory and team changes are saved and shared with permitted accounts.</p>
-      {manager && resource.status==='loading' && <p role="status">Loading {effectivePage==='Users'?'accounts':'inventory'}…</p>}
-      {manager && resource.error && <div role="alert" className="error"><p>{resource.error.message}</p><button className="secondary" disabled={isBusy||isDirty} onClick={resource.reload}>Retry loading</button></div>}
+        {manager && effectivePage!=='POS' && <button className="secondary" disabled={isDirty||isBusy||resource.status==='loading'} onClick={()=>{inventory.reload();accounts.reload();}}>Refresh data</button>}</div>
+      <p className="inventory-editor-note">Development workspace · saved business data is shared with permitted accounts.</p>
+      {manager && effectivePage!=='POS' && resource.status==='loading' && <p role="status">Loading {effectivePage==='Users'?'accounts':'inventory'}…</p>}
+      {manager && effectivePage!=='POS' && resource.error && <div role="alert" className="error"><p>{resource.error.message}</p><button className="secondary" disabled={isBusy||isDirty} onClick={resource.reload}>Retry loading</button></div>}
       {manager && effectivePage==='Inventory' && inventory.data && <Inventory persistent
         templates={inventory.data.modifierTemplates} items={inventory.data.stock} products={inventory.data.products}
         actor={`${identity.profile.full_name} (${role})`} onDirtyChange={onDirty} onLeave={leave}
@@ -72,7 +81,10 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
           const account=current.accounts.find(row=>row.id===id);if(!account)throw new ApiError('Account changed. Reload and review.','conflict');
           const saved=await service.saveAccount(current,{...account,active:false});accountSource.current=saved;accounts.replace(saved);
         })} notify={setToast} />}
-      {!manager && <section><h2>POS connection</h2><p>Your account is verified. Live checkout is not available yet.</p></section>}
+      {(access.data?.services?.checkout===true||hasRecovery)&&<LivePos scope={scope} active={effectivePage==='POS'} onBusyChange={onCheckoutBusy} onUncertainChange={onCheckoutUncertain} onSaved={()=>inventory.reload()}/>}
+      {effectivePage==='POS'&&access.status==='loading'&&<p role="status">Checking POS availability…</p>}
+      {effectivePage==='POS'&&access.error&&<div role="alert" className="error"><p>{access.error.message}</p><button onClick={access.reload}>Retry POS connection</button></div>}
+      {effectivePage==='POS'&&access.data?.services?.checkout!==true&&access.status!=='loading'&&!access.error&&<section><h2>POS connection</h2><p>Your account is verified. Live checkout is not available yet.</p><button className="secondary" onClick={access.reload}>Check POS availability</button></section>}
     </main>
     {toast && <div className="toast" role="status">{toast}<button aria-label="Dismiss notification" onClick={()=>setToast('')}>×</button></div>}
     {pending && <Modal title="Discard unsaved changes?" onClose={()=>setPending(null)}><p>You have unsaved changes. Keep editing to save them, or discard them to continue.</p><Actions><button className="secondary" data-initial-focus onClick={()=>setPending(null)}>Keep editing</button><button className="danger-button" onClick={()=>{const action=pending;setPending(null);onDirty(false);action();}}>Discard changes</button></Actions></Modal>}

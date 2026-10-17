@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/require-auth.js';
-import { businessError, requirePermission, type BusinessAction } from '../lib/permissions.js';
+import { businessError, requirePermission, uuid, type BusinessAction } from '../lib/permissions.js';
 import { HttpError } from '../lib/http-error.js';
 
 export const businessRouter = Router();
@@ -20,7 +20,7 @@ function pagination(query: Record<string, unknown>) {
 businessRouter.get('/access', requireAuth, async (_req, res) => {
   const { data, error } = await res.locals.database.rpc('business_access');
   if (error) businessError(error);
-  res.json({ ...data, services: { inventoryCrud: data?.services?.inventoryCrud === true, checkout: false, salesReview: false, reports: false } });
+  res.json({ ...data, services: { inventoryCrud: data?.services?.inventoryCrud === true, checkout: data?.services?.checkout === true, salesReview: false, reports: false } });
 });
 
 for (const path of ['/sales', '/sales/:id']) {
@@ -44,6 +44,50 @@ businessRouter.get('/void-requests', requireAuth, requirePermission('sales.read'
 
 businessRouter.get('/pos/catalogue', requireAuth, requirePermission('pos.read'), async (req, res) => {
   const { data, error } = await res.locals.database.rpc('read_pos_catalogue', pagination(req.query));
+  if (error) businessError(error);
+  res.json(data);
+});
+
+businessRouter.get('/pos/checkout-catalogue', requireAuth, requirePermission('pos.read'), async (req, res) => {
+  const { data, error } = await res.locals.database.rpc('read_checkout_catalogue', pagination(req.query));
+  if (error) businessError(error);
+  res.json(data);
+});
+
+businessRouter.post('/pos/image-urls', requireAuth, requirePermission('pos.read'), async (req, res) => {
+  const paths:unknown=req.body?.paths;
+  if(Object.keys(req.body??{}).some(key=>key!=='paths')||!Array.isArray(paths)||paths.length>100||paths.some(path=>typeof path!=='string'||!/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(png|jpg|webp)$/.test(path)))throw new HttpError(422,'Invalid image paths.');
+  if(!paths.length){res.json({images:[]});return;}
+  const {data,error}=await res.locals.database.storage.from('inventory-images').createSignedUrls(paths,3600);
+  if(error||data?.some((value:{error:unknown})=>value.error))throw new HttpError(503,'Product images are unavailable.');
+  res.json({images:data});
+});
+
+businessRouter.get('/sales/:id/receipt', requireAuth, requirePermission('sales.read','id'), async (req,res)=>{
+  if(Object.keys(req.query).length)throw new HttpError(422,'Receipt reads do not accept scope overrides.');
+  const {data,error}=await res.locals.database.rpc('read_checkout_receipt',{target_sale_id:req.params.id});
+  if(error)businessError(error);res.json(data);
+});
+
+businessRouter.post('/pos/quote', requireAuth, requirePermission('checkout.create'), async (req, res) => {
+  if (!req.body || Array.isArray(req.body) || typeof req.body !== 'object' ||
+    Object.keys(req.body).some(key => key !== 'lines') || !Array.isArray(req.body.lines)) {
+    throw new HttpError(422, 'A cart is required for a quote.');
+  }
+  const { data, error } = await res.locals.database.rpc('quote_checkout', { lines: req.body.lines });
+  if (error) businessError(error);
+  res.json(data);
+});
+
+businessRouter.post('/pos/availability', requireAuth, requirePermission('checkout.create'), async (req,res)=>{
+  if(!req.body||typeof req.body!=='object'||Array.isArray(req.body)||Object.keys(req.body).some(key=>!['productId','lines'].includes(key))||!Array.isArray(req.body.lines))throw new HttpError(422,'A product and current cart are required.');
+  const {data,error}=await res.locals.database.rpc('check_checkout_product',{product_id:uuid(req.body.productId),lines:req.body.lines});
+  if(error)businessError(error);res.json(data);
+});
+
+businessRouter.post('/checkout', requireAuth, requirePermission('checkout.create'), async (req, res) => {
+  if (!req.body || Array.isArray(req.body) || typeof req.body !== 'object') throw new HttpError(422, 'A checkout command is required.');
+  const { data, error } = await res.locals.database.rpc('checkout', { command: req.body });
   if (error) businessError(error);
   res.json(data);
 });
@@ -76,7 +120,7 @@ const pending: [string, string, BusinessAction, string?][] = [
   ['get', '/dashboard', 'dashboard.read'],
   ['post', '/inventory', 'inventory.write'], ['patch', '/inventory/:id', 'inventory.write'],
   ['delete', '/inventory/:id', 'inventory.write'], ['get', '/reports', 'reports.read'],
-  ['post', '/checkout', 'checkout.create'], ['post', '/sales/:id/void-requests', 'void.request', 'id'],
+  ['post', '/sales/:id/void-requests', 'void.request', 'id'],
   ['post', '/sales/:id/void', 'sale.void', 'id'], ['post', '/sales/:id/void-decision', 'void.decide', 'id'],
   ['post', '/daily-sales-reviews', 'review.confirm'],
 ];

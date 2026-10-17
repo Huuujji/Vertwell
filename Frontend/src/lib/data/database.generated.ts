@@ -7,6 +7,8 @@
 // 20261017040000_business_permissions.sql: 43d09db1222bd52083f248a4de5bccce95d58670868ea0e1e529939784102f87
 // 20261017050000_inventory_commands.sql: 146286def00fd69d56ec96dec5023ad4da6ede361dbc7aec5cf422bfb1ee2f03
 // 20261017060000_inventory_revision_scope.sql: bc56df5ac87c86d92691efb15f233cf26ab7abe49fb043a2083e05bc3b1f0990
+// 20261017070000_nonretryable_business_conflicts.sql: 01eb62e5b42b8397df1a10590b6c9361a0d3da2d69f29d35e680701e869edeac
+// 20261017135332_atomic_checkout.sql: dfbe81cbe9d8817be5880e8f9048c016a4dc5ab5ec1ab40d1559d81cfd74ca9a
 // Decimal wire values are strings; conversion to display numbers is explicit.
 export const databaseSchema = {
   alert_settings: {

@@ -116,8 +116,8 @@ async function verify(client: pg.Client) {
   const helpers = await client.query(`select p.proname,r.rolname from pg_proc p
     join pg_namespace n on n.oid=p.pronamespace cross join pg_roles r
     where n.nspname='private' and r.rolname in ('anon','authenticated','service_role')
-      and has_function_privilege(r.rolname,p.oid,'EXECUTE')`);
-  if (JSON.stringify(helpers.rows) !== JSON.stringify([{proname:'business_role',rolname:'authenticated'}])) throw new Error('Unexpected private helper execution grants.');
+      and has_function_privilege(r.rolname,p.oid,'EXECUTE') order by p.proname`);
+  if (JSON.stringify(helpers.rows) !== JSON.stringify([{proname:'business_role',rolname:'authenticated'},{proname:'pos_image_allowed',rolname:'authenticated'}])) throw new Error('Unexpected private helper execution grants.');
   const publicFunctions = await client.query<{proname:string;rolname:string}>(`select p.proname,r.rolname from pg_proc p
     join pg_namespace n on n.oid=p.pronamespace cross join pg_roles r
     where n.nspname='public' and r.rolname in ('anon','authenticated','service_role')
@@ -127,9 +127,14 @@ async function verify(client: pg.Client) {
     {proname:'account_provisioning_result',rolname:'authenticated'},
     {proname:'authorize_business_action',rolname:'authenticated'},
     {proname:'business_access',rolname:'authenticated'},
+    {proname:'check_checkout_product',rolname:'authenticated'},
+    {proname:'checkout',rolname:'authenticated'},
     {proname:'current_profile',rolname:'authenticated'},
     {proname:'inventory_command',rolname:'authenticated'},
+    {proname:'quote_checkout',rolname:'authenticated'},
     {proname:'read_business_sales',rolname:'authenticated'},
+    {proname:'read_checkout_catalogue',rolname:'authenticated'},
+    {proname:'read_checkout_receipt',rolname:'authenticated'},
     {proname:'read_inventory',rolname:'authenticated'},
     {proname:'read_managed_accounts',rolname:'authenticated'},
     {proname:'read_pos_catalogue',rolname:'authenticated'},

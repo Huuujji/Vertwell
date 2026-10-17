@@ -75,16 +75,13 @@ authRouter.post('/accounts', requireAuth, async (req, res) => {
 });
 
 authRouter.patch('/accounts/:id', requireAuth, async (req, res) => {
-  console.info('Account update diagnostic: identity verified.');
   if ((res.locals.profile as Profile).role === 'Staff') throw new HttpError(403, 'Account update is not permitted.');
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(req.params.id))) throw new HttpError(422, 'Invalid account ID.');
   const input = accountInput(req.body);
-  console.info('Account update diagnostic: fields validated.');
   const { data, error } = await res.locals.database.rpc('update_account', {
     target_id: req.params.id, expected_updated_at: input.updatedAt, full_name: input.fullName,
     username: input.username, account_role: input.role, account_active: input.active,
   });
-  console.info('Account update diagnostic: database returned.');
   if (error) databaseError(error);
   res.json({ profile: data });
 });

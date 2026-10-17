@@ -189,4 +189,14 @@ export const inventoryScenarios: {name:string;run(db: DB):Promise<void>}[] = [
     await db.query('reset role');
     assert.deepEqual((await db.query("select kind,quantity_base::text from public.stock_movements where batch_id=$1 and kind<>'Opening'",[stock.batches[0].id])).rows,[{kind:'Removal',quantity_base:'-7.000000'}]);
   }},
+  {name:'Stale inventory revisions use nonretryable PT409 and leave the complete snapshot unchanged',async run(db) {
+    const f=await fixture(db),stock=stockRecord();const {request}=await f.command('stock.save',stock);
+    const before=await f.read();
+    await db.query('savepoint stale_revision');
+    try{
+      await assert.rejects(()=>scalar(db,'select public.inventory_command($1::jsonb) as value',
+        [JSON.stringify({...request,operationId:randomUUID()})]),(error:any)=>error.code==='PT409');
+    }finally{await db.query('rollback to savepoint stale_revision');await db.query('release savepoint stale_revision');}
+    assert.deepEqual(await f.read(),before);
+  }},
 ];

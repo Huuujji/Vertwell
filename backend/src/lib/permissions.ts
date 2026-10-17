@@ -8,7 +8,7 @@ export type BusinessAction = 'dashboard.read' | 'inventory.read' | 'inventory.wr
 
 export function businessError(error: { code?: string } | null): never {
   if (error?.code === '42501') throw new HttpError(403, 'Business access is not permitted.');
-  if (error?.code === '40001' || error?.code === '23505') throw new HttpError(409, 'The record changed. Reload and review before trying again.');
+  if (error?.code === 'PT409' || error?.code === '40001' || error?.code === '23505') throw new HttpError(409, 'The record changed. Reload and review before trying again.');
   if (error?.code?.startsWith('22') || error?.code?.startsWith('23')) throw new HttpError(422, 'Business details are invalid.');
   // Log only the provider's bounded error identifier, never its message/details,
   // request, credentials or caller data. Keep the client response generic.

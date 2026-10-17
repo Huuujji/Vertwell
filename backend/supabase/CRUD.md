@@ -1,15 +1,25 @@
 # P5 protected Users and Inventory — October 17, 2026
 
+P6 is now accepted in hosted development on top of the accepted P5 boundary. Its
+checkout command joins the same account/catalogue locks and inventory revision,
+so an old physical-count draft cannot overwrite sold stock. The protected POS
+opens only after database activation; the approved test window ended disabled.
+See [CHECKOUT.md](CHECKOUT.md). Existing P5 evidence below is historical and intact.
+
 Implementation is local and the reviewed P5 migration is applied in hosted
 development. The user explicitly answered "Approve P5 migration and verification
 on this exact project" for DualCounter `izdemgzdywtxhvgvsian`, resolving the
 historical automatic approval rejection. The exact-target tool applied only
-`20261017050000_inventory_commands.sql`; all seven applied hashes match and
-sources are now immutable. Hosted SQL checks pass; real signed-in browser/
-PostgREST/image persistence acceptance remains pending in HandsOff.md.
-Do not infer that acceptance from local transports or rolled-back SQL scenarios.
-Backend work remains uncommitted and off GitHub until the full Backend task list
-is finished. Retain both real Owners.
+`20261017050000_inventory_commands.sql`. Real browser/PostgREST acceptance found
+two issues repaired by new applied migrations: `20261017060000_inventory_revision_scope.sql`
+scopes the singleton UPDATE for safe-update, and
+`20261017070000_nonretryable_business_conflicts.sql` replaces only deliberate
+business-conflict SQLSTATEs with PT409. PostgREST 14 retried 40001 indefinitely.
+All nine applied sources are immutable. Real browser/Auth/API/Storage persistence,
+role restrictions, failure rollback and inventory contention/retry acceptance now
+pass; HandsOff.md records exact coverage and final hosted checks. Backend changes
+stay local and off GitHub. Retain both original Owners unchanged and keep the
+user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active.
 
 ## Management boundary
 
@@ -66,6 +76,8 @@ and compare the snapshot revision in the transaction that makes the actual chang
 This deliberately coarse revision rejects a save after any other inventory command;
 it prevents a stale batch correction from overwriting a receipt. Refresh after
 discarding/reviewing a conflict, then reopen the record. It is not per-field merging.
+Deliberate conflicts raise **PT409**, mapped to HTTP 409 by PostgREST and Express.
+Do not substitute 40001: the hosted PostgREST 14 transaction runner retries it.
 Generated SKUs are reserved under the same catalogue lock, include archived codes,
 and use IN/PRR/PRC/PRV/PRB plus FD/BV/HB and four digits. Stable internal IDs preserve
 links and movement/receipt history through SKU edits.
@@ -145,17 +157,28 @@ SQL scenarios in rolled-back transactions. It compares all public/private table
 counts, real Auth/profile/settings fingerprints, revision and grants before/after.
 It does not log in, password-test, demote or deactivate either retained real Owner,
 create real Auth users, send mail, upload real objects or leave durable fixture rows.
-Hosted acceptance currently records **14/14 inventory scenarios, 11/11 permission
-scenarios and 12/12 database smoke checks**, plus schema/grant/hash verification.
-An independent pre/post comparison confirms both retained Auth/profile Owners,
-settings and all existing public/Auth table counts are unchanged. No real Auth
-users, catalogue records, movements or image objects were created by these checks.
+The final hosted regression sequence includes **15 inventory scenarios, 11
+permission scenarios and 12 database smoke checks**, plus schema/grant/hash
+verification. Each rolled-back SQL checker preserves its before/after real
+accounts/settings/counts; consult HandsOff.md for the final recorded outcome.
 Five actual anonymous PostgREST checks also confirm permission denial for the
 four new P5 RPCs and direct product SELECT. A fresh generated-schema check passes.
-Simultaneous multi-connection writes and real signed-in hosted browser/PostgREST/
-Storage round trips remain unverified. P6–P9 are not implemented here. P6 must join the account/catalogue lock and
-inventory-revision discipline before enabling checkout; P5 tests do not establish
-full-cart contention or pricing guarantees.
+Separate real acceptance created the user-requested Admin/Staff accounts, left
+both active, and verified actual account lifecycle/denials. Owner browser saves
+survive refresh and a separate real Admin login. Hosted APIs cover all four
+stock models, independent library copies, images, invalid/denied rollback,
+logout/login, two-session revision contention and concurrent identical receipt
+replay. Both original Owner credential/profile fingerprints and settings remain
+unchanged. Acceptance sessions were signed out without globally revoking the
+user's Owner browser session. Labeled catalogue fixtures were archived and all
+batch balances are zero; movement/audit/operation/configuration history and one
+private PNG are intentionally retained. No invitation email was sent.
+Browser control was disabled mid-acceptance; the later live API checks used
+actual Express source and hosted services without mocked transports. No new
+whole browser-suite, physical-device or full-cart contention result is claimed.
+The P5 tests above do not establish full-cart contention or pricing guarantees.
+Separate P6 hosted/caller-token/concurrent acceptance now passes; see CHECKOUT.md.
+P7–P9 remain later work.
 
 Implementation references: [Supabase functions](https://supabase.com/docs/guides/database/functions),
 [private buckets](https://supabase.com/docs/guides/storage/buckets/fundamentals),

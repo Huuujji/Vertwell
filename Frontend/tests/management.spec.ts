@@ -75,7 +75,7 @@ test('Users creates Auth/profile accounts, persists edits and deactivates with r
   await context.close();
 });
 test('Staff cannot enter management and direct invalid/denied API writes change no inventory data',async({page})=>{
-  await api.setup(page.context(),'Staff');await api.login(page,'Staff');await expect(page.getByRole('heading',{name:'POS connection'})).toBeVisible();
+  await api.setup(page.context(),'Staff');await api.login(page,'Staff');await expect(page.getByRole('heading',{name:'Point of Sale',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Inventory',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Users',exact:true})).toHaveCount(0);
   const before=await api.read();
   const result=await page.evaluate(async()=>{

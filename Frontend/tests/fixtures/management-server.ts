@@ -14,6 +14,8 @@ export async function managementServer() {
     create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;`);
   const root=new URL('../../../backend/supabase/migrations/',import.meta.url);
   for(const name of (await readdir(root)).filter(n=>n.endsWith('.sql')).sort()) await db.exec(await readFile(new URL(name,root),'utf8'));
+  // Disposable acceptance database only; hosted activation is a separate gate.
+  await db.query('update private.checkout_state set enabled=true where singleton');
   const ids={Owner:randomUUID(),Admin:randomUUID(),Staff:randomUUID()};
   for(const [role,id] of Object.entries(ids)) {
     await db.query('insert into auth.users(id,email) values($1,$2)',[id,`${role.toLowerCase()}@example.invalid`]);

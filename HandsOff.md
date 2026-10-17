@@ -1,10 +1,296 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4 are accepted. P5 protected Users/Inventory CRUD is implemented locally and its explicitly approved seventh migration is applied and verified on DualCounter. Real signed-in browser/PostgREST/image persistence acceptance remains next, before P6.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep admin active and unchanged; Huuujji is an additional Owner for testing only. Original user messages and historical checkpoints remain preserved below.
+Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4/P5/P6 are accepted. P6 hosted migration, real caller-token persistence and simultaneous checkout acceptance pass. The user-approved temporary activation ended disabled. P7 durable reviews/voids/audit is next; P8/P9 remain later work.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep both original Owners unchanged and keep the user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active. Original user messages and historical checkpoints remain preserved below.
 
 ## New — current state and continuation
 
-### Current checkpoint — P5 migration approved, applied and hosted SQL verified (October 17, 2026)
+### Current checkpoint — P6 accepted; hosted persistence and concurrency verified (October 17, 2026)
+
+**P6 is complete and accepted in hosted development. Checkout finishes disabled
+as the user requested.** Read all seven full original messages and carried-forward
+decisions below. All Backend changes remain local; no commit, push, PR, GitHub save
+or deployment. The user's existing `91a043f` snapshot and prior work are preserved.
+
+- The user explicitly answered **"Approve P6 migration and verification on this
+  exact project"** for DualCounter `izdemgzdywtxhvgvsian`. This resolves the previous
+  automatic approval rejection. A separate answer, **"Approve temporary test
+  activation, then disable"**, authorized only the real verification window with
+  isolated test accounts and retained labeled development history. It does not
+  authorize leaving checkout enabled for use.
+- Read-only preflight matched the nine frozen migration hashes and recorded the
+  four retained active accounts, zero sales/payments, 13 movements, 53 audits and
+  revision 21. The existing exact-project `db:apply` applied only
+  **`20261017135332_atomic_checkout.sql`**, SHA-256
+  `dfbe81cbe9d8817be5880e8f9048c016a4dc5ab5ec1ab40d1559d81cfd74ca9a`.
+  All **ten** applied sources are now immutable. No applied SQL or application
+  runtime source needed modification for this acceptance.
+- Hosted schema/grant/policy verification passes. Real Express requests used
+  Supabase Auth, caller-token PostgREST and Storage without mock transports or
+  service-role catalogue/checkout writes. Separate generated test accounts
+  exercised Owner/Admin/Staff checkout, Cash, GCash, all four stock models,
+  kg-to-g conversion, nested bundle/shared demand, persisted purchased receipts,
+  new Auth sessions after catalogue edits, actor/content-bound retries and Staff
+  receipt scope. Owner completes immediately; paid/fulfilled Admin/Staff consumes
+  once and awaits Owner review. GCash remains recorded evidence, never provider
+  verification. Real Staff can sign/download active POS images and cannot sign
+  their archived/unattached image afterward or read management inventory.
+- **Three simultaneous connection races pass.** A dedicated transaction held the
+  exact account advisory lock; both real PostgREST requests were observed waiting
+  on it before release. Identical checkout commands return one committed receipt
+  and one replay, with one sale/payment/deduction/revision. Two seven-of-ten orders
+  yield one 200 and one 409, leaving three pieces. Checkout versus a physical-count
+  correction yields one 200 and one 409, with only the winner's ledger and one
+  revision change. Snapshot/count checks find no losing-command residue.
+- The first real pass saved three valid role-test sales, then its **test lock
+  monitor** incorrectly filtered provider role/query metadata. The held requests
+  timed out with 57014 and rolled back; teardown disabled checkout and archived/
+  deactivated that pass's fixtures. The monitor now reads the exact `pg_locks`
+  advisory key. The corrected run passes all **ten real acceptance groups** and
+  all three overlap checks. Failed and successful evidence are both preserved.
+- The exact-project activation command enabled checkout only for verification,
+  then disabled it. A real committed retry still reconciles while disabled; a new
+  checkout returns 503 without writes. Application roles cannot change readiness.
+  Final state confirms **`checkoutEnabled: false`**. Do not enable for use without
+  a later user request, and do not substitute preview data after live errors.
+- All **eight** test accounts from both passes are inactive, with **zero Auth
+  sessions** remaining. Generated passwords/tokens were process-only and were not
+  saved. Managers/Staff were deactivated through caller-token account commands;
+  each test Owner required narrowly scoped trusted administration for cleanup
+  because self-deactivation is correctly denied. Cleanup is explicitly audited.
+  Neither retained Owner was signed in, password-tested, reset or edited.
+- An independent final fingerprint exactly matches the pre-apply Auth/profile/
+  settings snapshot for **admin, Huuujji, Jest and Aquino**, all still active.
+  Nine new acceptance products and seven stock items are archived, every new stock
+  balance is zero, and the existing private PNG remains. Do not hard-delete the
+  deliberate history: totals are **12 Auth/profiles (four active/eight inactive),
+  11 sales/payments/checkout receipts, 13 purchased lines, 14 usage rows,
+  41 stock movements, 144 audit events, 51 inventory operation receipts and
+  inventory revision 62**. The two account receipts and existing settings remain
+  unchanged. No review/void/cash-adjustment records were created.
+- **Final hosted regressions pass:** `checkout:verify` **16/16**,
+  `inventory:verify` **15/15**, `permissions:verify` **11/11**, `db:smoke` **12/12**,
+  and `db:verify` confirms all ten hashes and narrow grants/policies/indexes.
+  Rolled-back fixtures preserve the intentional live history. Final inspection
+  finds no active/stuck checkout/inventory requests. The prior **106/106 local
+  root tests, typechecks/builds/schema equality and 26/26 scoped browser tests**
+  remain historical evidence for unchanged runtime source; they were not rerun in
+  this hosted acceptance. No new browser/physical-device/Figma/printing claim.
+- Final source audit preserves all **seven full original message blocks**, all
+  **ten applied SQL hashes**, and the unchanged `91a043f` snapshot. No configured
+  server/database secrets were found in 173 publishable text files; no files are
+  staged. Audit evidence: `.review/october-17-p6-final-{audit.cjs,audit.json}`.
+- Evidence is workspace-parent `.review/october-17-p6-acceptance-{approval.txt,
+  before.mts,before.json,apply.log,db-verify.log,checkout.log}`;
+  `.review/october-17-p6-{live.mts,live.json,live.log,
+  live-lock-monitor-failed.json,live-lock-monitor-failed.log,final-state.mts,
+  final-state.json,final-state.log}`; final regression logs use
+  `.review/october-17-p6-final-{checkout-verify,inventory-verify,
+  permissions-verify,db-smoke,db-verify}.log`.
+
+**Next:** P7 durable Daily Sales Review, void requests/decisions and event history,
+using the full original requirements and existing account/catalogue/revision/
+idempotency discipline. Owner review must never deduct stock again. Voids must
+not imply stock returns or refunds. Keep the user-requested disabled checkout
+state, all four retained accounts, the labeled P6 development history, Daily
+Sales Values and all original messages. Figma comparison and physical-printing
+verification remain removed. P8/P9 and Backend GitHub saves stay deferred.
+
+### Previous checkpoint — P6 local checkout implementation; hosted approval resolved above (October 17, 2026)
+
+Read the full seven original user messages and carried-forward decisions below.
+P6 builds on accepted P5; it is **not yet accepted against hosted/concurrent
+requirements**. All Backend work remains local. No commit, push, PR or deployment.
+The existing user snapshot `91a043f` and all pre-existing work are preserved.
+
+- New CLI-generated, Manila-normalized migration
+  **`20261017135332_atomic_checkout.sql`**, SHA-256
+  `dfbe81cbe9d8817be5880e8f9048c016a4dc5ab5ec1ab40d1559d81cfd74ca9a`.
+  All nine applied migration hashes are unchanged. No applied SQL was edited or
+  raw-reapplied. See `backend/supabase/CHECKOUT.md` for the reviewable contract.
+- Five caller-token RPCs provide scoped POS configuration cards, cart-aware
+  configuration availability, authoritative quotes, atomic checkout and receipt
+  reads. No public table write/management read grant changes. A private operation
+  receipt table and disabled-by-default activation singleton have no app grants.
+  One read-only private helper plus a restricted Storage SELECT policy permits
+  active POS users to sign only enabled/unarchived product images; Staff still
+  cannot sign archived/unattached inventory objects or browse management data.
+- Checkout uses the existing account → catalogue → revision lock order and
+  deterministic batch locks. It resolves current active actors/configurations,
+  recalculates selected prices/discounts/cent rounding/12% VAT, converts units,
+  clamps omissions within each configured line and aggregates all shared demand.
+  Fixed stock cannot be omitted. Usable batches allocate by expiry, receipt time
+  and ID; expired/unsellable/archived stock is excluded. Revision updates have
+  `WHERE singleton`; deliberate conflicts use PT409, not retryable 40001.
+- Sale, payment, immutable purchased item/modifier/configuration/usage snapshots,
+  consumption movements, movement/final audits, revision and operation receipt
+  commit in one transaction. An identical actor-bound command retry returns its
+  stored receipt without another deduction. Changed actor/content conflicts.
+  Owner checkout completes; paid/fulfilled Admin/Staff checkout consumes once and
+  awaits Owner review. Review never deducts again; voids do not imply returns or
+  refunds. GCash reference uniqueness is recorded evidence, not provider payment
+  verification. No live collection QR or P7/P8/P9 service is introduced.
+- Protected live POS reuses the established layouts with category/SKU search,
+  discounted ranges, variants/modifiers/fixed bundle disclosure, editable cart,
+  Cash/GCash payment, current-day Staff receipt scope and manager receipt access.
+  Server checks prevent opening options when the cart already consumes usable
+  stock. Unavailable defaults stay unchecked. Large choice spaces are explicitly
+  labeled for an exact chosen-configuration check; they are not falsely declared
+  available or unavailable. Catalogue pages must share revision/business date.
+- Failed requests retain cart, configuration, payment fields and quote. Before
+  sending checkout the account-scoped session storage records its exact command,
+  without tokens/passwords. A lost response restores the same retry through
+  refresh; another order/navigation remains blocked until reconciliation. Later
+  failed retries cannot erase an earlier uncertain outcome. The cart survives
+  manager navigation; refresh warns. Closing the tab can clear session storage:
+  check recorded sales before recreating an uncertain Cash checkout afterward.
+- Database readiness starts **disabled**, including after migration application.
+  `checkout:activate -- --project-ref izdemgzdywtxhvgvsian --enable` is a separate
+  reviewed administration step after acceptance. App roles cannot activate it.
+  `--disable` closes new sales while committed command replay remains available.
+  Preview remains separate; real service failure never falls back to sample data.
+- Final local root tests pass **106/106** (87 backend/API/PostgreSQL, 19 frontend
+  unit), including sixteen shared checkout SQL scenarios and committed disk
+  close/reopen. Typechecks/builds and generated-schema equality pass. Browser
+  checkout acceptance passes seven new scenarios; the final combined 26-case
+  authentication/management/checkout run passes **26/26 (1.3m), exit 0**. Earlier failed
+  combined runs exposed outdated enabled-POS/recovery expectations, a missing
+  exact accessible Variant label, and test login-limit exhaustion. Production
+  limits were preserved; checkout tests now restore test-owned SDK sessions.
+  These local transports are not hosted Auth/PostgREST/Storage acceptance or
+  simultaneous connection contention.
+- Read-only hosted preflight confirms nine matching hashes, four active profiles
+  (two Owners, one Admin, one Staff), zero sales/payments, 13 movements, 53 audit
+  events and inventory revision 21. No real account sign-in/password test,
+  modification or durable business write was used. Existing baseline/history is
+  intact. Do not describe this as a new hosted checkout test.
+- **Hosted apply was rejected before execution.** Automatic approval review
+  requires explicit authorization for the P6 schema/RPC/private-table/Storage
+  policy migration on DualCounter `izdemgzdywtxhvgvsian`. No workaround or indirect
+  execution was attempted. The nine-migration hosted state is unchanged; the
+  P6 RPCs/activation table/policy are not hosted. The user must approve this
+  reviewed P6 migration and verification on that exact project. Keep new-sale
+  activation closed; applying this migration alone starts it disabled.
+- Source audit preserves all seven full original blocks and nine applied hashes,
+  finds no configured server/database secrets in 173 publishable text files, no
+  staged files, and the unchanged `91a043f` snapshot. Evidence is workspace-parent
+  `.review/october-17-p6-{audit.cjs,audit.json,before.mts,before.json,browser/}`.
+  Captures cover 1440×900, 820×400 and 320×568 with no page overflow; sampled
+  visual review confirms readable cards/payment controls. Physical devices and
+  screen readers are not newly verified. Figma comparison and physical printing
+  remain removed; Daily Sales Values is preserved.
+
+**Next:** obtain explicit exact-project P6 migration/verification approval, then
+apply through the existing `db:apply` command and run rollback SQL regressions, real
+caller-token persistence and simultaneous duplicate/competing checkout and
+checkout-versus-correction acceptance. Keep activation closed until these gates
+are resolved; record intentional development fixture sale/audit history rather
+than claiming a clean zero-sales baseline after real checkout. Do not start P7
+or save unfinished Backend work to GitHub.
+
+### Previous checkpoint — P5 accepted; real persistence and final regressions pass (October 17, 2026)
+
+**P5 is complete and accepted against its recorded requirements.** The full seven original request
+blocks and all carried-forward business decisions remain authoritative. P6–P9
+have not been implemented in this task. P6 atomic checkout is next.
+
+- The user privately signed in as Huuujji. A stale local Node server on IPv6
+  localhost initially returned 404 for the new routes; it was stopped after its
+  listeners were identified. Current Vite/API routing restored the same browser
+  session without resetting or password-testing either retained Owner.
+- Real browser acceptance saved a labeled Retail Item with a private PNG image,
+  refreshed/restored it, verified its signed image loaded, received a separate
+  three-piece batch and corrected only the first batch from ten to nine pieces.
+  Another browser tab restored the session and saw the saved data and real Users
+  directory. The product also received an independent modifier-library copy.
+- Two real API-only issues were found and fixed without editing any applied SQL:
+  **`20261017060000_inventory_revision_scope.sql`** adds `WHERE s.singleton` to
+  the revision UPDATE, satisfying the hosted safe-update guard; SHA-256
+  `bc56df5ac87c86d92691efb15f233cf26ab7abe49fb043a2083e05bc3b1f0990`.
+  **`20261017070000_nonretryable_business_conflicts.sql`** changes only explicit
+  business-conflict raises in six existing functions from `40001` to `PT409`;
+  SHA-256 `01eb62e5b42b8397df1a10590b6c9361a0d3da2d69f29d35e680701e869edeac`.
+  PostgREST 14.18 retried deliberate `40001` conflicts indefinitely; the new code
+  returns HTTP 409 promptly. Validation, locks, revisions, rollback, grants,
+  signatures and search paths remain. All nine applied sources are frozen.
+  The generated contract now includes all nine sources; API error mapping
+  recognizes PT409 and still scrubs provider details.
+- The stuck acceptance account statements were identified through sanitized
+  activity metadata and narrowly cancelled; their transactions rolled back.
+  The session-pooler port timed out during the loops. Same-project transaction
+  pooler 6543 was used through a process-local override for recovery/verification;
+  saved connection settings and TLS validation were not changed. Final activity
+  inspection finds no active/stuck PostgREST requests.
+- The user supplied exact new Admin/Staff identity details and initial passwords,
+  then explicitly chose **"Keep both active for my use"**. Created **Jestine Admin
+  / @Jest** (Admin, `3e89616e-13d0-4c87-94cf-1de959c9ae0a`) through the existing
+  trusted Auth-admin provisioning trigger, attributed to the authorizing Owner.
+  Created **Aquino Staff / @Aquino** (Staff,
+  `c1326a52-8854-4883-851a-8fcdc8d26d21`) through the protected HTTP account
+  endpoint using the real Admin token. No invitation/verification email was sent.
+  Passwords were transient process inputs only; none is recorded here, in source,
+  profiles, receipts, logs or test artifacts. Do not recreate or reset these users.
+- Real username/email login, Admin account-list scope, Staff management denial,
+  Admin promotion denial, account creation-operation reconciliation, deactivation
+  affecting an existing Staff token, reactivation, and stale profile-revision
+  rejection pass. Both new accounts end active with the requested names/roles.
+  A separate real Admin login saw the product and unchanged nine/three batch
+  balances created in the Owner browser session. Acceptance-owned API sessions
+  were signed out; the user's Owner browser session was not globally revoked.
+- Real caller-token API/Storage acceptance passes for all four stock models,
+  recipes/configuration links, independent library copies, invalid/forged/Staff
+  write denial with an identical before/after snapshot, denied direct management
+  SELECT, private image signing/download and Staff signing denial, optional-image
+  clearing, and durable logout/login persistence. Two real Auth sessions raced
+  on one inventory revision: exactly one committed and the other received 409
+  without residue. Concurrent identical receipt commands committed once and
+  returned one stored replay; changed idempotency content returned 409.
+- Only labeled P5 acceptance catalogue records were archived through the caller
+  commands after verification. There are now four archived products, three
+  archived stock items, five archived batches and one archived library (plus its
+  independent product copy). All batch balances are zero. History intentionally
+  remains: 21 inventory operation receipts, two account operation receipts,
+  13 stock movements, 53 audit events and one private test PNG object. Six SKU
+  reservations and configuration relationships remain; no hard deletion or
+  speculative Storage cleanup was performed. There are no sales/payments/reviews.
+- A final private fingerprint comparison confirms both original Owner profiles,
+  roles, active states, credential/email metadata and alert settings are unchanged.
+  Normal sign-in/session timestamps are excluded from the credential fingerprint.
+  Four real Auth/profile accounts are active: both retained Owners and the new
+  requested Admin/Staff. This real acceptance intentionally changed counts;
+  do not reuse the earlier two-account/empty-catalogue baseline as current state.
+- Final local root tests pass **86/86** (69 backend/API/PostgreSQL, 17 frontend
+  unit). New regressions verify PT409 rollback and scrubbed single-response HTTP
+  409 for account/inventory/settings writes. Root typechecks/builds pass. The
+  schema generator replayed all nine migrations; its unit equality check passes.
+  No new whole browser suite is claimed. Browser control became disabled in Work
+  settings mid-acceptance; remaining live checks used the actual Express source
+  in test-owned HTTP servers and real hosted Auth/PostgREST/Storage, not mocks.
+  Previously captured browser results and verification boundaries stay historical.
+- **Final hosted regressions pass:** `db:verify` confirms all nine hashes and
+  unchanged narrow grants/policies/indexes; `inventory:verify` passes **15/15**,
+  `permissions:verify` **11/11**, and `db:smoke` **12/12**. Each SQL checker restores
+  its fixture rows/temporary grants and verifies unchanged existing accounts,
+  settings and table counts. The inventory checker also compares revision/private
+  receipts and bucket/policy metadata. These checks leave the intentional live
+  acceptance history intact; they do not claim an empty hosted database.
+- Evidence: workspace-parent `.review/october-17-p5-{browser/,browser-before.json,
+  browser-repair-apply.log,conflict-apply.log,conflict-unit.log,live-accounts.json,
+  live-accounts-accepted.log,live-inventory.json,live-inventory.log,final-state.log,
+  live-typecheck-final.log,live-build-final.log}` and the final verification logs.
+  Final hosted logs are `.review/october-17-p5-final-{db-verify,inventory-verify,
+  permissions-verify,db-smoke}.log`; final source/secret audit is
+  `.review/october-17-p5-final-audit.json`.
+  This task performed no commit, push, PR, GitHub save or deployment. An existing
+  local user snapshot `91a043f` was present when work resumed and was preserved;
+  subsequent task changes remain local. Keep all unfinished Backend work off GitHub.
+
+**Next:** proceed to P6 atomic checkout as the next implementation priority.
+P6 must join the same account/
+catalogue lock, revision, idempotency, stock-ledger and audit discipline. Existing
+live checkout/review/report boundaries remain closed. Keep Daily Sales Values;
+Figma comparison and physical printing remain removed.
+
+### Previous checkpoint — P5 migration approved, applied and hosted SQL verified (October 17, 2026)
 
 **The P5 migration/hosted SQL gate is complete. P5 remains pending real signed-in
 browser/PostgREST/image persistence acceptance.** All seven full original request
@@ -721,9 +1007,9 @@ The Backend-start request supersedes old blanket frontend-only and stop-for-revi
 | **P2A — after database setup** | Begin backend-dependent frontend integration preparation | **Complete — prepared locally; live access remains gated** | Schema-derived contracts/mapping, typed transport and request states are implemented and tested; authenticated/protected operations remain dependent on P3–P5. |
 | **P3** | Complete real authentication and account lifecycle | **Complete — live checks, configured Auth and user-confirmed emailed password change/login** | Login/logout, session restoration/expiry, protected identity lookup, account provisioning and complete emailed recovery work with real development accounts. |
 | **P4** | Enforce Owner/Admin/Staff permissions | **Complete — approved migration applied; hosted verification passes** | Caller-scoped API checks, six restricted read grants, 25 SELECT policies, 11 hosted permission scenarios and 12 rollback smoke checks pass; both real Owners/settings remain unchanged. See current checkpoint for verification limits. |
-| **P5 — next; finish the first milestone** | Protected CRUD and Users/Inventory integration | Implemented locally; approved seventh migration applied and hosted SQL verified; signed-in browser acceptance pending | Authorized Users and Inventory changes persist across refresh/login and are visible to another permitted session; invalid and unauthorized actions change nothing. |
-| **P6 — after P1–P5** | Transactional checkout, payments recorded and stock consumption | Pending | Sale, purchased snapshots, batch deductions, movement records and audit events save together; duplicate/concurrent requests cannot oversell or deduct twice. |
-| **P7** | Durable Daily Sales Review, voids and audit history | Pending | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
+| **P5 — first milestone** | Protected CRUD and Users/Inventory integration | Complete — real acceptance, nine hosted hashes and final regressions pass | Real browser and Auth/PostgREST/Storage changes persist across refresh/login and another authorized account; denied/invalid actions change nothing. Nine migrations include two hosted-path fixes. |
+| **P6** | Transactional checkout, payments recorded and stock consumption | Complete — hosted/caller-token/concurrent acceptance passes; disabled after approved test window | Sale, purchased snapshots, batch deductions, movement records and audit events save together; duplicate/concurrent requests cannot oversell or deduct twice. |
+| **P7 — next** | Durable Daily Sales Review, voids and audit history | Pending | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
 | **P8** | Database-backed reports and reconciliation | Pending | Screen/PDF/CSV/Print scopes derive from durable records with matching filters, correct historical/current balances and explicit missing-history disclosures. |
 | **P9 — later** | External payment verification, notifications and additional integrations | Pending / details to define | Provider and notification scope, rules and verification are specified separately; existing sample QR/reference entry is not represented as payment verification. |
 
@@ -813,33 +1099,35 @@ The October 17 fixes and the latest October 16 frontend requests are recorded as
 2. **Real-device/accessibility/browser verification:** actual phones/tablets, real screen readers, Safari and Firefox remain unverified; desktop Edge emulation does not establish these results. This remains a verification boundary and is not made a new P0 blocker by this documentation update.
 3. **Frontend work dependent on the backend — after database setup:** P2A starts after completed P2; real authentication/profile routing and protected Users/Inventory persistence are completed with P3–P5. Real checkout/reviews/reports follow under P6–P8. Sample behavior is not live integration. This is scheduled integration work, not an unresolved preview-design task.
 
-#### Current continuation — P5 signed-in acceptance; preserve both Owners and Backend-local work
+#### Previous continuation — P6 checkout after accepted P5; superseded by current P6 checkpoint
 
 ```text
 Resume in C:/Users/ASUS/Documents/Personal/Vertwell/repo in phase Backend.
 Read the FULL seven original user-message blocks, carried-forward decisions,
 current P5 checkpoint, README.md and backend/supabase/
 {README,DESIGN,INTEGRATION,AUTHENTICATION,AUTHORIZATION,CRUD}.md.
-P1/P2/P2A/P3/P4 are accepted. P5 is implemented locally; its explicitly approved
-seventh migration is now applied and hosted SQL verification passes.
-The user answered "Approve P5 migration and verification on this exact project"
-for DualCounter izdemgzdywtxhvgvsian, resolving the historical approval rejection.
-All seven applied sources are frozen. Do not edit or raw-reapply them.
-db:verify, inventory:verify (14/14), permissions:verify (11/11) and db:smoke
-(12/12) pass; SQL fixtures/grants rolled back. Independent before/after comparison
-confirms unchanged real Auth/profile accounts/settings and all table counts.
-Five anonymous hosted PostgREST denial checks and fresh schema --check pass.
-No new runtime source changed; local unit/typecheck/build/browser suites were
-not rerun for this apply.
-P5 signed-in browser acceptance is pending; P6–P9 stay deferred.
-Finish real signed-in development-account browser/PostgREST/image persistence
-acceptance without password-testing or modifying either retained Owner to sign in.
-The open localhost:5173 in-app browser showed login without an active session;
-the user was asked to sign in privately as Huuujji and reply "Signed in".
-Reuse the existing frontend on 5173; the acceptance backend API was started.
-Check current processes/session rather than assuming either survives a later chat.
+P1/P2/P2A/P3/P4/P5 are implemented and acceptance is recorded in the current
+checkpoint. P6 atomic checkout is next; P7–P9 remain later work.
+Nine migrations are applied to DualCounter izdemgzdywtxhvgvsian. Freeze every
+applied source, including the P5 safe-update and PT409 follow-ups. Never edit or
+raw-reapply them. Do not raise 40001 for deliberate business conflicts: it caused
+actual PostgREST 14.18 retry loops. PT409 returns a conflict with rollback.
+Keep the revision UPDATE explicitly scoped to WHERE singleton.
+Use the latest verification evidence; older pending-approval and empty-catalogue
+checkpoints are historical. Real Owner browser and Admin/Staff API/Auth/Storage
+acceptance passes, including another authorized account, logout/login, denied
+writes, independent copies, images, revision contention and once-only retries.
+Browser control became disabled mid-acceptance. Do not claim browser coverage
+beyond the captured Owner flow or bypass that setting. Check current processes
+and sessions rather than assuming development servers survive later chats.
 Keep admin ACTIVE AND UNCHANGED. Huuujji remains an additional Owner for testing.
 Do not demote/deactivate/delete/replace or password-test either retained account.
+Keep Jestine Admin / Jest and Aquino Staff / Aquino active for the user. They
+supplied exact identities/passwords and explicitly chose to keep them active.
+Never record passwords in files/logs/handoff or recreate/reset these accounts.
+Acceptance catalogue fixtures are archived and every batch balance is zero.
+History remains: 21 inventory receipts, two account receipts, 13 stock movements,
+53 audit events, six SKU reservations, configurations and one private image.
 Use caller-token access and the protected aggregate commands; no blanket table
 grants or service-role business writes. Revisions/idempotency, attributed stock
 movements, atomic audit and independent modifier copies are implemented. Keep
@@ -847,13 +1135,15 @@ all four stock models, SKU-only inputs/IDs, valid units/dates, optional private
 images, archive/deactivate history, filters and retained async editor/wizard drafts.
 P5 UI opens Inventory/Users for managers; Staff live checkout stays pending.
 Preview remains separate and cannot substitute for an unavailable real service.
-Final root tests 84/84, typechecks/builds and schema --check pass. Broad browser
-235/236 preceded a corrected preview-label failure. The affected 72-pass run
-hit the test login limiter, which was fixed in test session setup. Fresh 18/18
-and final 9/9 management browser runs pass. All 238 cases are covered across
-runs; these remain historical local results. No final single clean whole-suite
-result, new signed-in hosted Auth/Storage round trip or multi-connection
-contention result is claimed. Review exact evidence above.
+Final root tests 86/86, typechecks/builds and generated-schema equality pass.
+Final hosted regressions are recorded in the current checkpoint. Earlier broad/
+focused browser results remain historical; no fresh whole-suite run is claimed.
+P6 must aggregate/recalculate cart inputs/prices, allocate usable batches, prevent
+overselling/double deduction, and save sale/payment/purchased snapshots/ledger/
+audit atomically. Join P5's account/catalogue lock and inventory revision.
+Owner checkout completes immediately; paid/fulfilled Admin/Staff consumes once
+and awaits Owner review. Review never deducts again. GCash reference entry is
+not provider verification. Keep live checkout closed until P6 passes.
 Keep Daily Sales Values. Figma comparison and physical printing stay removed.
 No commit/push/PR/GitHub save until ALL Backend tasks finish. No deployment.
 Preserve all seven original blocks and record exact results and remaining gates.

@@ -4,7 +4,7 @@ import { HttpError } from './http-error.js';
 export interface Profile { id: string; full_name: string; username: string; role: 'Owner' | 'Admin' | 'Staff'; active: boolean; updated_at: string }
 export function databaseError(error: { code?: string } | null): never {
   if (error?.code === '42501') throw new HttpError(403, 'Account access is not permitted.');
-  if (error?.code === '23505' || error?.code === '40001') throw new HttpError(409, 'Account changed or username is already used. Reload and review.');
+  if (error?.code === 'PT409' || error?.code === '23505' || error?.code === '40001') throw new HttpError(409, 'Account changed or username is already used. Reload and review.');
   if (error?.code?.startsWith('23')) throw new HttpError(422, 'Account change violates account protection or validation rules.');
   throw new HttpError(503, 'Account service is unavailable.');
 }

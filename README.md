@@ -1,10 +1,28 @@
 # Vertwell
 # System Fundamentals Project - BSCS 3A
 
-> **Status:** P5 protected Users/Inventory migration applied and hosted SQL verified; signed-in acceptance pending
+> **Status:** P6 atomic checkout accepted in hosted development; checkout left disabled as requested
 > Separate frontend and backend applications for Vertwell's inventory and sales management system.
 
-## Current checkpoint — October 17 protected CRUD
+## Current checkpoint — October 17 atomic checkout accepted
+
+P6 now adds server quotes, whole-cart/configuration stock checks, atomic
+sale/payment/purchased snapshots/FEFO consumption/audit, operation replay and a
+protected live POS with refresh recovery and scoped receipt retrieval. The new
+`20261017135332_atomic_checkout.sql` migration is applied to DualCounter after
+explicit exact-project approval. All ten hosted hashes match. Real caller-token
+Auth/API/PostgREST/Storage acceptance and three forced-overlap checkout races
+pass: identical retries deduct once, competing orders cannot oversell, and
+checkout/count correction allows one commit. See [CHECKOUT.md](backend/supabase/CHECKOUT.md).
+The user separately approved temporary test activation followed by disablement;
+**checkout is disabled again**. P7 durable review/void/audit workflows are next.
+No Backend changes have been committed or pushed.
+
+Labeled development history from both test passes remains: 11 sales/payments,
+eight inactive test accounts and archived test stock with zero balances. The
+four retained active accounts and settings are unchanged. Generated test
+passwords/tokens were not saved. The prior 106 local tests and 26 scoped browser
+checks remain historical; no new whole browser run is claimed.
 
 P5 connects the existing Users and Inventory screens to protected transactional
 services. Managers can save all four stock models, ingredients/batches, recipes,
@@ -16,18 +34,27 @@ operation receipts reconcile uncertain saves without duplicate stock changes.
 
 The user explicitly approved the P5 migration and verification on DualCounter
 `izdemgzdywtxhvgvsian`, resolving the earlier automatic approval rejection.
-The reviewed seventh migration is applied; all seven applied source hashes match.
-Hosted schema/grant checks, 14 inventory scenarios, 11 permission scenarios and
-12 database smoke checks pass. SQL fixtures and temporary grants were rolled back;
-both real Owners/settings and all existing public/Auth table counts remain unchanged.
-P5 still needs real signed-in browser/PostgREST/image persistence acceptance.
-The prior 84 root tests, typechecks/builds and focused browser checks remain local
-historical evidence; they were not rerun for this hosted apply/documentation step.
+P5 ended with nine applied migrations, including two narrow live-path repairs: scope
+the singleton revision UPDATE for the safe-update guard and return deliberate
+business conflicts as PT409 instead of retryable SQLSTATE 40001. Applied SQL
+sources remain immutable; permissions and transactional safeguards are preserved.
+Real Owner browser and Admin/Staff Auth/API/PostgREST/Storage acceptance passes:
+refresh/login/another authorized account, all four stock models, independent
+copies, private images, denied/invalid writes and concurrent revision/retry checks.
+Root tests pass **86/86**, and typechecks/builds pass. Final hosted regressions
+and exact limits are recorded in HandsOff.md. Browser control became disabled
+mid-acceptance; no new whole browser-suite result is claimed.
+
+Both original Owners and settings remain unchanged. The user-requested **Jestine
+Admin / @Jest** and **Aquino Staff / @Aquino** accounts were created and remain
+active as explicitly requested. Passwords are Auth-managed and omitted from files.
+Labeled acceptance catalogue records are archived with zero batch balances;
+audit/movement/configuration/SKU/operation history and one private test image remain.
 Read [CRUD.md](backend/supabase/CRUD.md) for the exact API, validation, archival,
-image and verification boundaries. P6 checkout, P7 reviews, P8 reports and P9
-external integrations stay deferred. Preview remains separate and unchanged.
+image and verification boundaries. P6 acceptance is recorded above; P7 reviews,
+P8 reports and P9 external integrations remain later work. Preview remains separate.
 All Backend work stays local: no commit, push, PR, GitHub save or deployment.
-Keep admin active and unchanged; Huuujji remains an additional testing Owner.
+Keep both original Owners unchanged and both new Admin/Staff accounts active.
 
 ## Previous accepted checkpoint — October 17 permissions
 
@@ -91,7 +118,7 @@ cases and **10/10** live testing-account/provisioning checks pass. Real browser
 login/restoration/logout, root typechecks/builds and schema verification pass.
 The earlier **16/16** live lifecycle, **12/12** rollback database and **223/223**
 broad browser runs remain historical; no newer broad browser run is claimed.
-All seven original-message blocks and all seven currently applied SQL sources are preserved.
+All seven original-message blocks and all ten currently applied SQL sources are preserved.
 
 Backend changes stay local/uncommitted until all Backend tasks are finished.
 No commit, push, PR, GitHub save or deployment was performed.
@@ -744,12 +771,12 @@ No Vercel or Supabase resources are provisioned by this scaffold.
 ## Next Implementation Steps — Backend phase
 
 - P0 is saved and verified on GitHub. Backend work now stays local until all backend tasks are finished. HandsOff.md preserves the complete original requests.
-- P1/P2/P2A/P3/P4 are accepted. P5's approved seventh migration is applied and hosted SQL checks pass; finish signed-in acceptance recorded in HandsOff.md before P6.
-- Verify real development-account browser/PostgREST/image persistence; preserve both retained Owners and all existing history.
-- Integrate the implemented account commands into Users at P5; add broader role authorization and durable Owner daily-sales review in their ordered phases.
-- Implement atomic checkout and stock movements, void approval, and reconciliation.
-- Connect the existing inventory and report screens to durable data and movement records.
-- Connect the preview variant/bundle workflows and modifier libraries to durable records and real-time updates.
+- P1/P2/P2A/P3/P4/P5/P6 acceptance is recorded in HandsOff.md. P6 hosted verification is complete; checkout was disabled after the approved test window.
+- Preserve both original Owners, the two user-requested active Admin/Staff accounts and all acceptance history.
+- Preserve disabled checkout until the user requests activation for use; do not repeat completed P6 acceptance without a new reason.
+- Add P7 durable Owner daily-sales review, void decisions and audit workflows.
+- Connect P8 reports and exports to durable sales/movement reconciliation.
+- Define P9 payment verification, notifications and synchronization separately.
 
 References: [Vercel Express](https://vercel.com/docs/frameworks/backend/express),
 [Vercel Vite](https://vercel.com/docs/frameworks/frontend/vite),

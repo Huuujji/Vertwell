@@ -92,9 +92,11 @@ record who acted at the event time. Protect the last active Owner under concurre
 changes and prevent deleting the signed-in account. P3 implements serialized
 account commands and last-Owner/self-deactivation
 protections; see AUTHENTICATION.md. Direct table access remains revoked. The broader business permission matrix is applied and accepted under P4; see
-AUTHORIZATION.md. P5 protected aggregate services are now implemented locally;
-CRUD.md and HandsOff.md track the new migration and hosted acceptance. P6–P8
-transactional checkout, reviews and reports remain deferred.
+AUTHORIZATION.md. P5 protected aggregate services and real hosted acceptance pass;
+CRUD.md and HandsOff.md record nine immutable sources, caller-token persistence,
+role checks and inventory contention. P6 transactional checkout is now applied
+and accepted with ten immutable sources and real concurrent caller-token tests;
+see CHECKOUT.md. P7 reviews and P8 reports remain deferred.
 
 ## Column dictionary
 
@@ -160,7 +162,7 @@ Foundation stock writes append a movement while holding its batch row lock,
 reject negative physical balances, reject consumption of archived/unsellable or
 expired stock and append an audit event in the same statement/transaction.
 Physical balances have a single source of truth. The foundation is not a checkout
-RPC and does not promise concurrent full-cart checkout until P6 verification.
+RPC. The separately applied P6 RPC now supplies verified concurrent full-cart checkout.
 Do not use multiple independent Supabase SDK calls as an atomic transaction.
 
 `stock_movements` also has `stock_sku text!`, `stock_name text!` and

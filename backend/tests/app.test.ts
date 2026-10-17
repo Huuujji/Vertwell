@@ -96,9 +96,9 @@ const permissionMatrix = {
 const ids = { actor:'00000000-0000-4000-8000-000000000001', staff:'00000000-0000-4000-8000-000000000002',
   ownSale:'00000000-0000-4000-8000-000000000003',otherSale:'00000000-0000-4000-8000-000000000004' };
 async function businessTransport(run: (request: (path: string, method?: string, body?: unknown) => Promise<Response>,
-  state: {role:keyof typeof permissionMatrix;active:boolean;permissionRole?:keyof typeof permissionMatrix;calls:{path:string;body:any;token:string|null}[]})=>Promise<void>) {
+  state: {role:keyof typeof permissionMatrix;active:boolean;permissionRole?:keyof typeof permissionMatrix;conflict?:boolean;calls:{path:string;body:any;token:string|null}[]})=>Promise<void>) {
   const original = globalThis.fetch;
-  const state: {role:keyof typeof permissionMatrix;active:boolean;permissionRole?:keyof typeof permissionMatrix;calls:{path:string;body:any;token:string|null}[]} = {role:'Owner',active:true,calls:[]};
+  const state: {role:keyof typeof permissionMatrix;active:boolean;permissionRole?:keyof typeof permissionMatrix;conflict?:boolean;calls:{path:string;body:any;token:string|null}[]} = {role:'Owner',active:true,calls:[]};
   const profile = (role = state.role) => ({id:ids.actor,full_name:'Verified actor',username:'verified',role,active:state.active,updated_at:'2026-10-17T00:00:00Z'});
   const fail = (code = '42501') => Response.json({code,message:'Private provider detail must not leak'}, {status:403});
   const mocked = mock.method(globalThis,'fetch',async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -109,6 +109,9 @@ async function businessTransport(run: (request: (path: string, method?: string, 
     state.calls.push({path:url,body,token});
     if (url.includes('/auth/v1/user')) return Response.json({id:ids.actor,email:'verified@example.invalid'});
     if (url.includes('/rpc/current_profile')) return state.active ? Response.json(profile()) : fail();
+    if (state.conflict && /\/rpc\/(update_account|inventory_command|update_alert_settings)$/.test(url)) {
+      return Response.json({code:'PT409',message:'Private provider detail must not leak'},{status:409});
+    }
     if (url.includes('/rpc/authorize_business_action')) {
       assert.equal(token,'Bearer session-token');
       const role = state.permissionRole ?? state.role;
@@ -120,6 +123,9 @@ async function businessTransport(run: (request: (path: string, method?: string, 
     if (url.includes('/rpc/read_managed_accounts')) return Response.json([]);
     if (url.includes('/rpc/read_business_sales')) return Response.json({version:1,items:[{id:ids.ownSale,total:'10.00'}],hasMore:false});
     if (url.includes('/rpc/read_pos_catalogue')) return Response.json({version:1,checkoutReady:false,items:[],hasMore:false});
+    if (url.includes('/rpc/checkout')) return body.command?.operationId ? Response.json({saleId:ids.ownSale,replayed:false}) : Response.json({code:'22023',message:'Invalid checkout'},{status:422});
+    if (url.includes('/rpc/quote_checkout')) return Response.json({version:1,total:'14.00'});
+    if (url.includes('/rpc/read_checkout_catalogue')) return Response.json({version:1,checkoutReady:true,items:[],hasMore:false});
     if (url.includes('/rpc/update_alert_settings')) return state.permissionRole === 'Admin' ? fail() : Response.json({similar_order_threshold:body.similar_order_threshold,updated_by:ids.actor});
     if (url.includes('/rpc/update_account')) return state.role === 'Admin' && (body.target_id!==ids.staff || body.account_role!=='Staff') ? fail() : Response.json({...profile(),id:body.target_id,role:body.account_role});
     if (url.includes('/void_requests')) return Response.json([]);
@@ -140,7 +146,7 @@ test('every business route enforces the complete three-role matrix before return
       ['GET','/dashboard','dashboard.read',501], ['GET','/inventory','inventory.read',200],
       ['POST','/inventory','inventory.write',501], ['PATCH',`/inventory/${ids.staff}`,'inventory.write',501],
       ['DELETE',`/inventory/${ids.staff}`,'inventory.write',501], ['GET','/reports','reports.read',501],
-      ['POST','/checkout','checkout.create',501], ['POST',`/sales/${ids.ownSale}/void-requests`,'void.request',501],
+      ['POST','/checkout','checkout.create',422], ['POST',`/sales/${ids.ownSale}/void-requests`,'void.request',501],
       ['POST',`/sales/${ids.ownSale}/void`,'sale.void',501], ['POST',`/sales/${ids.ownSale}/void-decision`,'void.decide',501],
       ['POST','/daily-sales-reviews','review.confirm',501], ['GET','/sales','sales.read',200],
       ['GET',`/sales/${ids.ownSale}`,'sales.read',200], ['GET','/void-requests','sales.read',200],
@@ -226,4 +232,34 @@ test('all new business routes require authentication even when called directly',
   for (const [method,path] of [['GET','/access'],['GET','/sales'],['GET','/void-requests'],['GET','/pos/catalogue'],['GET','/inventory'],['GET','/reports'],['GET','/dashboard'],['PATCH','/alert-settings'],['POST','/checkout'],['POST','/daily-sales-reviews'],['POST',`/sales/${ids.ownSale}/void`],['GET','/auth/accounts']]) {
     assert.equal((await fetch(`${baseUrl}/api${path}`,{method})).status,401,`${method} ${path}`);
   }
+});
+
+test('checkout routes forward only caller-scoped commands and never use Auth administration credentials',async()=>{
+  await businessTransport(async(request,state)=>{
+    for(const role of ['Owner','Admin','Staff'] as const){
+      state.role=role;
+      assert.equal((await request('/pos/checkout-catalogue?limit=100')).status,200);
+      assert.equal((await request('/pos/quote','POST',{lines:[]})).status,200);
+      assert.equal((await request('/checkout','POST',{operationId:ids.ownSale})).status,200);
+      const calls=state.calls.filter(call=>/\/rpc\/(checkout|quote_checkout|read_checkout_catalogue)$/.test(call.path));
+      assert.ok(calls.every(call=>call.token==='Bearer session-token'));
+    }
+    assert.equal((await request('/pos/quote','POST',{lines:[],role:'Owner'})).status,422);
+  });
+});
+
+test('nonretryable database conflicts return one scrubbed HTTP 409 for account, inventory and settings writes', async () => {
+  await businessTransport(async (request,state) => {
+    state.conflict=true;
+    const writes:[string,string,unknown,string][]=[
+      ['PATCH',`/auth/accounts/${ids.staff}`,{fullName:'Staff',username:'staff',role:'Staff',active:true,updatedAt:'2026-10-17T00:00:00Z'},'update_account'],
+      ['POST','/inventory/commands',{},'inventory_command'],
+      ['PATCH','/alert-settings',{updatedAt:null,similarOrderThreshold:7,windowMinutes:3},'update_alert_settings'],
+    ];
+    for(const [method,path,body,rpc] of writes){
+      const response=await request(path,method,body);assert.equal(response.status,409);
+      assert.equal(JSON.stringify(await response.json()).includes('Private provider detail'),false);
+      assert.equal(state.calls.filter(call=>call.path.endsWith(`/rpc/${rpc}`)).length,1);
+    }
+  });
 });

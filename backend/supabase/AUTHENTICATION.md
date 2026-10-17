@@ -7,8 +7,10 @@ reference/API URL is unchanged; organization/repository remain Vertwell.
 receipt is confirmed, and the user confirmed a successful same-browser password
 change and Huuujji login. The new password was entered privately by the user.
 P4 business permissions are accepted after explicit exact-project approval,
-hosted application and passing verification. P5 business UI integration is now implemented locally. Its new migration and
-hosted acceptance are tracked in CRUD.md and HandsOff.md. See [AUTHORIZATION.md](AUTHORIZATION.md).
+hosted application and passing verification. P5 Users/Inventory is now accepted
+with real browser/Auth/API/Storage checks; CRUD.md and HandsOff.md record the
+nine applied sources, two additional user-requested active Admin/Staff accounts,
+unchanged Owners and precise coverage. See [AUTHORIZATION.md](AUTHORIZATION.md).
 Backend work stays local.
 
 ## Runtime and temporary Owner

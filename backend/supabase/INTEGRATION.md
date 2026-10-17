@@ -1,14 +1,22 @@
 # P2A/P5 frontend integration — October 17, 2026
 
+P6 extends the protected workspace with a server-quoted live POS, whole-cart
+configuration availability, Cash/GCash recording, purchased receipt reads and
+same-operation recovery through refresh. The applied database activation flag
+controls readiness; a missing/disabled P6 service stays closed. It never opens
+the preview after an error. [CHECKOUT.md](CHECKOUT.md) records the local contract
+and completed hosted/caller-token/concurrent acceptance. The approved temporary
+test activation ended disabled. P7 reviews and P8 reports remain closed.
+
 Database setup and P2A preparation are complete. P3 resolves real active profiles
 and handles account/session/recovery lifecycle. Hosted Auth settings are configured
 and the user confirmed emailed password change/login with a fresh same-browser
 link. P3 is accepted. See [AUTHENTICATION.md](AUTHENTICATION.md). P4
 business authorization is accepted after exact-project approval, migration
 application and hosted verification; see [AUTHORIZATION.md](AUTHORIZATION.md). P5
-Users/Inventory integration is implemented; its explicitly approved seventh
-migration is applied and hosted SQL checks pass. See [CRUD.md](CRUD.md) and
-HandsOff.md for pending signed-in acceptance and actual results. All
+Users/Inventory integration is complete: nine immutable migrations, real
+browser/Auth/API/Storage acceptance and final hosted checks pass. See
+[CRUD.md](CRUD.md) and HandsOff.md for exact results and boundaries. All
 Backend work stays local until the Backend task list is finished.
 
 ## What runs today
@@ -36,7 +44,8 @@ The database administration password/connection is never used by the frontend/AP
 `pendingBusinessData` is the retained P2A preparation test boundary. Runtime P5 uses
 `createManagementData` in `data/management.ts`, the caller-session transport and
 `ManagementWorkspace`. There is no flag that bypasses SQL permissions and no
-preview fallback. Checkout/review/report integration remains deferred.
+preview fallback. P6 checkout is accepted and gated by database activation;
+review/report integration remains deferred.
 
 ## Contract derived from the migration sources
 
@@ -44,7 +53,7 @@ preview fallback. Checkout/review/report integration remains deferred.
 disposable PGlite database, inspects PostgreSQL columns and generates
 `Frontend/src/lib/data/database.generated.ts`. It includes all 25 tables,
 nullability and LF-normalized migration hashes matching the administration tooling.
-All seven sources, including P5, match the separately verified hosted migration
+All ten sources, including both P5 live-path repairs and P6 checkout, match the verified hosted migration
 history. The contract generator itself does not prove hosted application and
 does not connect to or change the hosted project. Unknown SQL types fail
 generation. Regenerate after reviewed later migrations:
