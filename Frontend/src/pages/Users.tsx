@@ -5,6 +5,7 @@ import SearchField from '../components/SearchField';
 import useDiscardChanges from '../components/useDiscardChanges';
 import type { Account, Role } from '../data/demo';
 import { useViewState } from '../lib/view-state';
+import { useMutation } from '../lib/request-state';
 
 const roles: Role[] = ['Owner', 'Admin', 'Staff'];
 const access: Record<Role, string> = {
@@ -12,9 +13,14 @@ const access: Record<Role, string> = {
   Admin: 'Operational workspaces, sale and void review, and Staff management.',
   Staff: 'POS and their current Manila-day sales history; voids are submitted for review.',
 };
+export interface AccountCredentials { password: string; operationId: string }
 const emptyDraft = { name: '', username: '', email: '', role: 'Staff' as Role };
 
-export default function Users({ accounts, role: signedRole, actorId, onSave, onDelete, notify }: { accounts: Account[]; role: Role; actorId: string; onSave: (account: Account) => void; onDelete: (id: string) => void; notify: (message: string) => void }) {
+export default function Users({ persistent = false, onDirtyChange, accounts, role: signedRole, actorId, onSave, onDelete, notify }: { persistent?: boolean; onDirtyChange?: (dirty: boolean)=>void; accounts: Account[]; role: Role; actorId: string; onSave: (account: Account, credentials?: AccountCredentials) => void | Promise<void>; onDelete: (id: string) => void | Promise<void>; notify: (message: string) => void }) {
+  const saving = useMutation((action: { account: Account; credentials?: AccountCredentials } | { id: string }) => 'account' in action ? onSave(action.account,action.credentials) : onDelete(action.id));
+  const operation = useRef<{signature:string;id:string} | null>(null);
+  const [manageDirty,setManageDirty] = useState(false);
+  const [editActive,setEditActive] = useState(true);
   const [search, setSearch] = useViewState('users-search', '');
   const [filter, setFilter] = useViewState<Role | 'All'>('users-role', 'All');
   const [managing, setManaging] = useState<Account | null>(null);
@@ -30,27 +36,32 @@ export default function Users({ accounts, role: signedRole, actorId, onSave, onD
   const deleteOpener = useRef<HTMLButtonElement>(null);
   const addOpener = useRef<HTMLButtonElement>(null);
   const submitted = useRef(false);
-  const ownerCount = accounts.filter(account => account.role === 'Owner').length;
+  const ownerCount = accounts.filter(account => account.role === 'Owner' && account.active!==false).length;
   const query = search.trim().toLowerCase();
   const shown = accounts.filter(account => (filter === 'All' || account.role === filter) && [account.name, account.username, account.email].some(value => value.toLowerCase().includes(query)));
-  const deletionBlocked = managing?.id === actorId ? 'You cannot delete your signed-in account.' : managing?.role === 'Owner' && ownerCount === 1 ? 'Keep at least one owner account.' : '';
+  const deletionBlocked = managing?.id === actorId ? persistent ? 'You cannot deactivate your signed-in account.' : 'You cannot delete your signed-in account.' : managing?.role === 'Owner' && managing.active!==false && ownerCount === 1 ? 'Keep at least one owner account.' : '';
 
   useEffect(() => { if (confirmDelete) deleteCancel.current?.focus(); }, [confirmDelete]);
-  function closeManage() { setManaging(null); setConfirmDelete(false); setError(''); }
-  function closeAdd() { setAdding(false); setDraft(emptyDraft); setError(''); setVisiblePasswords(false); }
+  function closeManage() { if (saving.saving) return; setManaging(null); setConfirmDelete(false); setError(''); setManageDirty(false); }
+  function closeAdd() { if (saving.saving) return; setAdding(false); setDraft(emptyDraft); setError(''); setVisiblePasswords(false); }
+  const manageGuard = useDiscardChanges(Boolean(persistent && managing && manageDirty), closeManage, 'account changes');
   const addGuard = useDiscardChanges(adding && (step > 1 || JSON.stringify(draft) !== JSON.stringify(emptyDraft)), closeAdd, 'new user account');
+  useEffect(()=>{onDirtyChange?.(Boolean(adding && (step>1 || JSON.stringify(draft)!==JSON.stringify(emptyDraft)) || managing && manageDirty || saving.saving));return ()=>onDirtyChange?.(false);},[adding,step,draft,managing,manageDirty,saving.saving,onDirtyChange]);
   function backFromDelete() { setConfirmDelete(false); requestAnimationFrame(() => deleteOpener.current?.focus()); }
-  function save(event: FormEvent<HTMLFormElement>) {
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!managing || submitted.current) return;
     if (signedRole !== 'Owner' && (managing.role !== 'Staff' || editRole !== 'Staff')) { setError('Only Owner may assign Owner or Admin access.'); return; }
-    if (managing.role === 'Owner' && editRole !== 'Owner' && ownerCount === 1) { setError('Keep at least one owner account.'); return; }
+    if (managing.role === 'Owner' && managing.active!==false && editRole !== 'Owner' && ownerCount === 1) { setError('Keep at least one owner account.'); return; }
     if (!editName.trim()) { setError('Enter a name.'); return; }
     submitted.current = true;
-    onSave({ ...managing, name: editName.trim(), role: editRole }); closeManage(); notify('Sample account updated.');
+    setError('');
+    const result = await saving.run({ account: { ...managing, name: editName.trim(), role: editRole, ...(persistent ? {active:editActive}: {}) } });
+    if (!result.ok) { submitted.current = false; setError(result.error.message); return; }
+    setManaging(null); setConfirmDelete(false); notify(persistent ? 'Account updated.' : 'Sample account updated.'); setManageDirty(false);
   }
-  function next(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setError('');
+  async function next(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (saving.saving) return; setError('');
     const values = new FormData(event.currentTarget);
     if (step === 1) {
       if (!draft.name.trim()) { setError('Enter a name.'); return; }
@@ -58,41 +69,44 @@ export default function Users({ accounts, role: signedRole, actorId, onSave, onD
       if (accounts.some(account => account.username.toLowerCase() === draft.username.trim().toLowerCase())) { setError('This username already exists.'); return; }
       setDraft({ ...draft, name: draft.name.trim(), username: draft.username.trim() }); setStep(2);
     } else if (step === 2) {
-      if (values.get('code') !== '123456') { setError('Use preview verification code 123456. No email is sent.'); return; }
+      if (!persistent && values.get('code') !== '123456') { setError('Use preview verification code 123456. No email is sent.'); return; }
       if (accounts.some(account => account.email.toLowerCase() === draft.email.trim().toLowerCase())) { setError('This email already exists.'); return; }
       setDraft({ ...draft, email: draft.email.trim() }); setVisiblePasswords(false); setStep(3);
     } else {
       if (submitted.current) return;
       if (values.get('password') !== values.get('confirm')) { setError('Passwords must match.'); return; }
       submitted.current = true;
-      onSave({ ...draft, id: crypto.randomUUID() });
+      const password=String(values.get('password')); const signature=JSON.stringify({...draft,password});
+      if(operation.current?.signature!==signature) operation.current={signature,id:crypto.randomUUID()};
+      const result = await saving.run({ account: { ...draft, id: crypto.randomUUID() }, ...(persistent ? {credentials:{password,operationId:operation.current.id}} : {}) });
+      if (!result.ok) { submitted.current = false; setError(result.error.message); return; }
       // Reveal the created account even if the remembered list filters excluded it.
-      setSearch(''); setFilter('All'); closeAdd(); notify('Sample account added. No real account was created.');
+      setSearch(''); setFilter('All'); setAdding(false); setDraft(emptyDraft); setVisiblePasswords(false); notify(persistent ? 'Account created. The user can sign in with their credentials.' : 'Sample account added. No real account was created.'); operation.current=null;
     }
   }
   return <section className="users" data-node-id="1331:20074">
-    <div className="page-heading"><div><h1>User Management</h1><p className="subtitle">Manage your team and their workspace roles.</p></div><button ref={addOpener} className="accent" onClick={() => { submitted.current = false; setAdding(true); setStep(1); setError(''); setVisiblePasswords(false); setDraft(emptyDraft); }}>Add User</button></div>
+    <div className="page-heading"><div><h1>User Management</h1><p className="subtitle">Manage your team and their workspace roles.</p></div><button ref={addOpener} className="accent" onClick={() => { submitted.current = false; operation.current=null; setAdding(true); setStep(1); setError(''); setVisiblePasswords(false); setDraft(emptyDraft); }}>Add User</button></div>
     <p className="role-policy">Owner manages roles and business access. Admin manages Staff and operations. Staff uses POS and their current Manila-day history. Only Owner can assign Owner or Admin access.</p>
     <div className="users-toolbar"><SearchField label="Search users" value={search} onChange={setSearch} placeholder="Search name, username, or email" /><label>Account role<select value={filter} onChange={event => setFilter(event.target.value as Role | 'All')}><option value="All">All roles</option>{roles.map(role => <option key={role}>{role}</option>)}</select></label></div>
     <div className="filter-summary"><p role="status">{shown.length} of {accounts.length} accounts · {filter === 'All' ? 'All roles' : filter}{query && ` · Matching “${search.trim()}”`}</p>{(search || filter !== 'All') && <button className="secondary" onClick={() => { setSearch(''); setFilter('All'); }}>Clear filters</button>}</div>
     <div className="user-list">{shown.map(account => <div className="user-row" key={account.id} role="group" aria-label={`${account.name} account`}>
-      <div className="user-identity"><span className="user-avatar" aria-hidden="true">{account.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('')}</span><div><strong>{account.name}</strong>{account.id === actorId && <span className="current-account">You</span>}<small>@{account.username} · {account.email}</small>{signedRole !== 'Owner' && account.role !== 'Staff' && <small>Owner manages this account.</small>}</div></div>
-      <strong className="account-role">{account.role}</strong><button className="primary" disabled={signedRole !== 'Owner' && account.role !== 'Staff'} onClick={() => { submitted.current = false; setManaging(account); setEditName(account.name); setEditRole(account.role); setError(''); setConfirmDelete(false); }}>Manage</button>
+      <div className="user-identity"><span className="user-avatar" aria-hidden="true">{account.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('')}</span><div><strong>{account.name}</strong>{persistent && account.active===false && <span className="current-account">Inactive</span>}{account.id === actorId && <span className="current-account">You</span>}<small>@{account.username} · {account.email}</small>{signedRole !== 'Owner' && account.role !== 'Staff' && <small>Owner manages this account.</small>}</div></div>
+      <strong className="account-role">{account.role}</strong><button className="primary" disabled={signedRole !== 'Owner' && account.role !== 'Staff'} onClick={() => { submitted.current = false; setManageDirty(false); setEditActive(account.active!==false); setManaging(account); setEditName(account.name); setEditRole(account.role); setError(''); setConfirmDelete(false); }}>Manage</button>
     </div>)}</div>
     {!shown.length && <div className="users-empty"><h2>No matching accounts</h2><p>Try another name, username, email, or role.</p><button className="secondary" onClick={() => { setSearch(''); setFilter('All'); }}>Show all accounts</button></div>}
-    {managing && <Modal title={confirmDelete ? 'Delete sample account?' : 'Manage User'} className="user-modal" onClose={confirmDelete ? backFromDelete : closeManage}>
-      {confirmDelete ? <div className="account-delete-review"><p>Delete <strong>{managing.name}</strong> from the preview team?</p><dl className="account-summary"><div><dt>Username</dt><dd>{managing.username}</dd></div><div><dt>Email</dt><dd>{managing.email}</dd></div><div><dt>Role</dt><dd>{managing.role}</dd></div></dl><p>The sample account will be removed until refresh. Recorded sales and actor names remain in Audit Trail. No real account is changed.</p><Actions><button ref={deleteCancel} className="secondary" onClick={backFromDelete}>Keep account</button><button className="danger-button" disabled={Boolean(deletionBlocked)} onClick={() => { if (submitted.current || deletionBlocked || signedRole !== 'Owner' && managing.role !== 'Staff') return; submitted.current = true; onDelete(managing.id); closeManage(); requestAnimationFrame(() => addOpener.current?.focus()); notify('Sample account deleted.'); }}>Confirm Delete Account</button></Actions></div>
-      : <form onSubmit={save}><div className="user-modal-title"><h3>{managing.name}</h3><p>{managing.role} Account{managing.id === actorId ? ' · Signed in as you' : ''}</p></div>
+    {managing && <Modal title={confirmDelete ? persistent ? 'Deactivate account?' : 'Delete sample account?' : 'Manage User'} className="user-modal" onClose={() => { if (!saving.saving) (confirmDelete ? backFromDelete : manageGuard.requestClose)(); }}>
+      {confirmDelete ? <div className="account-delete-review"><p>{persistent ? 'Deactivate' : 'Delete'} <strong>{managing.name}</strong>{persistent ? ' and prevent account access?' : ' from the preview team?'}</p><dl className="account-summary"><div><dt>Username</dt><dd>{managing.username}</dd></div><div><dt>Email</dt><dd>{managing.email}</dd></div><div><dt>Role</dt><dd>{managing.role}</dd></div></dl><p>{persistent ? 'The profile and all recorded sales/audit history are retained. You can reactivate this account later.' : 'The sample account will be removed until refresh. Recorded sales and actor names remain in Audit Trail. No real account is changed.'}</p>{error && <p className="error" role="alert">{error}</p>}<Actions><button ref={deleteCancel} className="secondary" disabled={saving.saving} onClick={backFromDelete}>Keep account</button><button className="danger-button" disabled={Boolean(deletionBlocked) || saving.saving} onClick={async () => { if (submitted.current || deletionBlocked || signedRole !== 'Owner' && managing.role !== 'Staff') return; submitted.current = true; setError(''); const result = await saving.run({ id: managing.id }); if (!result.ok) { submitted.current = false; setError(result.error.message); return; } setManaging(null); setConfirmDelete(false); requestAnimationFrame(() => addOpener.current?.focus()); notify(persistent ? 'Account deactivated. History retained.' : 'Sample account deleted.'); setManageDirty(false); }}>{saving.saving ? persistent ? 'Saving…' : 'Deleting…' : persistent ? 'Confirm deactivation' : 'Confirm Delete Account'}</button></Actions></div>
+      : <form onSubmit={save} onChangeCapture={()=>setManageDirty(true)} aria-busy={saving.saving}><fieldset disabled={saving.saving} style={{ display: 'contents' }}><div className="user-modal-title"><h3>{managing.name}</h3><p>{managing.role} Account{managing.id === actorId ? ' · Signed in as you' : ''}</p></div>
         <dl className="account-summary"><div><dt>Username</dt><dd>{managing.username}</dd></div><div><dt>Email</dt><dd>{managing.email}</dd></div></dl>
         <label className="line-field">Name<input name="name" value={editName} onChange={event => { setEditName(event.target.value); setError(''); }} required maxLength={80} autoFocus /></label>
         <label className="line-field">Role<select name="role" value={editRole} onChange={event => { setEditRole(event.target.value as Role); setError(''); }} aria-describedby="manage-role-hint"><option>Staff</option><option disabled={signedRole !== 'Owner'}>Admin</option><option disabled={signedRole !== 'Owner'}>Owner</option></select></label>
-        <p className="account-access" id="manage-role-hint">{access[editRole]}{managing.id === actorId && editRole !== managing.role && ' Saving changes your current preview access.'}</p>
-        <div className="danger-zone"><h3>Danger Zone</h3><p>Remove this sample account from the preview team.</p>{deletionBlocked && <p id="delete-account-hint">{deletionBlocked}</p>}<button ref={deleteOpener} type="button" className="delete-button" disabled={Boolean(deletionBlocked)} aria-describedby={deletionBlocked ? 'delete-account-hint' : undefined} onClick={() => setConfirmDelete(true)}><Art file="1d023.svg" />Delete Account</button></div>
-        {error && <p className="error" role="alert">{error}</p>}<Actions><button type="button" className="secondary" onClick={closeManage}>Cancel</button><button className="primary">Save</button></Actions>
-      </form>}
+        <p className="account-access" id="manage-role-hint">{access[editRole]}{managing.id === actorId && editRole !== managing.role && (persistent ? ' Saving changes your workspace access.' : ' Saving changes your current preview access.')}</p>
+        {persistent && <label className="line-field">Account status<select value={editActive ? 'active' : 'inactive'} onChange={event=>setEditActive(event.target.value==='active')}><option value="active">Active</option><option value="inactive" disabled={managing.id===actorId}>Inactive</option></select></label>}<div className="danger-zone"><h3>Danger Zone</h3><p>{persistent ? 'Deactivate this account while retaining its history.' : 'Remove this sample account from the preview team.'}</p>{deletionBlocked && <p id="delete-account-hint">{deletionBlocked}</p>}<button ref={deleteOpener} type="button" className="delete-button" disabled={Boolean(deletionBlocked) || persistent && managing.active===false} aria-describedby={deletionBlocked ? 'delete-account-hint' : undefined} onClick={() => setConfirmDelete(true)}><Art file="1d023.svg" />{persistent ? 'Deactivate Account' : 'Delete Account'}</button></div>
+        {error && <p className="error" role="alert">{error}</p>}<Actions><button type="button" className="secondary" onClick={manageGuard.requestClose}>Cancel</button><button className="primary">{saving.saving ? 'Saving…' : 'Save'}</button></Actions>
+      </fieldset></form>}
     </Modal>}
-    {adding && <Modal title="Add New User" className="user-modal" onClose={addGuard.requestClose}><form onSubmit={next}>
-      <div className="wizard-progress"><span>Step {step} of 3</span><div aria-hidden="true">{[1, 2, 3].map(value => <i key={value} className={step >= value ? 'complete' : ''} />)}</div><h3>{['Account Name', 'Email Verification', 'Account Password'][step - 1]}</h3><p>{['Set a name and choose the workspace access.', 'Try verification with the sample code. No email is sent.', 'Review the account and try password validation.'][step - 1]}</p></div>
+    {adding && <Modal title="Add New User" className="user-modal" onClose={() => { if (!saving.saving) addGuard.requestClose(); }}><form onSubmit={next} aria-busy={saving.saving}><fieldset disabled={saving.saving} style={{ display: 'contents' }}>
+      <div className="wizard-progress"><span>Step {step} of 3</span><div aria-hidden="true">{[1, 2, 3].map(value => <i key={value} className={step >= value ? 'complete' : ''} />)}</div><h3>{['Account Name', persistent ? 'Account Email' : 'Email Verification', 'Account Password'][step - 1]}</h3><p>{['Set a name and choose the workspace access.', persistent ? 'Enter the email used for login and password recovery.' : 'Try verification with the sample code. No email is sent.', persistent ? 'Set an initial password. No invitation email is sent.' : 'Review the account and try password validation.'][step - 1]}</p></div>
       <div className="wizard-fields" key={step}>
         {step === 1 ? <>
           <label className="line-field">Full Name<input placeholder="Full Name" value={draft.name} onChange={event => { setDraft({ ...draft, name: event.target.value }); setError(''); }} required maxLength={80} autoFocus autoComplete="off" /></label>
@@ -100,14 +114,14 @@ export default function Users({ accounts, role: signedRole, actorId, onSave, onD
           <label className="line-field">Role<select value={draft.role} onChange={event => setDraft({ ...draft, role: event.target.value as Role })} aria-describedby="add-role-hint"><option>Staff</option><option disabled={signedRole !== 'Owner'}>Admin</option><option disabled={signedRole !== 'Owner'}>Owner</option></select></label><p className="account-access" id="add-role-hint">{access[draft.role]}</p>
         </> : step === 2 ? <>
           <label className="line-field">Email Address<input type="email" placeholder="Email Address" value={draft.email} onChange={event => { setDraft({ ...draft, email: event.target.value }); setError(''); }} required autoFocus autoComplete="off" /></label>
-          <label className="line-field">Code<input placeholder="Code" name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required aria-describedby="account-code-hint" onChange={() => setError('')} /></label><p className="preview-code" id="account-code-hint">Preview code: 123456 · no email sent</p>
+          {!persistent && <><label className="line-field">Code<input placeholder="Code" name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required aria-describedby="account-code-hint" onChange={() => setError('')} /></label><p className="preview-code" id="account-code-hint">Preview code: 123456 · no email sent</p></>}
         </> : <>
           <dl className="account-summary"><div><dt>Name</dt><dd>{draft.name}</dd></div><div><dt>Username</dt><dd>{draft.username}</dd></div><div><dt>Email</dt><dd>{draft.email}</dd></div><div><dt>Role</dt><dd>{draft.role}</dd></div></dl>
-          <label className="line-field">Password<input type={visiblePasswords ? 'text' : 'password'} name="password" placeholder="At least 8 characters" minLength={8} required autoComplete="new-password" autoFocus aria-describedby="account-password-hint" onChange={() => setError('')} /></label>
-          <label className="line-field">Confirm Password<input type={visiblePasswords ? 'text' : 'password'} name="confirm" placeholder="Confirm Password" minLength={8} required autoComplete="new-password" onChange={() => setError('')} /></label>
-          <button className="secondary password-toggle" type="button" aria-pressed={visiblePasswords} onClick={() => setVisiblePasswords(!visiblePasswords)}>{visiblePasswords ? 'Hide passwords' : 'Show passwords'}</button><p className="preview-code" id="account-password-hint">Use at least 8 characters. Preview only: passwords are never saved and no real account is created.</p>
+          <label className="line-field">Password<input type={visiblePasswords ? 'text' : 'password'} name="password" placeholder="At least 8 characters" minLength={8} maxLength={128} required autoComplete="new-password" autoFocus aria-describedby="account-password-hint" onChange={() => setError('')} /></label>
+          <label className="line-field">Confirm Password<input type={visiblePasswords ? 'text' : 'password'} name="confirm" placeholder="Confirm Password" minLength={8} maxLength={128} required autoComplete="new-password" onChange={() => setError('')} /></label>
+          <button className="secondary password-toggle" type="button" aria-pressed={visiblePasswords} onClick={() => setVisiblePasswords(!visiblePasswords)}>{visiblePasswords ? 'Hide passwords' : 'Show passwords'}</button><p className="preview-code" id="account-password-hint">{persistent ? 'Use 8–128 characters. Credentials are managed by the authentication service.' : 'Use at least 8 characters. Preview only: passwords are never saved and no real account is created.'}</p>
         </>}
-      </div>{error && <p role="alert" className="error">{error}</p>}<Actions><button type="button" className="secondary" onClick={() => { setError(''); setVisiblePasswords(false); if (step === 1) addGuard.requestClose(); else setStep(step - 1); }}>{step === 1 ? 'Cancel' : 'Back'}</button><button className="primary">{step === 1 ? 'Next' : step === 2 ? 'Confirm' : 'Add Account'}</button></Actions>
-    </form></Modal>}{addGuard.confirmation}
+      </div>{error && <p role="alert" className="error">{error}</p>}<Actions><button type="button" className="secondary" onClick={() => { setError(''); setVisiblePasswords(false); if (step === 1) addGuard.requestClose(); else setStep(step - 1); }}>{step === 1 ? 'Cancel' : 'Back'}</button><button className="primary">{saving.saving ? 'Saving…' : step === 1 ? 'Next' : step === 2 ? 'Confirm' : 'Add Account'}</button></Actions>
+    </fieldset></form></Modal>}{addGuard.confirmation}{manageGuard.confirmation}
   </section>;
 }

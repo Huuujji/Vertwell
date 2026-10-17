@@ -10,8 +10,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.integration.json",
+    "test:e2e": "playwright test",
+    "test:unit": "node --import tsx --test tests/unit/*.test.ts",
+    "typecheck:integration": "tsc -p tsconfig.integration.json"
   },
   "dependencies": {
     "@fontsource/poppins": "^5.3.0",
@@ -22,12 +24,14 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.1.1",
     "typescript": "^7.0.2",
+    "tsx": "^4.23.15",
     "vite": "^8.3.2"
   }
 }

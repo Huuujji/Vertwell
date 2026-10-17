@@ -17,6 +17,7 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, _ne
     return;
   }
 
-  console.error(error);
+  // Provider errors can contain request/credential details. Do not log raw objects.
+  console.error('Unhandled API error.');
   res.status(500).json({ error: { message: 'An unexpected server error occurred.' } });
 };

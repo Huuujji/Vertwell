@@ -3,6 +3,16 @@ import { env, isSupabaseConfigured } from '../config/env.js';
 import { HttpError } from './http-error.js';
 
 let authClient: SupabaseClient | undefined;
+let adminClient: SupabaseClient | undefined;
+
+export function getSupabaseAdminClient(): SupabaseClient {
+  getSupabaseAuthClient();
+  if (!env.supabaseSecretKey) throw new HttpError(503, 'Server account provisioning is not configured.');
+  adminClient ??= createClient(env.supabaseUrl, env.supabaseSecretKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  return adminClient;
+}
 
 export function getSupabaseAuthClient(): SupabaseClient {
   if (!isSupabaseConfigured) {
@@ -20,7 +30,7 @@ export function getSupabaseAuthClient(): SupabaseClient {
 export function createUserDatabaseClient(accessToken: string): SupabaseClient {
   getSupabaseAuthClient();
   return createClient(env.supabaseUrl, env.supabasePublishableKey, {
-    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    ...(accessToken ? { global: { headers: { Authorization: `Bearer ${accessToken}` } } } : {}),
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 }

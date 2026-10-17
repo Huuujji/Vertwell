@@ -26,8 +26,8 @@ function Icon({ name }: { name: IconName }) {
 function layoutForWidth(): Layout {
   return window.matchMedia('(min-width: 1200px)').matches ? 'desktop' : window.matchMedia('(min-width: 768px)').matches ? 'tablet' : 'mobile';
 }
-function Brand() {
-  return <header className="nav-brand"><img src={asset('be809.png')} alt="Happy Hentie Hobbies" /><div><strong>Happy Hentie</strong><span>Café &amp; Hobby Shop</span><small>Sample data · resets on refresh</small></div></header>;
+function Brand({persistent=false}:{persistent?:boolean}) {
+  return <header className="nav-brand"><img src={asset('be809.png')} alt="Happy Hentie Hobbies" /><div><strong>Happy Hentie</strong><span>Café &amp; Hobby Shop</span><small>{persistent ? 'Saved development data' : 'Sample data · resets on refresh'}</small></div></header>;
 }
 function Drawer({ children, open, onClose, trigger }: { children: ReactNode; open: boolean; onClose: () => void; trigger: RefObject<HTMLButtonElement | null> }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -63,8 +63,8 @@ function Drawer({ children, open, onClose, trigger }: { children: ReactNode; ope
   </dialog>;
 }
 
-export default function Navigation({ identity, destinations, activePage, onNavigate, onLogout }: {
-  identity: { role: Role; name: string }; destinations: Page[]; activePage: Page; onNavigate: (page: Page) => void; onLogout: () => void;
+export default function Navigation({ persistent=false, identity, destinations, activePage, onNavigate, onLogout }: {
+  persistent?: boolean; identity: { role: Role; name: string }; destinations: Page[]; activePage: Page; onNavigate: (page: Page) => void; onLogout: () => void;
 }) {
   const [layout, setLayout] = useState<Layout>(layoutForWidth);
   const [open, setOpen] = useState(false);
@@ -83,11 +83,11 @@ export default function Navigation({ identity, destinations, activePage, onNavig
     <Icon name={page} /><span className={compact ? 'nav-tooltip' : 'nav-label'}>{label(page)}</span>
   </button>)}</nav>;
   const account = <footer className="nav-account"><div className="nav-identity"><span className="nav-avatar"><Icon name="account" /></span><div><strong>{identity.name}</strong><span>{identity.role}</span></div></div><button className="nav-logout" onClick={() => { setOpen(false); onLogout(); }}><Icon name="logout" /><span>Log out</span></button></footer>;
-  const fullNavigation = <><Brand /><p className="nav-section-label">{identity.role === 'Staff' ? 'Your workspace' : 'Manage your shop'}</p>{links()}{account}</>;
+  const fullNavigation = <><Brand persistent={persistent} /><p className="nav-section-label">{identity.role === 'Staff' ? 'Your workspace' : 'Manage your shop'}</p>{links()}{account}</>;
   if (layout === 'desktop') return <aside className="desktop-navigation">{fullNavigation}</aside>;
   return <>
-    {layout === 'mobile' ? <header className="mobile-topbar" inert={open} aria-hidden={open || undefined}><button className="nav-control" aria-label="Open navigation" aria-expanded={open} aria-controls="navigation-drawer" onClick={event => { trigger.current = event.currentTarget; setOpen(true); }}><Icon name="menu" /></button><img src={asset('be809.png')} alt="Happy Hentie Hobbies" /><div><span>Happy Hentie</span><strong>{label(activePage)}</strong><small>Sample data · resets on refresh</small></div></header> :
-      <aside className="tablet-navigation" inert={open} aria-hidden={open || undefined}><div className="rail-brand"><img className="rail-logo" src={asset('be809.png')} alt="Happy Hentie Hobbies" /><small>Sample data</small></div><button className="nav-control rail-menu" aria-label="Open navigation" aria-expanded={open} aria-controls="navigation-drawer" onClick={event => { trigger.current = event.currentTarget; setOpen(true); }}><Icon name="menu" /><span className="nav-tooltip">Open navigation</span></button>{links(true)}<button className="nav-control rail-account" aria-label={`Account: ${identity.name}. Open navigation`} aria-expanded={open} aria-controls="navigation-drawer" onClick={event => { trigger.current = event.currentTarget; setOpen(true); }}><Icon name="account" /><span className="nav-tooltip">{identity.name} · {identity.role}</span></button></aside>}
+    {layout === 'mobile' ? <header className="mobile-topbar" inert={open} aria-hidden={open || undefined}><button className="nav-control" aria-label="Open navigation" aria-expanded={open} aria-controls="navigation-drawer" onClick={event => { trigger.current = event.currentTarget; setOpen(true); }}><Icon name="menu" /></button><img src={asset('be809.png')} alt="Happy Hentie Hobbies" /><div><span>Happy Hentie</span><strong>{label(activePage)}</strong><small>{persistent ? 'Saved development data' : 'Sample data · resets on refresh'}</small></div></header> :
+      <aside className="tablet-navigation" inert={open} aria-hidden={open || undefined}><div className="rail-brand"><img className="rail-logo" src={asset('be809.png')} alt="Happy Hentie Hobbies" /><small>{persistent ? 'Saved data' : 'Sample data'}</small></div><button className="nav-control rail-menu" aria-label="Open navigation" aria-expanded={open} aria-controls="navigation-drawer" onClick={event => { trigger.current = event.currentTarget; setOpen(true); }}><Icon name="menu" /><span className="nav-tooltip">Open navigation</span></button>{links(true)}<button className="nav-control rail-account" aria-label={`Account: ${identity.name}. Open navigation`} aria-expanded={open} aria-controls="navigation-drawer" onClick={event => { trigger.current = event.currentTarget; setOpen(true); }}><Icon name="account" /><span className="nav-tooltip">{identity.name} · {identity.role}</span></button></aside>}
     <Drawer open={open} trigger={trigger} onClose={() => setOpen(false)}>{fullNavigation}</Drawer>
   </>;
 }

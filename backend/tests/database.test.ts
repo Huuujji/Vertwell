@@ -13,14 +13,15 @@ let migrations: string[];
 async function initialize(database: PGlite) {
   // Only test-owned Auth/role stand-ins. Production uses Supabase's real objects.
   await database.exec(`create role anon; create role authenticated; create role service_role bypassrls;
-    create schema auth; create table auth.users(id uuid primary key);`);
+    create schema auth; create table auth.users(id uuid primary key, email text, raw_app_meta_data jsonb default '{}'::jsonb);
+    create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;`);
   for (const migration of migrations) await database.exec(migration);
 }
 
 before(async () => {
   const files = (await readdir(new URL('migrations/', sqlRoot))).filter(name => name.endsWith('.sql')).sort();
   migrations = await Promise.all(files.map(name => readFile(new URL(`migrations/${name}`, sqlRoot), 'utf8')));
-  assert.equal(files.length, 3);
+  assert.equal(files.length, 8);
   db = new PGlite();
   await initialize(db);
 });
@@ -69,7 +70,7 @@ async function movement(batchId: string, kind: string, quantity: number, operati
   [batchId, kind, quantity, owner, operationId, itemId]);
 }
 
-test('fresh migrations expose no application tables/functions and seed no business identities or history', async () => {
+test('fresh migrations expose only scoped P4 reads and restricted functions, without seeded identities or history', async () => {
   const tables = await db.query<{ relname: string; relrowsecurity: boolean }>(`
     select c.relname,c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace
     where n.nspname='public' and c.relkind='r'`);
@@ -78,15 +79,16 @@ test('fresh migrations expose no application tables/functions and seed no busine
   assert.equal(await scalar('select count(*)::int from public.profiles'), 0);
   assert.equal(await scalar('select count(*)::int from public.sales'), 0);
   assert.equal(await scalar('select count(*)::int from public.stock_movements'), 0);
-  const grants = await db.query(`select table_name from information_schema.role_table_grants
-    where table_schema='public' and grantee in ('PUBLIC','anon','authenticated','service_role')`);
-  assert.deepEqual(grants.rows, []);
+  const grants = await db.query(`select table_name,grantee,privilege_type from information_schema.role_table_grants
+    where table_schema='public' and grantee in ('PUBLIC','anon','authenticated','service_role') order by table_name`);
+  assert.deepEqual(grants.rows, ['alert_settings','payments','sale_item_modifiers','sale_items','sales','void_requests']
+    .map(table_name => ({table_name,grantee:'authenticated',privilege_type:'SELECT'})));
   assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public'`), 0);
+    where n.nspname='public'`), 12);
   for (const role of ['anon', 'authenticated', 'service_role']) {
-    assert.equal(await scalar(`select has_schema_privilege($1,'private','USAGE')`, [role]), false);
+    assert.equal(await scalar(`select has_schema_privilege($1,'private','USAGE')`, [role]), role === 'authenticated');
     assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-      where n.nspname='private' and has_function_privilege($1,p.oid,'EXECUTE')`, [role]), 0);
+      where n.nspname='private' and has_function_privilege($1,p.oid,'EXECUTE')`, [role]), role === 'authenticated' ? 1 : 0);
     await db.exec(`set local role ${role}`);
     await rejected('select * from public.profiles', /permission denied/);
     await rejected("insert into public.skus(value) values ('UNAUTHORIZED')", /permission denied/);
@@ -264,6 +266,10 @@ test('expired and unsellable batches cannot be consumed; expiry-day consumption 
 
 test('sale and purchased snapshots survive catalogue/profile edits and void does not restore stock', async () => {
   await actor();
+  // Deactivating a historical actor requires another active Owner under P3.
+  const replacement = randomUUID();
+  await db.query('insert into auth.users(id) values ($1)', [replacement]);
+  await db.query("insert into profiles(id,full_name,username,role) values ($1,'Replacement Owner','replacement-owner','Owner')", [replacement]);
   const s = await stock(), p = await product('Retail Item',s), b = await batch(s), receipt = await sale();
   await movement(b,'Opening',5);
   await movement(b,'Removal',-1);
@@ -384,4 +390,109 @@ test('migrations reproduce a second database and durable records survive close/r
     assert.equal((await persistent.query<{ count: number }>('select count(*)::int from public.inventory_units')).rows[0]?.count,6);
   } finally { await persistent.close(); }
   // Retain this disposable local verification artifact under ignored .review/.
+});
+
+
+async function provision(command: Record<string, unknown>, id = randomUUID()) {
+  await db.query('insert into auth.users(id,email,raw_app_meta_data) values ($1,$2,$3)',
+    [id, `${id}@example.invalid`, JSON.stringify({vertwell_provision:command})]);
+  return id;
+}
+async function asActor(id: string) {
+  await db.query("select set_config('request.jwt.claim.sub',$1,true)", [id]);
+}
+async function accountUpdate(id: string, role = 'Staff', active = true, username = 'updated-account') {
+  return db.query(`select public.update_account($1,(select updated_at from profiles where id=$1),
+    'Updated account',$2,$3,$4)`, [id,username,role,active]);
+}
+
+test('Auth provisioning is atomic, ignores user signup metadata, and bootstraps only one Owner', async () => {
+  const initial = await provision({bootstrap:true,full_name:'Initial Owner',username:'initial',role:'Owner'});
+  assert.equal(await scalar('select role from profiles where id=$1',[initial]), 'Owner');
+  assert.equal(await scalar("select count(*)::int from audit_events where event_type='Account created'"), 1);
+  await rejected(`insert into auth.users(id,raw_app_meta_data) values ($1,$2)`, /already provisioned/,
+    [randomUUID(),JSON.stringify({vertwell_provision:{bootstrap:true,full_name:'Other',username:'other',role:'Owner'}})]);
+  assert.equal(await scalar('select count(*)::int from auth.users'),1);
+  const publicSignup = randomUUID();
+  await db.query('insert into auth.users(id) values ($1)',[publicSignup]);
+  assert.equal(await scalar('select count(*)::int from profiles where id=$1',[publicSignup]),0);
+});
+
+test('provisioning rechecks actor permissions and failed profiles leave no Auth or audit residue', async () => {
+  await actor();
+  const admin = await provision({actor_id:owner,full_name:'Admin',username:'admin',role:'Admin'});
+  const staff = await provision({actor_id:admin,full_name:'Staff',username:'staff',role:'Staff'});
+  for (const command of [
+    {actor_id:admin,full_name:'Escalation',username:'escalation',role:'Owner'},
+    {actor_id:staff,full_name:'Denied',username:'denied',role:'Staff'},
+    {actor_id:owner,full_name:'Duplicate',username:'STAFF',role:'Staff'}]) {
+    const before = await scalar('select count(*)::int from auth.users');
+    const audits = await scalar('select count(*)::int from audit_events');
+    await rejected('insert into auth.users(id,raw_app_meta_data) values ($1,$2)', /not permitted|unique/,
+      [randomUUID(),JSON.stringify({vertwell_provision:command})]);
+    assert.equal(await scalar('select count(*)::int from auth.users'),before);
+    assert.equal(await scalar('select count(*)::int from audit_events'),audits);
+  }
+  await db.query('update profiles set active=false where id=$1',[admin]);
+  await rejected('insert into auth.users(id,raw_app_meta_data) values ($1,$2)', /not permitted/,
+    [randomUUID(),JSON.stringify({vertwell_provision:{actor_id:admin,full_name:'Denied',username:'inactive',role:'Staff'}})]);
+});
+
+test('identity RPC requires an active linked profile and has no client-supplied ID', async () => {
+  await actor(); await asActor(owner);
+  await db.exec('set local role authenticated');
+  assert.equal((await scalar('select public.current_profile()') as {role:string}).role,'Owner');
+  await rejected('select * from profiles', /permission denied/);
+  await rejected("select public.account_login_email('db-test-owner')", /permission denied/);
+  await db.exec('reset role');
+  const unknown = randomUUID(); await asActor(unknown);
+  await rejected('select public.current_profile()', /inactive|no application profile/);
+  await db.exec('set local role anon');
+  await rejected('select public.current_profile()', /permission denied/);
+  await db.exec('reset role');
+});
+
+test('profile commands enforce roles, own-account protection, revisions and atomic audit', async () => {
+  await actor();
+  const admin = await provision({actor_id:owner,full_name:'Admin',username:'admin',role:'Admin'});
+  const staff = await provision({actor_id:owner,full_name:'Staff',username:'staff',role:'Staff'});
+  await asActor(admin);
+  await accountUpdate(staff);
+  assert.equal(await scalar('select username from profiles where id=$1',[staff]),'updated-account');
+  await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Escalated','escalated','Owner',true)", /not permitted/, [staff]);
+  await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Changed','owner','Owner',true)", /not permitted/, [owner]);
+  await asActor(staff);
+  await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Changed','changed','Staff',true)", /not permitted/, [staff]);
+  await asActor(owner);
+  await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Owner','owner','Owner',false)", /signed-in/, [owner]);
+  await rejected("select update_account($1,'2000-01-01','Changed','changed','Staff',true)", /changed/, [staff]);
+  await accountUpdate(staff,'Staff',false);
+  await asActor(staff);
+  await rejected('select current_profile()', /inactive/);
+});
+
+test('last active Owner protection applies to direct writes and ownership handover keeps history', async () => {
+  await actor();
+  await rejected('update profiles set active=false where id=$1', /last active Owner/, [owner]);
+  await rejected("update profiles set role='Admin' where id=$1", /last active Owner/, [owner]);
+  await rejected('delete from profiles where id=$1', /append-only/, [owner]);
+  const successor = await provision({actor_id:owner,full_name:'Real Owner',username:'real-owner',role:'Owner'});
+  await asActor(successor);
+  await accountUpdate(owner,'Owner',false,'retired-owner');
+  assert.equal(await scalar('select active from profiles where id=$1',[owner]),false);
+  assert.equal(await scalar('select count(*)::int from audit_events where entity_id=$1',[owner]),1);
+});
+
+
+
+test('trusted Auth metadata arriving after insertion provisions once and cannot rewrite a profile', async () => {
+  const id=randomUUID();
+  await db.query('insert into auth.users(id) values ($1)',[id]);
+  const command={vertwell_provision:{bootstrap:true,full_name:'Initial',username:'initial',role:'Owner'}};
+  await db.query('update auth.users set raw_app_meta_data=$2 where id=$1',[id,JSON.stringify(command)]);
+  assert.equal(await scalar('select role from profiles where id=$1',[id]),'Owner');
+  command.vertwell_provision.role='Staff';
+  await db.query('update auth.users set raw_app_meta_data=$2 where id=$1',[id,JSON.stringify(command)]);
+  assert.equal(await scalar('select role from profiles where id=$1',[id]),'Owner');
+  assert.equal(await scalar('select count(*)::int from audit_events'),1);
 });

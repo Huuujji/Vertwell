@@ -14,9 +14,11 @@ October 17 request and earlier decisions in HandsOff.md govern this design.
 This foundation is a single-business database. UUIDs identify records; SKU is the
 only business-facing code. No Item Code or password column exists. Auth owns
 email, credential hashes, sessions and recovery. Profiles reference `auth.users`
-by its primary key. There is no automatic signup-to-Owner trigger.
+by its primary key. Public signup never assigns an application profile. P3 uses
+trusted Auth-admin metadata and current actor permissions for provisioning.
 
-The user-created Vertwell development project (`izdemgzdywtxhvgvsian`) now has
+The user-created development project (now named **DualCounter**, originally
+Vertwell; unchanged reference `izdemgzdywtxhvgvsian`) now has
 these migrations applied and verified on PostgreSQL 17.11. P3–P8 add
 application services and transaction commands; table existence is not proof that
 login, checkout, role permissions or reports work. All Data API access initially
@@ -71,7 +73,7 @@ null. If both exist, expiry cannot precede manufacturing. Dates belong to each
 batch; product dates are the existing catalogue editor's separate descriptive
 dates. Changing category must revalidate existing batch dates.
 
-## Permission matrix (design target, P4 implementation pending)
+## Permission matrix (P4 applied and accepted)
 
 | Action | Owner | Admin | Staff |
 | --- | --- | --- | --- |
@@ -87,9 +89,12 @@ dates. Changing category must revalidate existing batch dates.
 Trusted profile data supplies current role/active status on every operation;
 client role/name fields never authorize access. Actor ID plus name/role snapshots
 record who acted at the event time. Protect the last active Owner under concurrent
-changes and prevent deleting the signed-in account. P3/P4 will implement these
-checks with a serialized account-management transaction, not row-count prechecks.
-Until then no application role has table or function write access.
+changes and prevent deleting the signed-in account. P3 implements serialized
+account commands and last-Owner/self-deactivation
+protections; see AUTHENTICATION.md. Direct table access remains revoked. The broader business permission matrix is applied and accepted under P4; see
+AUTHORIZATION.md. P5 protected aggregate services are now implemented locally;
+CRUD.md and HandsOff.md track the new migration and hosted acceptance. P6–P8
+transactional checkout, reviews and reports remain deferred.
 
 ## Column dictionary
 

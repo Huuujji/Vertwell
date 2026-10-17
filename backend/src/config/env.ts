@@ -13,6 +13,7 @@ export const env = {
     .filter(Boolean),
   supabaseUrl: process.env.SUPABASE_URL?.trim() ?? '',
   supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ?? '',
+  supabaseSecretKey: process.env.SUPABASE_SECRET_KEY?.trim() ?? '',
 };
 
 export const isSupabaseConfigured = Boolean(env.supabaseUrl && env.supabasePublishableKey);

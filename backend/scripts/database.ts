@@ -96,17 +96,52 @@ async function apply(client: pg.Client, expectedRef: string, actualRef: string) 
 }
 
 async function verify(client: pg.Client) {
+  const history = await client.query<{version:string;name:string;statements:string[]}>(
+    'select version,name,statements from supabase_migrations.schema_migrations order by version');
+  const files = await migrationFiles();
+  if (history.rows.some(remote => {
+    const local = files.find(file => file.version === remote.version);
+    return !local || remote.name !== local.name || remote.statements?.length !== 1 || hash(remote.statements[0]!) !== local.sha256;
+  })) throw new Error('Applied migration history does not match local files.');
+  const pending = files.filter(file => !history.rows.some(remote => remote.version === file.version));
+  if (pending.length) throw new Error(`Local migrations await approved hosted application: ${pending.map(file => file.file).join(', ')}. Existing applied hashes match.`);
   const state = await inspect(client);
   const businessTables = state.tables.filter(row => row.schema === 'public');
   if (businessTables.length !== 25 || businessTables.some(row => !row.rls)) throw new Error('Expected 25 RLS-protected application tables.');
   const grants = await client.query(`select table_name,grantee,privilege_type from information_schema.role_table_grants
-    where table_schema='public' and grantee in ('PUBLIC','anon','authenticated','service_role')`);
-  if (grants.rows.length) throw new Error('Unexpected application table grants.');
+    where table_schema='public' and grantee in ('PUBLIC','anon','authenticated','service_role') order by table_name`);
+  const expectedGrants = ['alert_settings','payments','sale_item_modifiers','sale_items','sales','void_requests']
+    .map(table_name => ({table_name,grantee:'authenticated',privilege_type:'SELECT'}));
+  if (JSON.stringify(grants.rows) !== JSON.stringify(expectedGrants)) throw new Error('Unexpected application table grants.');
   const helpers = await client.query(`select p.proname,r.rolname from pg_proc p
     join pg_namespace n on n.oid=p.pronamespace cross join pg_roles r
     where n.nspname='private' and r.rolname in ('anon','authenticated','service_role')
       and has_function_privilege(r.rolname,p.oid,'EXECUTE')`);
-  if (helpers.rows.length) throw new Error('Unexpected private helper execution grants.');
+  if (JSON.stringify(helpers.rows) !== JSON.stringify([{proname:'business_role',rolname:'authenticated'}])) throw new Error('Unexpected private helper execution grants.');
+  const publicFunctions = await client.query<{proname:string;rolname:string}>(`select p.proname,r.rolname from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace cross join pg_roles r
+    where n.nspname='public' and r.rolname in ('anon','authenticated','service_role')
+      and has_function_privilege(r.rolname,p.oid,'EXECUTE') order by p.proname,r.rolname`);
+  const expectedFunctions = [
+    {proname:'account_login_email',rolname:'service_role'},
+    {proname:'account_provisioning_result',rolname:'authenticated'},
+    {proname:'authorize_business_action',rolname:'authenticated'},
+    {proname:'business_access',rolname:'authenticated'},
+    {proname:'current_profile',rolname:'authenticated'},
+    {proname:'inventory_command',rolname:'authenticated'},
+    {proname:'read_business_sales',rolname:'authenticated'},
+    {proname:'read_inventory',rolname:'authenticated'},
+    {proname:'read_managed_accounts',rolname:'authenticated'},
+    {proname:'read_pos_catalogue',rolname:'authenticated'},
+    {proname:'update_account',rolname:'authenticated'},
+    {proname:'update_alert_settings',rolname:'authenticated'},
+  ];
+  if (JSON.stringify(publicFunctions.rows)!==JSON.stringify(expectedFunctions)) throw new Error('Unexpected public function execution grants.');
+  // node-postgres leaves PostgreSQL name[] as text; text[] has a native parser.
+  const policies = await client.query(`select tablename,cmd,roles::text[] as roles from pg_policies where schemaname='public' order by tablename`);
+  if (policies.rows.length !== 25 || policies.rows.some(row => row.cmd !== 'SELECT' || JSON.stringify(row.roles) !== '["authenticated"]')) {
+    throw new Error('Expected one authenticated SELECT policy per application table and no write policies.');
+  }
   const missingIndexes = await client.query(`select c.conrelid::regclass::text as table_name,c.conname
     from pg_constraint c join pg_namespace n on n.oid=c.connamespace
     where c.contype='f' and n.nspname='public' and not exists (
@@ -116,14 +151,7 @@ async function verify(client: pg.Client) {
   const counts = await client.query(`select (select count(*)::int from auth.users) as auth_users,
     (select count(*)::int from public.profiles) as profiles,(select count(*)::int from public.sales) as sales,
     (select count(*)::int from public.stock_movements) as stock_movements`);
-  const history = await client.query<{version:string;name:string;statements:string[]}>(
-    'select version,name,statements from supabase_migrations.schema_migrations order by version');
-  const files = await migrationFiles();
-  if (history.rows.length !== files.length || files.some(file => {
-    const remote = history.rows.find(row => row.version === file.version);
-    return !remote || remote.name !== file.name || remote.statements?.length !== 1 || hash(remote.statements[0]!) !== file.sha256;
-  })) throw new Error('Applied migration history does not match local files.');
-  return {...state,counts:counts.rows[0],publicTableGrants:0,privateHelperGrants:0,unindexedForeignKeys:0,
+  return {...state,counts:counts.rows[0],publicTableGrants:grants.rows,privateHelperGrants:helpers.rows,policies:policies.rows,publicFunctions:publicFunctions.rows,unindexedForeignKeys:0,
     history:files.map(file => ({file:file.file,sha256:file.sha256}))};
 }
 

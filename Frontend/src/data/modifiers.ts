@@ -3,7 +3,7 @@ import { convert } from './inventory';
 
 // Copies own their identifiers and stock inputs. Library changes never propagate implicitly.
 export function copyModifierGroup(group: ModifierGroup): ModifierGroup {
-  return { id: crypto.randomUUID(), name: group.name, min: group.min, max: group.max,
+  return { id: crypto.randomUUID(), name: group.name, min: group.min, max: group.max, sourceGroupId: group.sourceGroupId,
     options: group.options.map(option => ({ ...option, id: crypto.randomUUID(), inputs: option.inputs.map(input => ({ ...input })) })) };
 }
 export function modifierError(group: ModifierGroup, items: StockItem[]): string | undefined {

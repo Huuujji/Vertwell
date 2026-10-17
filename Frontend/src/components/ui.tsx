@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
-export const asset = (file: string) => `/assets/${file}`;
+export const asset = (file: string) => /^(https:|blob:|\/)/.test(file) ? file : `/assets/${file}`;
 // SVG files retain their Figma root dimensions. The background slot scales their render.
 export function Art({ file, className = '', style, label }: { file: string; className?: string; style?: CSSProperties; label?: string }) {
   return <span role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true} className={`art ${className}`} style={{ backgroundImage: `url("${asset(file)}")`, ...style }} />;

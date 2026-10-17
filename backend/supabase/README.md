@@ -5,28 +5,63 @@ The October 17 database priority now has a verified hosted development foundatio
 permission matrix, history rules and later transaction boundaries. HandsOff.md
 records actual verification and the first unfinished priority.
 
+P3 real authentication/account lifecycle is implemented and live-tested. Hosted
+Auth configuration is approved/saved, and email receipt plus successful same-browser
+password change/login are user-confirmed. P3 is accepted. See
+[AUTHENTICATION.md](AUTHENTICATION.md). P4 business permissions are accepted:
+the user approved the exact DualCounter migration/verification, and hosted checks
+pass. See [AUTHORIZATION.md](AUTHORIZATION.md). P5 protected CRUD is implemented;
+its explicitly approved seventh migration is applied and hosted SQL checks pass.
+See [CRUD.md](CRUD.md) and HandsOff.md for pending signed-in browser acceptance.
+P2A's contracts/mappings remain documented in
+[INTEGRATION.md](INTEGRATION.md). Configured login resolves real profiles and
+keeps the explicitly labeled sample preview separate.
+
 ## Verified development project
 
-- Organization / project: **Vertwell** (user-created); project reference
+- Organization: **Vertwell**; project display name: **DualCounter** (originally
+  Vertwell, renamed by explicit user request). Its read-only project reference is
   `izdemgzdywtxhvgvsian`, region Singapore (`ap-southeast-1`).
 - [Project dashboard](https://supabase.com/dashboard/project/izdemgzdywtxhvgvsian)
   and API URL `https://izdemgzdywtxhvgvsian.supabase.co`.
-- PostgreSQL **17.11**; three applied migrations match local content hashes.
-- All 25 business tables have RLS and no application grants yet. Protected role
-  policies, real accounts and API/frontend integration remain later priorities.
+- PostgreSQL **17.11**; seven applied migrations match local content hashes.
+- All 25 business tables have RLS and authenticated SELECT-only policies. Exactly
+  six tables have authenticated SELECT grants; no table write grants exist.
+  Management/profile/ledger table grants remain closed. Twelve restricted public
+  RPC grants and one private role helper are documented in AUTHORIZATION.md.
+  P5 adds protected aggregate Users/Inventory services and a private image bucket;
+  its real signed-in browser/PostgREST/Storage acceptance remains pending.
 - Database password and administration connection settings are stored only in
   ignored `backend/.env.database.local`; the password variable is
   `VERTWELL_DEV_DATABASE_PASSWORD`. Do not put its value in this README,
   HandsOff.md, SQL files, examples, screenshots, logs or frontend variables.
 - The project is the dashboard's main branch (labeled PRODUCTION by Supabase),
-  intentionally used here for new-project **development**. No business data or
-  real accounts existed at inspection; no deployment or production cutover occurred.
+  intentionally used here for **development**. It now has two real Owner accounts:
+  retained admin and user-approved Huuujji for testing only. Admin remains active
+  and unchanged. No sales/stock movements or production cutover were created.
 
 **Keep all backend work local until all backend tasks are finished. Do not commit,
 push or save this phase to GitHub yet.** The earlier frontend P0 save remains the
 remote checkpoint. Deployment and production data changes are separate work.
 
 ## Files and verification
+
+- Applied `migrations/20261017050000_inventory_commands.sql`: four additional
+  authenticated RPCs, private inventory revision/operation/account receipts,
+  atomic catalogue/stock commands and private image-bucket policies. Exact-project
+  user approval resolved the previous hosted-apply rejection. All seven applied
+  sources remain immutable. Hosted inventory checks pass **14/14**, permission
+  regressions **11/11** and smoke checks **12/12**, with rolled-back SQL fixtures.
+  Existing real Owners/settings and public/Auth table counts remain unchanged.
+
+- Applied `migrations/20261017040000_business_permissions.sql`: current
+  role/action checks, 25 SELECT policies, six scoped read grants, narrow POS/sales
+  projections and Owner-only audited settings command. Five prior sources stay
+  immutable. Explicit exact-project user approval resolved the earlier hosted
+  authorization rejection. The ban on unfinished Backend GitHub saves remains.
+- `../tests/permissions.test.ts` and `../scripts/permission-checks.ts`: shared
+  rolled-back PostgreSQL scenarios. Hosted `permissions:verify` passes **11/11**,
+  and `db:smoke` passes **12/12**, leaving no durable fixture rows or changed grants.
 
 - `migrations/202610170001_foundation.sql`: 25 tables, exact decimal types,
   Supabase Auth-linked profiles, SKU relationships, all four stock models,
@@ -140,31 +175,42 @@ an already seeded database.
 
 ## Access and transaction boundaries
 
-No business data is exposed through the Data API yet, even to signed-in users or
-the service role. P3 establishes real account/profile lifecycle; P4 adds explicit
-Owner/Admin/Staff checks and caller-scoped RLS; P5 supplies protected aggregate
+P3's narrow account RPCs establish real account/profile lifecycle. P4's approved,
+applied migration adds Owner/Admin/Staff checks, caller-scoped sales reads and a
+limited POS selling-card projection. Checkout remains unavailable. P5 supplies protected aggregate
 catalogue and inventory commands. Existing `createUserDatabaseClient` remains the
 caller-token client. Never substitute unrestricted service credentials for it.
 The administration password/pg connection is for development schema tooling only,
-not the Express request data path. No frontend or runtime `.env` is enabled by
-this step; real login/profile behavior remains P3.
+not the Express request data path. P3 configures ignored runtime files separately.
 
-Hosted verification: exact migration hashes, 25 RLS tables, zero application-table
-or private-helper grants, zero unindexed foreign keys and 12 rollback smoke checks
-passed. Security/performance advisors reported zero errors/warnings. Security's
-25 no-policy notices reflect the deliberate P4 access boundary; performance's
-unused-index notices reflect this empty development database. Full Auth login,
-PostgREST requests and concurrent checkout remain outside these checks.
+Current hosted verification confirms seven exact migration hashes, 25 SELECT-only
+policies, six restricted table grants, one private helper, twelve public RPC grants,
+zero unindexed foreign keys, 14 inventory scenarios, 11 permission scenarios and
+12 rollback smoke checks. Private image-bucket metadata/policies also pass.
+Both real Auth/profile Owners, settings and all table counts remain unchanged.
+Five actual anonymous hosted PostgREST denial checks and a fresh generated-schema
+`--check` also pass. The previous P5 local root tests pass 84/84; typechecks/builds
+pass. Those local suites were not rerun for the hosted apply/documentation step. The
+verifier casts policy role metadata to `text[]` for node-postgres decoding.
+Evidence: workspace-parent `.review/october-17-p5-acceptance-*`.
+
+The earlier P2 security/performance advisor review reported zero errors/warnings;
+its 25 no-policy notices described the historical restricted foundation. Advisors
+were not rerun for this P5 apply. No new signed-in Auth/PostgREST/browser result or
+simultaneous account-write/checkout contention result is claimed by these checks.
 
 Balances are sums of canonical append-only movements. Inserting a movement locks
 its batch, rejects negative physical stock and writes audit atomically. Updates,
 deletions and truncation of historical rows are rejected; corrections append new
 events. Canonical movement SKU/name/unit snapshots survive inventory edits.
 
-This is the foundation, not an implemented checkout or inventory HTTP API.
-Catalogue completeness/default validation, authorization, multi-batch allocation,
-full-cart idempotency, payment reconciliation and real concurrent checkout still
-need their later commands and live checks. Checkout must save the sale, purchased
+P5 now provides the protected inventory HTTP API and aggregate commands described
+in CRUD.md. This foundation still does not implement checkout.
+P5 supplies catalogue completeness/default validation and authorization; its
+approved migration is applied and hosted SQL verified. Signed-in browser/
+PostgREST/Storage acceptance remains pending. Multi-batch checkout allocation,
+full-cart idempotency, payment reconciliation and real concurrent checkout remain
+later commands and live checks. Checkout must save the sale, purchased
 snapshots, payments, all batch deductions and audit events in **one transaction**.
 Independent SDK requests cannot provide that guarantee. Owner review never
 deducts again; voids do not automatically return stock or refund a payment.

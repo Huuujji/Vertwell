@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noUnusedLocals": true, "noUnusedParameters": true },
+  "include": ["src", "tests/unit", "tests/fixtures/integration-harness.tsx", "tests/integration-preparation.spec.ts", "tests/authentication.spec.ts", "tests/management.spec.ts", "tests/fixtures/management-server.ts"]
+}

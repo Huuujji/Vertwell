@@ -6,6 +6,8 @@ import { HttpError } from './lib/http-error.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { authRouter } from './routes/auth.js';
 import { healthRouter } from './routes/health.js';
+import { businessRouter } from './routes/business.js';
+import { inventoryRouter } from './routes/inventory.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -23,6 +25,8 @@ app.use('/api', (_req, res, next) => {
 });
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
+app.use('/api', inventoryRouter);
+app.use('/api', businessRouter);
 app.use((_req, res) => {
   res.status(404).json({ error: { message: 'Endpoint not found.' } });
 });

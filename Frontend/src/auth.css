@@ -78,3 +78,10 @@
   .preview-entry-actions { flex-direction: column; align-items: stretch; }
   .preview-entry select, .preview-entry button { width: 100%; }
 }
+/* Auth fields keep existing form spacing while preventing edits during requests. */
+.auth-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 18px; }
+.account-session { min-height: 100dvh; padding: 24px; display: grid; place-items: center; background: #f7f5ef; }
+.account-session-card { width: min(100%, 580px); background: white; border: 1px solid #ded9ce; border-radius: 16px; padding: clamp(20px, 5vw, 40px); overflow-wrap: anywhere; }
+.account-session-card h1 { font-size: clamp(24px, 5vw, 32px); }
+.account-session-card p { line-height: 1.7; }
+.account-session-card button { min-height: 44px; margin: 8px 12px 0 0; }

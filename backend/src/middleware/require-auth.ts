@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
-import { getSupabaseAuthClient } from '../lib/supabase.js';
+import { getSupabaseAuthClient, createUserDatabaseClient } from '../lib/supabase.js';
+import { currentProfile } from '../lib/accounts.js';
 import { HttpError } from '../lib/http-error.js';
 
 export const requireAuth: RequestHandler = async (req, res, next) => {
@@ -12,5 +13,8 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 
   res.locals.user = data.user;
   res.locals.accessToken = token;
+  res.locals.database = createUserDatabaseClient(token);
+  res.locals.profile = await currentProfile(res.locals.database);
+  if (res.locals.profile.id !== data.user.id) throw new HttpError(403, 'Account profile does not match the authenticated user.');
   next();
 };

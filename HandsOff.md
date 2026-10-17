@@ -1,10 +1,508 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1 design and P2 database setup are complete and verified in the user-created Vertwell Supabase development project. P2A frontend integration preparation is next.** Authentication and Roles must be enforced before protected actions go live. Original user messages and historical checkpoints remain preserved below.
+Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **The Backend phase has started by the user's explicit request. Database work is first. Keep all Backend code/documentation local; do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4 are accepted. P5 protected Users/Inventory CRUD is implemented locally and its explicitly approved seventh migration is applied and verified on DualCounter. Real signed-in browser/PostgREST/image persistence acceptance remains next, before P6.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep admin active and unchanged; Huuujji is an additional Owner for testing only. Original user messages and historical checkpoints remain preserved below.
 
 ## New — current state and continuation
 
-### Current checkpoint — Backend database priority applied and verified (October 17, 2026)
+### Current checkpoint — P5 migration approved, applied and hosted SQL verified (October 17, 2026)
+
+**The P5 migration/hosted SQL gate is complete. P5 remains pending real signed-in
+browser/PostgREST/image persistence acceptance.** All seven full original request
+blocks and carried-forward business decisions remain authoritative; P6–P9 stay deferred.
+
+- The user explicitly answered **"Approve P5 migration and verification on this
+  exact project"** for DualCounter `izdemgzdywtxhvgvsian`. This resolves the
+  previous automatic approval rejection for the reviewed P5 database/security/
+  Storage change. It does not authorize saving unfinished Backend work to GitHub.
+- The existing exact-target transactional `db:apply` command applied ONLY
+  `20261017050000_inventory_commands.sql`, SHA-256
+  `146286def00fd69d56ec96dec5023ad4da6ede361dbc7aec5cf422bfb1ee2f03`.
+  All six earlier sources were skipped as exact matches. All seven applied
+  migration sources are now immutable; use a new migration for later SQL changes.
+- Hosted `db:verify` passes: seven matching hashes, 25 RLS tables with one
+  authenticated SELECT policy each, exactly six scoped SELECT table grants,
+  twelve restricted public RPC grants, one callable private role helper and no
+  unindexed foreign keys. Management/profile/ledger direct grants and table
+  write grants stay closed. The new private operation/revision tables and the
+  private `inventory-images` bucket with its two restricted policies are applied.
+- **14/14 hosted inventory scenarios, 11/11 permission scenarios and 12/12 database
+  smoke checks pass.** SQL fixtures and temporary grants were rolled back.
+  Inventory verification also checks bucket limits/types/policies, private/public
+  counts, inventory revision, grants and protected account/settings fingerprints.
+- A final independent before/after comparison confirms all public/Auth table
+  counts, both real Auth/profile accounts and settings are unchanged, with seven
+  matching applied hashes. Both retained accounts remain active Owners; there
+  are still two audit events, no configured settings, no sales/stock movements
+  and no durable catalogue fixtures. Neither Owner was signed in, password-tested,
+  demoted, deactivated, replaced or edited by these checks.
+- The local browser was opened at `http://localhost:5173` and shows account login
+  with no active signed-in session. A private Huuujji sign-in has been requested
+  to finish browser acceptance; do not ask for the password in chat or obtain a
+  session by resetting/password-testing either retained Owner. An existing Vite
+  server already occupies 5173; reuse it. Only the local backend API was started
+  for acceptance. No application source or applied SQL changed in this step.
+- Five actual hosted anonymous PostgREST checks pass: all four new P5 RPCs and
+  direct product SELECT return permission denial. No token/session or hosted
+  data write was used. A fresh generated-schema `--check` also passes against
+  all seven local migration sources.
+- The preceding 84/84 local root tests, typechecks/builds and scoped browser
+  results remain historical evidence; those suites were not rerun for this hosted
+  apply/documentation step. Hosted SQL/anonymous checks do not establish a new signed-in
+  Auth/PostgREST/Storage round trip or simultaneous multi-connection contention.
+- Evidence: workspace-parent `.review/october-17-p5-acceptance-{approval.txt,
+  before.json,before.log,apply.log,db-verify.log,inventory.log,permissions.log,
+  db-smoke.log,after.log,http.log,schema.log,audit.json}` and
+  `october-17-p5-acceptance-state.mts`.
+  All Backend work remains local/uncommitted on `Backend_Phase`; no commit,
+  push, PR, GitHub save or deployment was performed.
+
+**Next:** finish real signed-in development-account Users/Inventory persistence,
+refresh/login/another permitted session, denied/invalid requests and optional-image
+acceptance. The approved migration must not be reapplied through raw SQL or edited.
+Use caller-token services; keep both Owners unchanged. Record any intentional
+development fixture rows/audit/storage artifacts rather than claiming a clean
+before/after baseline after real CRUD. P5 remains pending until this is resolved;
+only then begin P6. Keep Daily Sales Values; Figma comparison and physical printing
+remain removed. Keep all Backend work off GitHub.
+
+### Previous checkpoint — P5 local CRUD verified; hosted approval required (October 17, 2026; resolved above)
+
+**P5 implementation and local verification are complete; hosted acceptance remains
+unfinished.** Follow all seven full original request blocks and carried-forward
+business decisions below. P6–P9 remain deferred. See `backend/supabase/CRUD.md`
+for the command contract, safeguards and verification limits.
+
+- NEW `20261017050000_inventory_commands.sql`, SHA-256
+  `146286def00fd69d56ec96dec5023ad4da6ede361dbc7aec5cf422bfb1ee2f03`, adds a coherent
+  inventory snapshot, protected aggregate commands, scoped Auth-email/account
+  listing and account-creation operation receipts. The six applied migrations
+  remain hash-identical; never edit an applied source.
+- Commands use the caller token and resolve the current active profile in SQL.
+  Owner/Admin manage inventory; Owner manages all accounts, Admin Staff only.
+  No public table writes, management SELECT grants or service-role business access
+  are added. Four narrow authenticated RPCs join the existing eight. Private
+  operation/revision tables have no application grants. P5 service readiness is
+  advertised by the applied database contract, not an optimistic server flag.
+- Product/stock/batch/recipe/library/copy/variant/bundle saves commit together with
+  actor-attributed audit. Exact decimals, counted units, ISO dates, SKU reservation,
+  ID ownership, defaults/choice limits, duplicate configurations and nested cycles
+  are checked. SKU-only inputs and stable relationships remain. Manual enablement
+  stays separate from computed availability; disabled children make bundles
+  unavailable. Fixed retail/variant/bundle stock cannot be omitted by a modifier.
+- Receiving, count corrections and removals append distinct Receipt/Correction/
+  Removal movements; no total quantity column overwrites stock history. Other
+  batches retain their quantities/dates. Empty/removed records are archived;
+  referenced configurations, sale snapshots and movement/audit history survive.
+  Reasons are required for stock changes. Account/catalogue locks, a coarse global
+  inventory revision and stored operation receipts reject stale writes and prevent
+  an explicit retry after a lost receipt response from adding stock twice.
+- Real manager routing now uses the existing Users/Inventory screens and protected
+  services, with loading/errors, filters, dirty-navigation/refresh protection and
+  pending controls. Failed saves retain fields, files, wizard passwords and library
+  drafts. Background session checks keep an unchanged authenticated editor mounted.
+  Actual access loss closes it; role changes clear its data scope. Preview remains
+  separate, labeled and in memory, with no fallback after a real service failure.
+- Users supports scoped listing, real password-based creation, profile/role edits,
+  deactivation/reactivation and retained inactive rows. Auth owns credentials/email;
+  no password/hash is copied into profiles, audit or operation receipts. Creation
+  reconciles its original operation ID after uncertainty; profile updates use their
+  returned revisions. The last active Owner and signed-in account remain protected.
+  Email is read-only in Manage; creation sends no invitation/verification email.
+- Optional PNG/JPEG/WebP images (2 MB maximum) use a NEW private Storage bucket.
+  The proposed policies allow active managers to read/sign and insert immutable
+  objects in their own UUID folder, with no update/delete policy. The API checks
+  file signatures and SQL checks object references. Upload/signing uses the caller
+  token. Removing an image clears the reference; uncertain/unattached uploads are
+  retained rather than deleting a possibly committed image.
+- **Final local checks:** root `npm test` passes **84/84** (67 backend/API/PostgreSQL,
+  17 frontend unit), including **14** shared management SQL scenarios and a new
+  command-based disk close/reopen test. Root typechecks/builds and generated-schema
+  `--check` pass. The broad browser run was **235 passed / 1 failed (8.9m)**; the
+  only failure was the preview deletion progress label, which was restored.
+  The affected rerun then passed 72 cases, with a layout test hitting the unchanged
+  login limiter and the following case skipped. That test now restores its test
+  session. A fresh **18/18** management/request-state run passes (1.0m), followed
+  by a final **9/9** management run (41.3s) after reason-field styling/clean captures.
+  All **238** browser cases are covered across these runs; no single clean final
+  238-case full run is claimed. Local HTTP/browser permissions required approved
+  execution outside the sandbox; production limits were not weakened for tests.
+- Six final captures at 1440×900, 820×400 and 320×568 cover saved Inventory and the
+  retained stock editor. Geometry checks find no horizontal page overflow. Sampled
+  visual review confirmed readable fields/actions; the new reason field was moved
+  into the existing styled editor grid. Captures now scroll to zero before capture
+  to avoid sticky-navigation stitching artifacts. Physical devices, real screen
+  readers and other browsers are not newly verified. Figma comparison and physical
+  printing remain removed; Daily Sales Values and existing exports stay preserved.
+- **Hosted apply was rejected before execution.** Automatic approval review says
+  applying this persistent migration changes a shared hosted database and its
+  security/Storage boundary, and requires explicit authorization for DualCounter
+  `izdemgzdywtxhvgvsian`. No workaround or indirect execution was attempted. The
+  P4-specific approval is historical evidence, not approval of the new P5 migration.
+  Obtain explicit exact-project P5 migration/verification approval; do not request
+  a GitHub save. The new RPCs/private tables/bucket/policies are not hosted yet.
+- A final **read-only hosted comparison passes**: exactly six matching applied
+  hashes, unchanged Auth/profile/settings fingerprints and all application/Auth
+  table counts. Both retained accounts remain active Owners; audit events remain
+  two, settings unconfigured, sales/stock movements zero. Neither account was
+  demoted, deactivated, replaced, signed in or password-tested. No hosted fixture
+  users/catalogue/movements/uploads were created. Local browser tests use actual
+  Express/PostgreSQL behind test-owned Auth/Storage transport; they are not proof
+  of new hosted Auth/PostgREST/Storage round trips or multi-connection contention.
+- Evidence: workspace-parent `.review/october-17-p5-{before.json,before.log,
+  apply-rejection.txt,hosted-unchanged.log,unit-acceptance.log,typecheck-final.log,
+  build-acceptance.log,browser-full.log,browser-final.log,browser-acceptance.log,
+  browser-management-final.log,audit.json}` and `.review/october-17-p5/` captures.
+  Final audit preserves all seven original request blocks and six applied sources,
+  checks publishable text for saved server/database secrets, and confirms no staged
+  files. Work remains local/uncommitted on `Backend_Phase`; no commit, push, PR,
+  GitHub save or deployment was performed.
+
+**Next:** approve/apply ONLY this reviewed P5 migration on the exact DualCounter
+project, then run `db:verify`, `inventory:verify` (14 rolled-back SQL scenarios plus
+private bucket/policy metadata), `permissions:verify` and `db:smoke`. Compare real
+accounts/settings/counts before and after. Complete real development-account
+browser/PostgREST/image persistence acceptance using a private signed-in session;
+do not password-test or modify either retained Owner to obtain it. Keep P5 pending
+until that acceptance is resolved; P6 checkout must join the same revision/lock
+and stock-history discipline before it opens. Keep all Backend work off GitHub.
+
+### Previous checkpoint — P4 accepted; hosted permissions verified (October 17, 2026)
+
+**P4 is complete. P5 protected Users/Inventory persistence is the next unfinished
+priority.** The full seven original request blocks and carried-forward decisions
+remain the requirements reference; none was replaced with a continuation summary.
+
+- The user explicitly answered **"Approve the P4 migration and verification on
+  this exact project"** for DualCounter `izdemgzdywtxhvgvsian`. This resolves the
+  previous automatic approval rejection. It authorizes this hosted database step;
+  unfinished Backend code/documentation still stays local and off GitHub.
+- The existing exact-target `db:apply` tool applied only
+  `20261017040000_business_permissions.sql`, SHA-256
+  `43d09db1222bd52083f248a4de5bccce95d58670868ea0e1e529939784102f87`.
+  All five earlier sources and the newly applied sixth source are unchanged.
+  Never edit any applied SQL; use a new migration for subsequent schema changes.
+- Hosted `db:verify` passes: six matching migration hashes, 25 RLS tables with
+  one authenticated SELECT policy each, exactly six authenticated SELECT table
+  grants, one callable private role helper, eight restricted public RPC grants,
+  no table write grants/policies and no unindexed foreign keys. Management,
+  profile and ledger direct grants stay closed. The first verification attempt
+  exposed node-postgres returning `pg_policies.roles` (`name[]`) as text. Fixed
+  only the verifier query to select `roles::text[]`; the hosted rerun passes.
+- **11/11 hosted permission scenarios pass** using synthetic SQL fixtures
+  entirely within rolled-back transactions. They cover the full role matrix,
+  Staff ownership/current Manila day and child rows, cross-account/day denial,
+  forged metadata, inactive/unlinked/anonymous/service-role denial, scoped POS,
+  denied writes, role changes, Owner-only settings/revisions/actual actor and
+  settings/audit atomic failure. These checks do not provision real Auth users.
+- **12/12 hosted database smoke checks pass.** Final before/after comparison
+  confirms every application/Auth table count and private fingerprints of both
+  real Auth/profile accounts and settings are unchanged. Both admin and Huuujji
+  remain active Owners; settings remain unconfigured, audit events remain two,
+  and sales/stock movements remain zero. No durable fixture rows or temporary
+  grants remain. Neither real account was demoted, deactivated or password-tested.
+- Fresh root tests pass **67/67** (52 backend/API/PostgreSQL, 15 frontend unit).
+  Root typechecks/builds and generated schema `--check` pass. Backend typechecks
+  pass again after the verifier fix. Local HTTP/DNS sandbox restrictions required
+  approved reruns. No runtime UI changed or browser suite was rerun; the previous
+  **13/13** affected Auth/login and older broad browser results remain historical.
+  Hosted SQL checks do not establish new hosted Auth/PostgREST behavior or
+  simultaneous account-write contention; sequential last-Owner mutation cases
+  remain disposable-only. These limits are not claimed as passing checks.
+- Evidence: workspace-parent `.review/october-17-p4-acceptance-{before.json,
+  before.log,apply.log,policy-inspect.log,db-verify.log,permissions.log,
+  db-smoke.log,after.log,unit.log,typecheck.log,typecheck-final.log,build.log,
+  schema.log,audit.json}`. The final audit preserves all seven original-message
+  blocks and all six migration hashes and checks publishable files for saved
+  server/database secrets. Backend remains uncommitted on `Backend_Phase`;
+  no commit, push, PR, GitHub save or deployment was performed.
+
+**Next:** implement P5 against the existing protected services and durable schema:
+Users account list/management plus Inventory products, ingredients/stock, batches,
+recipes, modifier library/copies, variants and bundles. Preserve P2A request/draft
+handling, SKU-only inputs, all stock relationships, optional images, existing
+filters, preview isolation and test-owned Vite teardown. Archive referenced rows;
+stock changes require attributed movements and atomic audit. Prove persistence
+across refresh/login and another authorized session, plus unchanged data on
+denied/invalid requests. P6–P9 remain later work. Keep Daily Sales Values; Figma
+comparison and physical-printing verification remain removed.
+
+### Previous checkpoint — P4 local permissions; hosted application awaiting approval (October 17, 2026; resolved above)
+
+**P4 implementation and local verification are complete; hosted acceptance is
+pending.** Follow all seven original request blocks, carried-forward decisions
+and the accepted P3 checkpoint below. P5–P9 are still unfinished. See
+`backend/supabase/AUTHORIZATION.md` for the exact matrix, routes, grants and limits.
+
+- A NEW `20261017040000_business_permissions.sql` adds database-owned permissions,
+  current active-profile checks, 25 authenticated SELECT policies, scoped sales
+  reads, a selling-card POS projection and Owner-only revisioned alert settings.
+  The five already-applied migrations are frozen. The generated frontend contract
+  includes the new source hash; no columns or stock relationships were changed.
+- API business authorization calls caller-scoped SQL; it never trusts client
+  role/name/actor/date metadata. Staff can see only their own current Manila-day
+  sales/items/options/payments and their own requests on those sales. Cross-account,
+  yesterday/tomorrow and inactive/unlinked identities are denied. Role changes apply
+  to the next request using the same token. Owner/Admin void/review permissions use
+  their own identity, with no Owner password for Admin. Daily Sales Review confirmation
+  and alert settings remain Owner-only. Existing P3 account commands retain their
+  own transactional checks, last-active-Owner and signed-in-account protections.
+- **Narrow grants:** an initial blanket SELECT grant was rejected by automatic
+  approval review as too broad. It was replaced with six explicit authenticated
+  SELECT grants for sales/items/purchased options/payments/requests/settings, each
+  governed by its RLS policy. Management/profile/ledger tables keep zero direct
+  grants. No table write grants or write policies; anon/service-role business
+  access remains revoked. Only the current-role private helper is callable;
+  five new authenticated RPCs join the three existing account RPCs.
+- The settings RPC serializes with account changes and settings writers, rechecks
+  active Owner, compares revisions, validates bounds and atomically records the
+  actual actor/name/role plus before/after audit. Stale/invalid/denied/audit-failed
+  writes change nothing. No fake setting/Owner is seeded. Alert delivery is P9.
+- New API reads cover access capabilities, scoped sales/requests, POS selling
+  cards and settings. Selling cards explicitly report `checkoutReady: false`;
+  they expose no physical stock, batches, recipe inputs or library drafts.
+  Dashboard/Inventory/Reports/checkout/void/review command boundaries return 403
+  for denied roles and 501 for permitted roles until their actual services are
+  implemented. Permission checks alone do not execute those workflows.
+- **Hosted apply blocked:** the exact-target `db:apply` command was rejected
+  before execution. Automatic approval review interpreted the Backend-local
+  instruction as withholding authorization for persistent hosted database changes.
+  No alternate route retried or bypassed this rejection. Ask for explicit approval
+  to apply this reviewed P4 migration to DualCounter `izdemgzdywtxhvgvsian`; do not
+  request a GitHub save. Until approval/application, hosted P4 policies/RPCs do not
+  exist and hosted verification of this migration is not claimed. Existing P3
+  login/profile/account lifecycle stays compatible with the five hosted sources.
+- **Verification:** final root checks pass **67/67** (52 backend/API/PostgreSQL and
+  15 frontend unit), including all **11/11** permission scenarios. Root
+  typechecks/builds and schema `--check` pass. The
+  sandbox initially blocked local HTTP test connections; the approved rerun passed.
+  Affected authentication/login browser checks pass **13/13 (23.0s)**. No newer
+  broad browser-suite run is claimed. Read-only hosted verification confirms the
+  exact five applied hashes, two active Owners/profiles, zero sales/stock movements,
+  zero direct business grants and zero business policies: P4 is still unapplied.
+  Shared SQL scenarios are ready for hosted rollback verification via
+  `npm run permissions:verify --workspace backend` after migration approval.
+  These are not proof of hosted Auth/PostgREST P4 behavior or multi-connection
+  account contention. Sequential last-Owner protections remain disposable-only;
+  neither real Owner was demoted, deactivated, replaced or password-tested.
+- Local evidence: workspace-parent `.review/october-17-p4-{before.json,unit-final.log,
+  build.log,browser.log,db-before.log,hosted-status.log,audit.json}`. All seven full original-message blocks
+  and five applied SQL hashes are preserved. Backend stays local/uncommitted on
+  `Backend_Phase`; no commit, push, PR, GitHub save or deployment. P2A draft/error
+  protection, SKU-only editors, all stock models/copies, optional images, assets,
+  preview notices, Daily Sales Values and test-owned Vite teardown are preserved.
+  Figma comparison and physical-printing verification stay removed.
+
+**Next:** obtain exact-target hosted migration approval,
+then apply/verify P4 (migration hashes, grants/policies, rollback permissions and
+existing database smoke checks). Only then start P5 Users/Inventory persistence.
+
+### Previous checkpoint — P3 accepted; DualCounter and both Owners retained (October 17, 2026)
+
+**P3 acceptance is complete.** Hosted settings and real account/browser checks pass;
+the user confirmed email receipt and the full same-browser password-change/login
+round trip. **P4 enforced business permissions is next, followed by P5 CRUD.**
+The following user decisions supersede the previous checkpoint's pending approvals
+and temporary-account replacement plan:
+
+- The user explicitly approved disabling public signup, Site URL
+  `http://localhost:5173`, and exact redirect `http://localhost:5173/auth/callback`
+  on this specific project, including its dashboard `main PRODUCTION` label.
+  All three settings were saved and verified. The initial URL-setting rejection
+  was resolved by that exact-target approval; no alternate method bypassed it.
+- The user explicitly approved **Owner** access for the additional **Huuujji**
+  testing account, ID `601ce4ed-8c72-49ed-83e0-294c3cdba2b4`. It has the supplied
+  name/email in Auth/profile. Its password was passed only to a transient process
+  and Supabase Auth, never saved in source, environment files or this handoff.
+  Provisioning used the existing trusted administration boundary and retained
+  account-creation audit. No sample person became a real identity.
+- **Keep admin active and unchanged.** The user's correction explicitly says not
+  to remove admin and to use the real account for testing only. The retained admin
+  ID is `e84626ab-c64f-4945-b978-1cd743fcd954`. Do not deactivate, delete, demote,
+  replace it, or change its password based on older replacement instructions.
+  Ten live checks verify both email/username API login, Owner profile/restoration,
+  unchanged admin, exactly two Auth users/profiles, and zero sales/stock movements.
+  Real browser Huuujji login, refresh/restoration and logout were also verified.
+- The live verification command now avoids real Owner demotion: that old probe
+  could succeed after adding a second Owner. Last-Owner mutation coverage stays in
+  disposable SQL tests. Recovery/password change is skipped unless explicitly
+  opted into with `--allow-password-change`; normal verification logs out only its
+  own session. This revised command has not been rerun on the user's account.
+- Fixed a reproduced callback defect: invalid/expired codes could reuse an older
+  signed-in session as recovery proof. Recovery now explicitly exchanges its PKCE
+  code, requires the SDK's matching `PASSWORD_RECOVERY` event, then verifies the
+  active application profile. Automatic SDK URL exchange is disabled. Empty/error
+  callbacks, missing verifiers, expired exchanges and non-recovery codes cannot
+  open the reset form. URL parameters are scrubbed immediately; StrictMode shares
+  one exchange, and `sb_flow_id` selects the correct verifier slot.
+- A real reset was first requested from the local **in-app browser** and inbox
+  receipt was user-confirmed. The first opened link reported invalid/expired;
+  PKCE requires the same browser storage that requested it. After instructions to
+  request a fresh link at `http://localhost:5173` in the browser used to open email,
+  the user confirmed **"Password change and login both worked"**. This final
+  emailed round trip is human-verified in the user's browser, not an agent browser
+  capture. The user entered/submitted the new password privately; its value was
+  not requested, recorded or changed by the agent. Use a fresh same-browser link
+  for future recovery; sample code remains unconfigured-preview-only.
+- The user asked to rename the hosted project to **DualCounter**. The display name
+  is saved and dashboard-verified. The read-only Project ID/API reference remains
+  `izdemgzdywtxhvgvsian`; URLs, connection settings and migration history stay valid.
+  The organization and repository remain Vertwell. This is a name change, not a
+  project migration, domain purchase, deployment or whole-application rebrand.
+- **Final checks:** 50/50 root unit/API/PostgreSQL tests; 13/13 affected
+  Auth/login browser cases (22.6s), including six new callback cases; root
+  typechecks/builds and schema `--check` pass. All five new invalid-callback checks
+  failed before the fix and pass afterward. Windows browser/HTTP sandbox limits
+  required approved reruns. The previous 223-case broad browser run remains
+  historical; no new full-suite run is claimed. Hosted db:verify passes with all
+  five migration hashes, 25 RLS tables, two Auth users/profiles, zero sales/stock
+  movements and unchanged restricted grants. The final backend typecheck also
+  covers the safer live-verification command; that command was not rerun on the
+  user's account after the private password change.
+- Evidence is in workspace-parent `.review/october-17-p3-acceptance-*`,
+  `october-17-p3-callback-{before,after,final}.log`, and
+  `.review/october-17-p3-acceptance/` screenshots. The ignored one-time provisioning
+  script contains no credentials. The local Auth preview remains on 3001/5173 for
+  the user's testing session; its owned process PID is 34800. The browser test
+  runner closed its own 5180 server. Temporary agent tabs were closed after the
+  emailed test; the user's regular browser/session was left alone.
+- All seven original request blocks and five applied SQL sources are preserved.
+  Backend work remains local/uncommitted on `Backend_Phase`; no commit, push, PR,
+  GitHub save or deployment. P4/P5 and later business services remain closed.
+
+### Previous checkpoint — P3 authentication/account lifecycle (October 17, 2026)
+
+**P3 implementation and live token/password checks are complete; P3 acceptance is
+partial until hosted Auth configuration and actual emailed recovery are verified.**
+Finish these P3 gates before P4 business permissions and P5 CRUD. The full original
+Backend-start message, all carried-forward decisions and original frontend
+messages govern this work; P1/P2/P2A remain complete.
+
+- Real email/username login resolves the active database profile/actual role.
+  Restoration/refresh/logout, cross-tab events and focus/60-second revalidation
+  are implemented. Configured login opens a verified account screen while P4/P5
+  are closed; it never enters a sample Staff workspace. Open preview stays separate.
+- Protected account creation/profile updates/deactivation enforce Owner all roles,
+  Admin Staff-only and Staff denial. Current revisions, unsupported-field rejection,
+  last-active-Owner and signed-in-account protections, serialized writes and atomic
+  audit are implemented. Invitations/email changes and Users UI integration are P5.
+- Auth/profile/audit creation is transactional. Live verification exposed Auth
+  applying admin metadata after INSERT; a second NEW migration handles that UPDATE.
+  The incomplete initial trusted bootstrap was explicitly repaired and verified.
+  Real duplicate-profile creation now leaves no Auth residue. All five applied
+  migrations are hash-verified; no applied source was edited.
+- PKCE recovery verifies the active profile, changes the real password and globally
+  logs out. Invalid/expired callbacks report an error and scrub URL parameters;
+  StrictMode effect replay is covered. Sample 123456 stays unconfigured-preview-only.
+  The real password-change confirmation survives the return to login.
+- **Requested temporary Owner:** name `admin`, username `admin`, email
+  `admin@gmail.com`, ID `e84626ab-c64f-4945-b978-1cd743fcd954`. The supplied
+  replacement password is Auth-managed, never copied into source/profiles/handoff.
+  Recovery checks restored and verified that requested password. Replace this
+  temporary account after the real Owner's active account/login is verified:
+  deactivate under the real Owner and retain history. Hard profile deletion and
+  last-Owner removal remain blocked. No preview person became a real account.
+- Ignored `backend/.env` now holds the existing server secret/publishable settings;
+  ignored `Frontend/.env.local` contains only URL/publishable settings. The separate
+  database administration password stays in `backend/.env.database.local`, outside
+  request handlers. Browser regression tests ignore runtime credentials and preserve
+  the test-owned Vite teardown. Direct application-table/private-helper grants remain
+  zero; only the three documented account RPC grants exist. All 25 tables keep RLS.
+- **Hosted acceptance pending:** signup is enabled, Site URL `http://localhost:3000`,
+  and no redirect URLs exist. Automatic approval review rejected disabling signup
+  because this persistent Auth-policy change lacked explicit authorization. No
+  workaround changed it. Request approval to disable public signup, set Site URL
+  `http://localhost:5173`, and allow exact redirect
+  `http://localhost:5173/auth/callback`. Until configured, emailed recovery can
+  return to the wrong local port. Actual email delivery/inbox receipt and complete
+  emailed-link recovery remain unverified; no email was sent to admin@gmail.com.
+- **Verification:** root tests pass 50/50 (35 backend/PostgreSQL + 15 frontend unit).
+  **16/16** live lifecycle checks pass for username/profile/restoration, invalid
+  credentials/tokens, denied self-deactivation/last-Owner demotion, rollback, real
+  one-time recovery/password update, logout and revoked refresh denial. A separate
+  live revoked-access-token probe returns 401 after global logout. The broad browser
+  run passed **223/223 (9.2m)**. A subsequent recovery-success
+  notice change is verified by the final **7/7 Auth/login rerun (15.2s)**; no newer
+  full-suite run is claimed. Final root typechecks/builds and schema check pass.
+  Real browser Owner login/refresh/logout is verified;
+  desktop/320px account captures were inspected with no phone page overflow. Hosted
+  counts: one Auth user/profile, zero sales/stock movements. db:verify and **12/12**
+  rolled-back db:smoke checks pass. The audit confirms all seven original blocks
+  match HEAD, the first three SQL hashes are unchanged, runtime files are ignored
+  and 247 publishable files contain no saved database/server/Owner password.
+  Evidence: `.review/october-17-p3-{audit.json,live-auth.log,browser.log,
+  auth-browser-final.log,unit-final.log,db-verify.log,db-smoke.log}` and screenshots
+  in `.review/october-17-p3/` (workspace parent). See AUTHENTICATION.md for boundaries.
+  Temporary browser tabs and local servers were closed; ports 3001/5173/5180/5181
+  were verified without listeners.
+- **Save boundary:** work stays local/uncommitted on `Backend_Phase`. No commit,
+  push, PR, GitHub save or deployment. Existing P2A changes, all seven original
+  message blocks, SKU-only inputs, stock models/relationships, independent copies,
+  Owner-only settings, assets/licenses and preview behavior are preserved.
+
+### Previous checkpoint — P2A frontend integration preparation (October 17, 2026)
+
+**P2A preparation is complete and verified locally. P3
+Authentication is the next implementation priority, followed by P4 Roles and P5
+protected Users/Inventory CRUD.** This follows the complete original Backend-start
+message and the user's decision to place frontend integration after database setup.
+It does not repeat completed frontend fixes or enable protected actions early.
+
+- `backend/supabase/INTEGRATION.md` records actual schema-to-frontend mappings,
+  existing versus future API boundaries, request/error contracts, command ownership,
+  identifiers, decimal/date/unit handling and the remaining P3–P9 dependencies.
+- `backend/scripts/integration-schema.ts` builds a disposable PostgreSQL database
+  from the exact three migration sources and generates a 25-table read contract in
+  `Frontend/src/lib/data/database.generated.ts`. Nullability, numeric strings and
+  normalized content hashes are verified against SQL. No hosted schema changes.
+- `Frontend/src/lib/data/{contracts,decimal,mappers}.ts` prepares versioned
+  inventory/account decoding. All four stock models, independent library/product
+  modifiers, signed omissions, fixed bundle variants/options, SKU relationships,
+  unlisted retail stock, canonical batch balances and nullable Hobby dates map to
+  the existing UI. The decoded source retains revisions, image paths and provenance.
+  Incomplete/duplicate/malformed responses and unsafe decimal conversion fail
+  explicitly. Email belongs to an authorized Auth projection; no password or hash
+  is copied into a profile/account. No new Item Code or obsolete stock panel.
+- `api-client.ts` and the existing `api.ts` supply session-token requests, typed
+  validation/conflict/access/network errors, cancellation, no-content responses,
+  disabled caching/redirects and no automatic write retries. The business bridge
+  rejects reads before any request until P3–P5 are implemented; no runtime flag
+  opens unfinished services or silently substitutes sample data after a live error.
+- `request-state.ts` prepares scoped loading/reload/error states, cancellation,
+  stale-response suppression and duplicate-save prevention. Users create/edit/delete
+  and Inventory record saves/receiving/removals await callback success before
+  clearing/closing. Rejected saves preserve the mounted draft, wizard passwords,
+  batch quantity/dates, selections and dirty/discard protection; pending forms
+  disable their controls. Modifier-library/upload service completion and global
+  navigation/session reconciliation remain part of P5's actual integration.
+- **Live boundary:** normal `npm run dev` still uses labeled sample data and resets
+  on refresh. P2A is preparation, not real Auth, email delivery, HTTP CRUD or durable
+  business persistence. Existing configured-login profile routing is still P3.
+  Database application grants/RLS restrictions, hosted data, runtime settings and
+  applied migration sources remain unchanged. No live credentials were needed.
+- **Verification:** root `npm test` passes **38/38** (27 existing backend/database
+  checks and 11 new SQL/transport/mapping checks). The broad browser run passes
+  **219/219 (8.3m)**, covering all 210 existing cases plus nine new preparation
+  cases. A small subsequent removal-dialog error reset is verified by the final
+  **9/9 focused run (13.0s)**, including close/reopen/retry without a stale error;
+  no newer full-suite run is claimed. Final root typechecks (including integration
+  test/harness source), both builds and generated-schema `--check` pass. Playwright
+  now explicitly collects `*.spec.ts`, keeping Node unit checks in `npm test`.
+  The initial sandboxed browser launch was blocked by Windows; approved browser
+  runs succeeded. Initial harness selectors were corrected to search paginated
+  rows and distinguish the loading status from output; all final cases pass.
+  Retained-error editor captures at 1440×900 and 320×568 were visually reviewed;
+  they preserve readable controls and show no horizontal page overflow. Captures
+  are in `.review/october-17-p2a/`; logs are `.review/october-17-p2a-*.log`.
+  `.review/october-17-p2a-audit.json` confirms all seven full original-message
+  blocks match HEAD after newline normalization, applied SQL/HEAD are unchanged,
+  the saved credential file is ignored and 237 publishable files contain no saved
+  database password. `git diff --check` passes.
+- **Save boundary:** all work from this continuation remains local and uncommitted
+  on the existing `Backend_Phase` branch. No commit, push, PR or deployment. Earlier
+  repository checkpoints were present when this continuation started; they do not
+  authorize a new Backend save. All original verbatim message blocks stay intact.
+
+### Previous checkpoint — Backend database priority applied and verified (October 17, 2026)
 
 **The new user request supersedes the P0 stop-for-review instruction.** Start with
 the database, following the original messages and actual frontend behavior, not
@@ -59,7 +557,8 @@ we are now starting the phase Backend
   below. Live checks cover schema/constraints, role/privilege denial, transactional
   rollback, exact migration history and advisors. Real Auth login/provisioning,
   PostgREST requests, API/frontend integration and simultaneous full-cart checkout
-  are not verified. **P2A integration preparation is next**, then P3 → P4 → P5.
+  are not verified. At this database checkpoint P2A was next; the current P2A
+  checkpoint above now makes P3 → P4 → P5 the unfinished sequence.
 - **Save boundary:** all changes remain local and uncommitted; no GitHub write or
   deployment. README and database README carry the same Backend no-save rule.
 
@@ -219,10 +718,10 @@ The Backend-start request supersedes old blanket frontend-only and stop-for-revi
 | **P0 — bridge** | Save the frontend phase in the existing GitHub repository | **Complete — verified on main** | Checkpoint `f08f7b79932168954d670b5de9c2490a90db37db` is committed, pushed and independently verified; user has since authorized Backend. No new GitHub save during unfinished Backend work. |
 | **P1 — database first** | Finalize database design and role rules together | **Complete locally** | `backend/supabase/DESIGN.md` covers actual frontend relationships, every column, permissions, archival/history rules and deferred decisions. |
 | **P2** | Implement the database foundation | **Complete — hosted development verified** | Three applied migrations match local hashes; 25 RLS tables, denied role access, indexed FKs, 12 rollback smoke checks and advisor review verified in Vertwell development. |
-| **P2A — after database setup** | Begin backend-dependent frontend integration preparation | **Pending — next; P2 dependency satisfied** | Actual database/API shapes are mapped to frontend workflows and loading/error handling; authenticated/protected operations remain dependent on P3–P5. |
-| **P3** | Complete real authentication and account lifecycle | Pending | Login/logout, session restoration/expiry, protected identity lookup, account provisioning and recovery work with real development accounts. |
-| **P4** | Enforce Owner/Admin/Staff permissions | Pending | Backend checks and database access policies reject unauthorized operations and record the authenticated actor; role/account protections pass. |
-| **P5 — finish the first milestone** | Protected CRUD and Users/Inventory integration | Pending | Authorized Users and Inventory changes persist across refresh/login and are visible to another permitted session; invalid and unauthorized actions change nothing. |
+| **P2A — after database setup** | Begin backend-dependent frontend integration preparation | **Complete — prepared locally; live access remains gated** | Schema-derived contracts/mapping, typed transport and request states are implemented and tested; authenticated/protected operations remain dependent on P3–P5. |
+| **P3** | Complete real authentication and account lifecycle | **Complete — live checks, configured Auth and user-confirmed emailed password change/login** | Login/logout, session restoration/expiry, protected identity lookup, account provisioning and complete emailed recovery work with real development accounts. |
+| **P4** | Enforce Owner/Admin/Staff permissions | **Complete — approved migration applied; hosted verification passes** | Caller-scoped API checks, six restricted read grants, 25 SELECT policies, 11 hosted permission scenarios and 12 rollback smoke checks pass; both real Owners/settings remain unchanged. See current checkpoint for verification limits. |
+| **P5 — next; finish the first milestone** | Protected CRUD and Users/Inventory integration | Implemented locally; approved seventh migration applied and hosted SQL verified; signed-in browser acceptance pending | Authorized Users and Inventory changes persist across refresh/login and are visible to another permitted session; invalid and unauthorized actions change nothing. |
 | **P6 — after P1–P5** | Transactional checkout, payments recorded and stock consumption | Pending | Sale, purchased snapshots, batch deductions, movement records and audit events save together; duplicate/concurrent requests cannot oversell or deduct twice. |
 | **P7** | Durable Daily Sales Review, voids and audit history | Pending | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
 | **P8** | Database-backed reports and reconciliation | Pending | Screen/PDF/CSV/Print scopes derive from durable records with matching filters, correct historical/current balances and explicit missing-history disclosures. |
@@ -314,33 +813,96 @@ The October 17 fixes and the latest October 16 frontend requests are recorded as
 2. **Real-device/accessibility/browser verification:** actual phones/tablets, real screen readers, Safari and Firefox remain unverified; desktop Edge emulation does not establish these results. This remains a verification boundary and is not made a new P0 blocker by this documentation update.
 3. **Frontend work dependent on the backend — after database setup:** P2A starts after completed P2; real authentication/profile routing and protected Users/Inventory persistence are completed with P3–P5. Real checkout/reviews/reports follow under P6–P8. Sample behavior is not live integration. This is scheduled integration work, not an unresolved preview-design task.
 
-#### Current continuation — Backend database first; keep work local
+#### Current continuation — P5 signed-in acceptance; preserve both Owners and Backend-local work
 
 ```text
 Resume in C:/Users/ASUS/Documents/Personal/Vertwell/repo in phase Backend.
-Read the FULL original October 17 Backend-start message and current checkpoint,
-all carried-forward database decisions, original frontend requests/checkpoints,
-README.md, backend/supabase/{README,DESIGN}.md and applicable AGENTS.md.
-The user authorized Backend after P0; the old stop-for-review is historical.
-Do not commit, push, create a PR or save to GitHub until ALL Backend tasks finish.
-P1 design and P2 database setup are complete. The user-created Vertwell project
-izdemgzdywtxhvgvsian in Singapore has three applied/hash-verified migrations,
-25 restricted tables and 12 passed rollback smoke checks on PostgreSQL 17.11.
-The database password is stored only in ignored backend/.env.database.local;
-the handoff records its location rather than the value. Keep it out of GitHub,
-logs, SQL, screenshots and VITE_* variables. Use the existing administration
-scripts with verified TLS; never edit applied SQL or reconnect GitHub.
-Do not claim real Auth login, email delivery, PostgREST, protected CRUD or
-multi-connection checkout from the database checks. No sample users/sales remain.
-P2A frontend integration preparation is NEXT; then P3 authentication, P4 permissions,
-P5 Users/Inventory CRUD precede P6 checkout, P7 reviews and P8 reports. P9 remains
-separately defined. Test each priority and record actual scope and limitations.
-Preserve SKU-only inputs, stable IDs, stock/recipe/variant/bundle relationships,
-independent modifiers, batch history, Owner-only settings, all original messages,
-assets/licenses, preview notices, dirty-form guards and test-owned Vite teardown.
-Keep Daily Sales Values; Figma comparison and physical-printing verification stay
-removed. Deployment, production data and external payment verification remain
-separate work. Preserve the working local changes and do not replay old helpers.
+Read the FULL seven original user-message blocks, carried-forward decisions,
+current P5 checkpoint, README.md and backend/supabase/
+{README,DESIGN,INTEGRATION,AUTHENTICATION,AUTHORIZATION,CRUD}.md.
+P1/P2/P2A/P3/P4 are accepted. P5 is implemented locally; its explicitly approved
+seventh migration is now applied and hosted SQL verification passes.
+The user answered "Approve P5 migration and verification on this exact project"
+for DualCounter izdemgzdywtxhvgvsian, resolving the historical approval rejection.
+All seven applied sources are frozen. Do not edit or raw-reapply them.
+db:verify, inventory:verify (14/14), permissions:verify (11/11) and db:smoke
+(12/12) pass; SQL fixtures/grants rolled back. Independent before/after comparison
+confirms unchanged real Auth/profile accounts/settings and all table counts.
+Five anonymous hosted PostgREST denial checks and fresh schema --check pass.
+No new runtime source changed; local unit/typecheck/build/browser suites were
+not rerun for this apply.
+P5 signed-in browser acceptance is pending; P6–P9 stay deferred.
+Finish real signed-in development-account browser/PostgREST/image persistence
+acceptance without password-testing or modifying either retained Owner to sign in.
+The open localhost:5173 in-app browser showed login without an active session;
+the user was asked to sign in privately as Huuujji and reply "Signed in".
+Reuse the existing frontend on 5173; the acceptance backend API was started.
+Check current processes/session rather than assuming either survives a later chat.
+Keep admin ACTIVE AND UNCHANGED. Huuujji remains an additional Owner for testing.
+Do not demote/deactivate/delete/replace or password-test either retained account.
+Use caller-token access and the protected aggregate commands; no blanket table
+grants or service-role business writes. Revisions/idempotency, attributed stock
+movements, atomic audit and independent modifier copies are implemented. Keep
+all four stock models, SKU-only inputs/IDs, valid units/dates, optional private
+images, archive/deactivate history, filters and retained async editor/wizard drafts.
+P5 UI opens Inventory/Users for managers; Staff live checkout stays pending.
+Preview remains separate and cannot substitute for an unavailable real service.
+Final root tests 84/84, typechecks/builds and schema --check pass. Broad browser
+235/236 preceded a corrected preview-label failure. The affected 72-pass run
+hit the test login limiter, which was fixed in test session setup. Fresh 18/18
+and final 9/9 management browser runs pass. All 238 cases are covered across
+runs; these remain historical local results. No final single clean whole-suite
+result, new signed-in hosted Auth/Storage round trip or multi-connection
+contention result is claimed. Review exact evidence above.
+Keep Daily Sales Values. Figma comparison and physical printing stay removed.
+No commit/push/PR/GitHub save until ALL Backend tasks finish. No deployment.
+Preserve all seven original blocks and record exact results and remaining gates.
+```
+
+#### Previous continuation — P4 permissions (historical; resolved by current checkpoint)
+
+```text
+Resume in C:/Users/ASUS/Documents/Personal/Vertwell/repo in phase Backend.
+Read the FULL original Backend-start message and original frontend requests,
+carried-forward decisions, latest P3 checkpoint, README.md and backend/supabase/
+{README,DESIGN,INTEGRATION,AUTHENTICATION}.md. P1/P2/P2A are complete.
+P3 is complete: account/session implementation is live-tested. The user approved
+all hosted Auth changes, including this exact project despite main PRODUCTION.
+Signup is disabled; Site URL is http://localhost:5173; exact redirect is
+http://localhost:5173/auth/callback. The user confirmed email receipt, then a full
+password change and Huuujji login after requesting a fresh same-browser link.
+The initial cross-browser failure does not remain an open P3 gate. PKCE requires
+the requesting browser's storage; the user enters/submits new credentials privately.
+Keep admin / @admin / admin@gmail.com ACTIVE AND UNCHANGED. The user explicitly
+corrected the earlier replacement plan: Huuujji is an additional Owner for testing
+only, ID 601ce4ed-8c72-49ed-83e0-294c3cdba2b4. Never copy passwords/reset links into
+source, environment files or handoff. Preserve both accounts and their audit.
+The project display name is now DualCounter; reference izdemgzdywtxhvgvsian is
+unchanged. Do not replace the reference with the name in URLs/environment settings.
+The invalid-callback reuse bug is fixed and 13 affected browser checks pass.
+Recovery uses explicit one-time PKCE exchange plus verified SDK recovery event;
+preserve StrictMode replay and flow-specific verifier handling.
+Five migrations are applied/hash-verified. Never edit applied SQL. All 25 tables
+retain RLS and zero direct grants; only the documented account RPCs are exposed.
+Keep server secrets in backend only; runtime and database admin files are ignored
+and separate. Real login resolves the active profile/role, never sample Staff.
+P4 business roles are implemented and tested locally. Read AUTHORIZATION.md and
+the latest checkpoint. The new migration was NOT applied: automatic approval
+review rejected the hosted action because it interpreted Backend-local as
+withholding hosted authorization. Obtain explicit approval for this reviewed P4
+migration on DualCounter izdemgzdywtxhvgvsian; do not bypass or indirectly retry.
+Then use db:apply with the exact project reference, db:verify, permissions:verify
+and db:smoke. Preserve both real accounts/settings and roll back all SQL fixtures.
+P4 is not accepted until hosted application/verification is resolved. Local
+allowed/denied API/database scopes, attribution, Staff own-day history and role
+changes pass. The 501 command boundaries keep unfinished business work closed.
+P5 Users/Inventory persistence, then P6 checkout,
+P7 reviews and P8 reports remain unfinished. Preserve P2A request-state/draft protection,
+SKU-only inputs, all stock models/relationships, copies, Owner-only settings,
+assets/licenses, preview notices and test-owned Vite teardown. Keep Daily Sales
+Values; Figma comparison and physical-printing work stay removed.
+No commit/push/PR/GitHub save until ALL Backend tasks finish. No deployment.
+Preserve all seven full original-message blocks; record exact results and limits.
 ```
 
 ### Last completed frontend priority — Dashboard alert settings and Inventory Item Code (October 17, 2026)

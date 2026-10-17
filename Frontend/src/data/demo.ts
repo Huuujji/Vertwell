@@ -10,11 +10,11 @@ export interface RecipeInput { stockId: string; quantity: number; unit: string }
 export interface ProductVariant { id: string; name: string; stockId: string; sku: string; price: number; available: boolean }
 export interface BundleComponent { productId?: string; variantId?: string; modifierIds?: string[]; stockId: string; name: string; sku: string; quantity: number }
 export interface Modifier { id: string; name: string; price: number; inputs: RecipeInput[]; defaultSelected?: boolean }
-export interface ModifierGroup { id: string; name: string; min: number; max: number; options: Modifier[] }
+export interface ModifierGroup { id: string; name: string; min: number; max: number; options: Modifier[]; sourceGroupId?: string }
 export interface ModifierTemplate extends ModifierGroup { editedBy?: string; editedAt?: string }
 export interface StockItem { id: string; sku?: string; code?: string; name: string; kind?: 'Ingredient' | 'Finished'; category: Category; quantity: number; unit: string; threshold?: number; image?: string; manufactured: string; expires: string; status: string; batches?: Batch[]; editedBy?: string; editedAt?: string }
 export interface Product { manufactured?: string; expires?: string; id: string; sku?: string; code?: string; discountType?: DiscountType; discountValue?: number; name: string; category: Category; price: number; image: string; icon: string; mode?: 'Made to order' | 'Stocked' | 'Variants' | 'Bundle'; stockId?: string; recipe?: RecipeInput[]; variants?: ProductVariant[]; bundle?: BundleComponent[]; modifiers?: ModifierGroup[]; available?: boolean; editedBy?: string; editedAt?: string }
-export interface Account { id: string; name: string; username: string; email: string; role: Role }
+export interface Account { id: string; name: string; username: string; email: string; role: Role; active?: boolean }
 export interface VoidRequest { reason: string; requestedBy: string; requestedRole?: Role; requestedAt: string; status: 'Pending' | 'Approved' | 'Rejected'; reviewedBy?: string; reviewedRole?: Role; reviewedAt?: string }
 export interface Consumption { kind?: 'Ingredient' | 'Finished'; stockId: string; sku?: string; name: string; quantity: number; unit: string }
 export interface DailyReview { id: string; date: string; owner: string; role: 'Owner'; time: string; orderIds: string[]; expectedCash: number; expectedGCash: number; actualCash: number; actualGCash: number; countedCash: number; openingCash: number; additions: number; removals: number; refunds: number; explanation: string; outcome: 'Matched' | 'Reviewed with explained discrepancy' }

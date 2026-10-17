@@ -22,8 +22,11 @@ import Reports from './pages/Reports';
 import type { ReportContext } from './pages/Reports';
 import { supabase } from './lib/supabase';
 import { signOut } from './lib/auth';
+import ManagementWorkspace from './components/ManagementWorkspace';
+import AccountSession, { useAccountSession } from './components/AccountSession';
 
 export default function App() {
+  const accountSession = useAccountSession();
   const [demo] = useState(createDemoData);
   const contextSequence = useRef(0);
   const viewState = useRef(new Map<string, unknown>());
@@ -33,6 +36,11 @@ export default function App() {
   const inventoryDirty = useRef(false);
   const [modifierTemplates, setModifierTemplates] = useState<ModifierTemplate[]>([]);
   const [movements, setMovements] = useState<StockMovement[]>(() => openingMovements(demo.openingStock));
+  useEffect(() => {
+    if (accountSession.status === 'anonymous') return;
+    setIdentity(null); setCart([]); viewState.current.clear(); inventoryDirty.current = false;
+    setAuditContext(undefined); setInventoryContext(undefined); setReportContext(undefined);
+  }, [accountSession.status]);
   const stockRef = useRef(stock);
   stockRef.current = stock;
   function updateStock(item: StockItem) {
@@ -52,7 +60,6 @@ export default function App() {
   const productsRef = useRef(products);
   productsRef.current = products;
   useEffect(() => () => { productsRef.current.filter(product => product.image.startsWith('blob:')).forEach(product => URL.revokeObjectURL(product.image)); }, []);
-  function enter(role: Role, name: string) { setIdentity({ role, name, id: `preview-${name.toLowerCase()}` }); setPage(role === 'Staff' ? 'POS' : 'Dashboard'); }
   function enterPreview(id: string) {
     const account = accounts.find(value => value.id === id);
     if (!account) return;
@@ -93,7 +100,10 @@ export default function App() {
     if (approved) { const sale = sales.find(value => value.id === id); if (sale?.voidRequest?.status === 'Pending') voidOrders([id], sale.voidRequest.reason); }
     else setSales(current => current.map(sale => sale.id === id && sale.voidRequest?.status === 'Pending' ? { ...sale, voidRequest: { ...sale.voidRequest, status: 'Rejected', reviewedBy: identity.name, reviewedRole: identity.role, reviewedAt: new Date().toISOString() } } : sale));
   }
-  if (!identity) return <Login accounts={accounts} onPreview={enterPreview} onEnter={enter} />;
+  if (accountSession.status === 'recovery') return <Login accounts={accounts} onPreview={enterPreview} recovery />;
+  if (accountSession.status === 'authenticated') return <ManagementWorkspace key={`${accountSession.identity.profile.id}:${accountSession.identity.profile.role}`} identity={accountSession.identity} />;
+  if (accountSession.status !== 'anonymous') return <AccountSession state={accountSession} />;
+  if (!identity) return <Login accounts={accounts} onPreview={enterPreview} />;
   const navigation = identity.role === 'Staff' ? pages.filter(p => p === 'POS' || p === 'Audit Trail') : pages;
   const effectivePage = navigation.includes(page) ? page : navigation[0];
   return <ViewState.Provider value={viewState.current}><div className={`workspace ${identity.role === 'Staff' ? 'staff-workspace' : 'admin-workspace'}`}>

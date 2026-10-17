@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url';
 export default async function setupServer() {
   const server = await createServer({
     root: fileURLToPath(new URL('..', import.meta.url)),
+    // Regression previews are credential-free even when local development Auth is configured.
+    envDir: false,
+    define: { 'import.meta.env.VITE_SUPABASE_URL': '""', 'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': '""' },
     server: { host: '127.0.0.1', port: 5180, strictPort: true, open: false },
   });
   try {

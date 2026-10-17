@@ -1,10 +1,102 @@
 # Vertwell
 # System Fundamentals Project - BSCS 3A
 
-> **Status:** Backend phase started; database design and local foundation implemented
+> **Status:** P5 protected Users/Inventory migration applied and hosted SQL verified; signed-in acceptance pending
 > Separate frontend and backend applications for Vertwell's inventory and sales management system.
 
-## Current checkpoint — October 17 Backend database priority
+## Current checkpoint — October 17 protected CRUD
+
+P5 connects the existing Users and Inventory screens to protected transactional
+services. Managers can save all four stock models, ingredients/batches, recipes,
+modifier libraries/copies, variants and bundles; stock changes append attributed
+movements and atomic audit. Accounts can be created, edited, deactivated and
+reactivated under the existing role/last-Owner/self-account protections. Optional
+raster images use a private Storage bucket. Failed requests retain their drafts;
+operation receipts reconcile uncertain saves without duplicate stock changes.
+
+The user explicitly approved the P5 migration and verification on DualCounter
+`izdemgzdywtxhvgvsian`, resolving the earlier automatic approval rejection.
+The reviewed seventh migration is applied; all seven applied source hashes match.
+Hosted schema/grant checks, 14 inventory scenarios, 11 permission scenarios and
+12 database smoke checks pass. SQL fixtures and temporary grants were rolled back;
+both real Owners/settings and all existing public/Auth table counts remain unchanged.
+P5 still needs real signed-in browser/PostgREST/image persistence acceptance.
+The prior 84 root tests, typechecks/builds and focused browser checks remain local
+historical evidence; they were not rerun for this hosted apply/documentation step.
+Read [CRUD.md](backend/supabase/CRUD.md) for the exact API, validation, archival,
+image and verification boundaries. P6 checkout, P7 reviews, P8 reports and P9
+external integrations stay deferred. Preview remains separate and unchanged.
+All Backend work stays local: no commit, push, PR, GitHub save or deployment.
+Keep admin active and unchanged; Huuujji remains an additional testing Owner.
+
+## Previous accepted checkpoint — October 17 permissions
+
+P4 now enforces the Owner/Admin/Staff matrix in caller-scoped API authorization
+and the applied sixth database migration. Staff sale/request access is limited to their own
+current Manila-day records; settings and Daily Sales Review confirmation are
+Owner-only. Settings changes check revisions and atomically audit the real actor.
+Unfinished CRUD/checkout/void/review/report services stay closed. The real frontend
+continues to show the verified account screen while P5 integration is pending.
+
+**P4 is accepted.** The user explicitly approved its migration and verification
+on DualCounter (`izdemgzdywtxhvgvsian`), resolving the earlier automatic approval
+rejection. The existing exact-target tool applied only the new migration; all
+six applied source hashes match. Its 25 SELECT-only policies open only six
+RLS-scoped read tables, with no table write grants; management/profile/ledger
+grants remain closed. Both real Owner accounts and settings are unchanged. See
+[authorization](backend/supabase/AUTHORIZATION.md) and [HandsOff.md](HandsOff.md).
+
+Fresh validation: **67/67** root tests, typechecks/builds and generated-schema
+verification pass. Hosted **11/11** permission scenarios and **12/12** database
+smoke checks pass with all fixtures/grants rolled back. Before/after comparison
+confirms both Owners, settings, every table count and zero sales/stock movements
+are unchanged. Fixed verifier metadata decoding (`name[]` to `text[]`); its hosted
+rerun and final backend typecheck pass. The previous **13/13** affected Auth/login
+browser checks remain historical; no browser or real Auth/PostgREST test was
+rerun, and simultaneous account-write contention remains unverified.
+Evidence: workspace-parent `.review/october-17-p4-acceptance-*`.
+P5 Users/Inventory persistence is next. No Backend commit/push/PR/deployment.
+
+## Accepted P3 authentication checkpoint
+
+P3 real email/username login, verified active profile/role, session restoration,
+expiry/logout handling, protected account lifecycle and PKCE password changes are
+implemented and live-tested. The hosted development project is now named
+**DualCounter**; its API reference remains `izdemgzdywtxhvgvsian`. The organization
+and repository remain Vertwell. The user-approved **Huuujji** Owner account is for
+testing only. **Keep admin / @admin / admin@gmail.com active and unchanged.** This
+explicit user correction supersedes the earlier temporary-account replacement plan.
+Passwords stay in Supabase Auth and are not copied into source or documentation.
+
+**P3 is accepted:** the user approved the exact project/settings;
+public signup is disabled, Site URL is `http://localhost:5173`, and the allowed
+redirect is `http://localhost:5173/auth/callback`. A real recovery email was sent
+to the testing account and its receipt was user-confirmed. After an initial
+invalid/expired link, a fresh link requested/opened in the same browser let the
+user change the password and log in as Huuujji. The user confirmed both steps;
+the new password stays private. PKCE requires the requesting browser's storage.
+Invalid callbacks can no longer reuse an older session as recovery proof.
+
+At P3 acceptance configured login opened the verified account screen. P5 now
+provides the separate protected management workspace; its hosted acceptance is
+recorded above and in HandsOff.md. The labeled **Open preview** remains separate. Both real Owner accounts
+and their audit history are retained. At P3 acceptance, five applied migrations
+preserved 25 RLS tables, zero direct application grants and three narrow account
+RPCs. The accepted P4 checkpoint above records the additional restricted reads.
+See [authentication](backend/supabase/AUTHENTICATION.md) and
+[HandsOff.md](HandsOff.md) for exact behavior, pending gates and evidence.
+
+Historical P3 validation: **50/50** root checks, **13/13** affected Auth/login browser
+cases and **10/10** live testing-account/provisioning checks pass. Real browser
+login/restoration/logout, root typechecks/builds and schema verification pass.
+The earlier **16/16** live lifecycle, **12/12** rollback database and **223/223**
+broad browser runs remain historical; no newer broad browser run is claimed.
+All seven original-message blocks and all seven currently applied SQL sources are preserved.
+
+Backend changes stay local/uncommitted until all Backend tasks are finished.
+No commit, push, PR, GitHub save or deployment was performed.
+
+## Previous checkpoint — October 17 frontend integration preparation
 
 The Backend phase is now authorized. Database design, permission rules and a
 column dictionary are in [backend/supabase/DESIGN.md](backend/supabase/DESIGN.md).
@@ -17,9 +109,20 @@ See [database setup](backend/supabase/README.md) for commands and limitations.
 
 **Keep backend work local until all backend tasks are finished: no commits,
 pushes or GitHub saves for this phase yet.** P2 database setup is verified. P2A
-frontend integration preparation is next. Real
-authentication, enforced role permissions, protected CRUD and checkout follow in
+frontend integration preparation is complete locally. P3 real authentication is
+next; enforced role permissions, protected CRUD and checkout follow in
 the order recorded in [HandsOff.md](HandsOff.md).
+
+Schema-derived frontend contracts, inventory/account mappings and typed request
+handling are prepared. Users and Inventory save flows retain drafts after rejected
+requests and prevent duplicate submissions. The application still runs its labeled
+sample preview; live authentication and persistent CRUD remain P3–P5 work. See
+[the integration contract](backend/supabase/INTEGRATION.md) for boundaries and commands.
+
+Validation: 38 backend/database/frontend-unit checks pass. The broad browser run
+passes 219 cases; a final nine-case rerun verifies the subsequent removal-error
+cleanup. Final root typechecks, both builds and schema-generation checks pass.
+HandsOff.md records exact scope and verification limits.
 
 ## Previous checkpoint — October 17 GitHub save complete
 
@@ -462,9 +565,9 @@ Bundle revenue uses the parent product's selling category; stock usage still lis
 component SKU. Nested bundles, recipe-based components, production batches, and
 component-level mixed-category revenue allocation are not implemented.
 Backend integration is a separate phase. The normal login can call
-the existing Supabase helper when configured; it still opens the sample interface and does
-not grant business permissions. Supabase password-recovery callback handling remains a
-backend-integration task. Dashboard cards and the nine-day chart derive from the shared preview sales and inventory;
+the protected credential exchange when configured; it resolves a real active profile
+and opens the account screen. PKCE recovery/password changes are implemented, with
+hosted redirect settings and emailed recovery acceptance complete. Business CRUD remains P5. Dashboard cards and the nine-day chart derive from the shared preview sales and inventory;
 reports calculate from those same transactions. Manila business dates are used for order IDs,
 report filters, and Staff history. Preview cashier IDs are client-side identifiers only; Staff history uses Manila business dates rather than shifts.
 
@@ -494,18 +597,20 @@ are present, not whether a database connection has been tested.
 2. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in `backend/.env`.
 3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `Frontend/.env`.
 4. Configure Supabase Auth's Site URL and allowed redirects for your local and production frontend URLs.
-5. Disable public sign-ups for the planned owner-created account workflow. Create an initial
-   development account through the Supabase dashboard. A protected account-management API comes later.
-6. Restart the development processes after editing environment variables.
+5. Configure `SUPABASE_SECRET_KEY` on the backend only for username login and Auth account
+   administration. The requested temporary Owner is already provisioned in development.
+6. The approved local signup/redirect settings are configured; see AUTHENTICATION.md.
+   Emailed recovery/password/login was user-verified using a fresh same-browser link.
+7. Restart the development processes after editing environment variables.
 
-The frontend includes `signIn` and `signOut` helpers, a login screen, and a password-reset
-preview. The database foundation is applied and verified in Vertwell development;
-server role policies, real account lifecycle and protected workflow commands remain pending.
+The frontend includes real profile/session routing and PKCE recovery plus a separate
+password-reset preview when unconfigured. Database and account commands are applied
+and verified in development. P4 business policies are applied/verified; workflow commands remain pending.
 The backend verifies access tokens with Supabase Auth rather than trusting client-provided identities.
 
 Only publishable keys belong in `VITE_*` variables: Vite includes these values in the browser bundle.
-Keep any future Supabase secret/service-role keys exclusively on the server. This scaffold does
-not require those keys. Enable Row Level Security and create access policies before exposing tables.
+Keep any future Supabase secret/service-role keys exclusively on the server. Username login and account provisioning require the server secret; browser code
+rejects privileged keys. Enable Row Level Security and create access policies before exposing tables.
 The backend's user-scoped database client forwards the caller's token so database policies apply.
 
 ## API Endpoints
@@ -513,11 +618,20 @@ The backend's user-scoped database client forwards the caller's token so databas
 | Method | Path | Access | Purpose |
 | :--- | :--- | :--- | :--- |
 | GET | `/api/health` | Public | API status and whether Supabase settings are present |
-| GET | `/api/auth/me` | Bearer access token | Verified user's ID and email |
+| POST | `/api/auth/login` | Public credentials | Verified active-account session; email or username |
+| GET | `/api/auth/me` | Bearer access token | Verified ID/email and active profile/role |
+| GET | `/api/auth/accounts` | Active Owner/Admin | Complete authorized profile/email list; Admin Staff plus self |
+| GET | `/api/inventory` | Active Owner/Admin | One coherent catalogue/batch/balance snapshot |
+| POST | `/api/inventory/commands` | Active Owner/Admin | Revisioned aggregate saves, movements and archival |
+| POST | `/api/inventory/images` | Active Owner/Admin | Optional immutable raster upload |
+| POST | `/api/inventory/image-urls` | Active Owner/Admin | Bounded private signed image URLs |
+| POST | `/api/auth/accounts` | Active Owner/Admin | Create permitted accounts transactionally with Auth/profile/audit |
+| PATCH | `/api/auth/accounts/:id` | Active Owner/Admin | Update permitted profiles/deactivate with revision and account protections |
 
 `Frontend/src/lib/api.ts` attaches the current Supabase session token automatically.
-Authentication establishes identity only; business permissions and review checks need implementation
-before adding POS or inventory mutation endpoints. No business data is created by this scaffold.
+Authentication enforces active profiles and account-management permissions. Broader
+business permissions/review checks still precede POS or inventory endpoints. No sales
+or stock movements have been seeded.
 
 ## Validation
 
@@ -630,9 +744,9 @@ No Vercel or Supabase resources are provisioned by this scaffold.
 ## Next Implementation Steps — Backend phase
 
 - P0 is saved and verified on GitHub. Backend work now stays local until all backend tasks are finished. HandsOff.md preserves the complete original requests.
-- P1 design and P2 database setup are complete and verified in the Vertwell Supabase development project. Next: P2A frontend integration preparation, then P3 authentication, P4 roles and P5 protected CRUD.
-- Add and verify the permission policies and protected transaction commands before granting application access.
-- Add login and owner-managed accounts, then role authorization and Owner daily-sales review persistence.
+- P1/P2/P2A/P3/P4 are accepted. P5's approved seventh migration is applied and hosted SQL checks pass; finish signed-in acceptance recorded in HandsOff.md before P6.
+- Verify real development-account browser/PostgREST/image persistence; preserve both retained Owners and all existing history.
+- Integrate the implemented account commands into Users at P5; add broader role authorization and durable Owner daily-sales review in their ordered phases.
 - Implement atomic checkout and stock movements, void approval, and reconciliation.
 - Connect the existing inventory and report screens to durable data and movement records.
 - Connect the preview variant/bundle workflows and modifier libraries to durable records and real-time updates.

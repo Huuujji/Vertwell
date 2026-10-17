@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { signIn } from '../lib/auth';
+import { signIn, changeRecoveredPassword } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { Art, asset } from '../components/ui';
 import type { Account, Role } from '../data/demo';
@@ -12,19 +12,24 @@ function Field({ id, label, icon, iconClass, children }: { id: string; label: st
 function EyeIcon({ visible }: { visible: boolean }) {
   return <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />{!visible && <path d="m3 3 18 18" />}</svg>;
 }
-export default function Login({ accounts, onPreview, onEnter }: { accounts: Account[]; onPreview: (id: string) => void; onEnter: (role: Role, name: string) => void }) {
-  const [step, setStep] = useState<Step>('login');
+export default function Login({ accounts, onPreview, recovery = false }: { accounts: Account[]; onPreview: (id: string) => void; recovery?: boolean }) {
+  const [step, setStep] = useState<Step>(recovery ? 'password' : 'login');
   const [visible, setVisible] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(() => {
+    try { return sessionStorage.getItem('vertwell-password-updated') === '1' ? 'Password changed. Sign in with your new password.' : ''; }
+    catch { return ''; }
+  });
+  useEffect(() => { if (!recovery) { try { sessionStorage.removeItem('vertwell-password-updated'); } catch { /* Storage can be disabled. */ } } }, [recovery]);
   const [previewRole, setPreviewRole] = useState<Role>('Owner');
   const [previewId, setPreviewId] = useState('');
   const previewAccounts = accounts.filter(account => account.role === previewRole);
   const selectedAccount = previewAccounts.find(account => account.id === previewId) ?? previewAccounts[0];
   const heading = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef(step);
+  useEffect(() => { if (recovery) changeStep('password'); }, [recovery]);
   useEffect(() => { if (previousStep.current !== step) heading.current?.focus(); previousStep.current = step; }, [step]);
   function changeStep(next: Step) { setError(''); setMessage(''); setVisible(false); setStep(next); }
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -34,28 +39,30 @@ export default function Login({ accounts, onPreview, onEnter }: { accounts: Acco
       if (step === 'login') {
         if (!supabase) throw new Error('Account login is not available in this preview. Use Open preview below; no password is needed.');
         await signIn(String(values.get('username')), String(values.get('password')));
-        // Business-role authorization belongs to the backend; this only enters the sample UI.
-        onEnter('Staff', String(values.get('username')));
       } else if (step === 'email') {
         setEmail(String(values.get('email')));
         if (supabase) {
-          const { error: cause } = await supabase.auth.resetPasswordForEmail(String(values.get('email')), { redirectTo: window.location.origin });
+          const { error: cause } = await supabase.auth.resetPasswordForEmail(String(values.get('email')), { redirectTo: `${window.location.origin}/auth/callback` });
           if (cause) throw cause;
           setMessage('If this account exists, a password reset link has been sent to its email.');
         } else { setStep('code'); setMessage('Frontend preview: enter 123456. No email was sent.'); }
       } else if (step === 'code') {
+        if (supabase) throw new Error('Use the password reset link sent to your account email.');
         if (values.get('code') !== '123456') throw new Error('Use the preview code 123456.');
         changeStep('password');
       } else {
         if (values.get('password') !== values.get('confirm')) throw new Error('Passwords must match.');
-        // The unconfigured prototype never changes a real account.
-        changeStep('login'); setMessage('Password-reset preview complete. No account was changed.');
+        if (supabase) {
+          if (!recovery) throw new Error('Open a valid password reset link first.');
+          await changeRecoveredPassword(String(values.get('password')));
+          changeStep('login'); setMessage('Password changed. Sign in with your new password.');
+        } else { changeStep('login'); setMessage('Password-reset preview complete. No account was changed.'); }
       }
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Please try again.'); }
     finally { setBusy(false); }
   }
   const title = step === 'login' ? 'Welcome back' : step === 'email' ? 'Reset your password' : step === 'code' ? 'Check your code' : 'Choose a new password';
-  const description = step === 'login' ? 'Log in to your Happy Hentie account to get started.' : step === 'email' ? (supabase ? 'Enter your account email to receive a password reset link.' : 'Try the password recovery flow with a sample email.') : step === 'code' ? 'Enter the 6-digit verification code to continue.' : 'Use at least 8 characters. This preview will not change an account.';
+  const description = step === 'login' ? 'Log in to your Happy Hentie account to get started.' : step === 'email' ? (supabase ? 'Enter your account email to receive a password reset link.' : 'Try the password recovery flow with a sample email.') : step === 'code' ? 'Enter the 6-digit verification code to continue.' : supabase ? 'Use at least 8 characters for your new account password.' : 'Use at least 8 characters. This preview will not change an account.';
   return <main className={`login-screen ${step !== 'login' ? 'recovery' : ''}`}>
     <div className="login-panel">
       <aside className="login-brand" aria-label="Happy Hentie Café and Hobby Shop">
@@ -66,6 +73,7 @@ export default function Login({ accounts, onPreview, onEnter }: { accounts: Acco
       <section className="auth-content" aria-label={step === 'login' ? 'Account login' : 'Password recovery'}>
         <header className="auth-heading"><span className="auth-eyebrow">{step === 'login' ? 'Account access' : supabase ? 'Account recovery' : 'Recovery preview'}</span><h1 ref={heading} tabIndex={-1}>{title}</h1><p>{description}</p></header>
         <form key={step} className="login-form" onSubmit={submit} aria-busy={busy}>
+          <fieldset disabled={busy} className="auth-fields">
           {step === 'login' ? <>
             <Field id="login-username" label="Username or email" icon="52c5d.svg" iconClass="email-icon"><input id="login-username" name="username" autoComplete="username" placeholder={supabase ? 'you@example.com' : 'Enter your username or email'} required /></Field>
             <Field id="login-password" label="Password" icon="0153f.svg" iconClass="password-icon"><input id="login-password" name="password" type={visible ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" required /><button className="eye-button" type="button" onClick={() => setVisible(!visible)} aria-label={visible ? 'Hide password' : 'Show password'} aria-pressed={visible}><EyeIcon visible={visible} /></button></Field>
@@ -80,7 +88,8 @@ export default function Login({ accounts, onPreview, onEnter }: { accounts: Acco
           </>}
           {(error || message) && <p className={`form-message ${error ? 'error' : ''}`} role={error ? 'alert' : 'status'}>{error || message}</p>}
           <button className="primary login-submit" disabled={busy}>{busy ? 'Please wait…' : step === 'login' ? 'Log in' : step === 'email' ? (supabase ? 'Send reset link' : 'Send Code') : step === 'code' ? 'Confirm' : 'Change Password'}</button>
-          {step !== 'login' && <button className="text-button back-login" type="button" onClick={() => changeStep('login')}>Remembered it? Back to login</button>}
+          {step !== 'login' && <button className="text-button back-login" type="button" onClick={() => { if (recovery) { void supabase?.auth.signOut(); } else changeStep('login'); }}>Remembered it? Back to login</button>}
+          </fieldset>
         </form>
         {step === 'login' && <aside className="preview-entry" aria-label="Frontend preview"><h2>Explore the preview</h2><p>No password needed. Choose a role and person to try their sample workspace.</p><label htmlFor="preview-role">Preview role</label><select id="preview-role" value={previewRole} onChange={e => { setPreviewRole(e.target.value as Role); setPreviewId(''); }}><option>Owner</option><option>Admin</option><option>Staff</option></select><label htmlFor="preview-person">Preview person</label><div className="preview-entry-actions"><select id="preview-person" value={selectedAccount?.id ?? ''} onChange={e => setPreviewId(e.target.value)}>{previewAccounts.map(account => <option key={account.id} value={account.id}>{account.name} (@{account.username})</option>)}</select><button disabled={!selectedAccount} onClick={() => { if (selectedAccount) onPreview(selectedAccount.id); }}>Open preview <span aria-hidden="true">→</span></button></div><small>{selectedAccount ? `${selectedAccount.email} · ${selectedAccount.role}` : 'No sample accounts for this role'}</small><small>Sample data · resets on refresh</small></aside>}
         <p className="auth-footer">Happy Hentie Café &amp; Hobby Shop</p>
