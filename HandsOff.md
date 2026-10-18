@@ -1,6 +1,6 @@
 # Vertwell handoff
 
-Updated October 18, 2026. This is the single handoff file. **P1–P9 implementation remains complete within the agreed scope. P9A final current-system acceptance now passes one clean 276/276 browser run plus 160/160 root checks, typechecks, both builds and schema verification. P9B scoped hosted notification verification passes with the exact original read marker restored and all business/notification fingerprints unchanged. P10 technical-guide consistency and P12 disposable performance profiling are complete; P11 actual shop QR/payment trial is deferred at the user's choice.** These results do not establish unrestricted production readiness, native-PostgreSQL high-volume throughput or a new committed hosted business-event acceptance. All seventeen migrations are applied/verified on DualCounter `izdemgzdywtxhvgvsian` and remain immutable. Preserve the established frontend, manual GCash/sample QR, enabled checkout, retired accounts/history, accounts/credentials/roles/settings, local work and every original message. The public README is unchanged. This work began at the user's clean commit `5328679` (`Completed P1-P9 Priorities`); no new commit, push, PR, GitHub save or deployment was performed. Release preparation and GitHub/deployment decisions are explicitly for later. Older pending/payment-API/next-priority statements are historical wherever they disagree with the current checkpoint and chosen in-app-only scope.
+Updated October 19, 2026. This is the single handoff file. **FP means Final Priority. FP1–FP6 are recorded below and every one is WAITING FOR THE PROJECT MANAGER'S DECISION before any work starts. The Project Manager will decide whether each is done now or later; this documentation request authorizes none of them to begin.** **P1–P9 implementation remains complete within the agreed scope. P9A final current-system acceptance now passes one clean 276/276 browser run plus 160/160 root checks, typechecks, both builds and schema verification. P9B scoped hosted notification verification passes with the exact original read marker restored and all business/notification fingerprints unchanged. P10 technical-guide consistency and P12 disposable performance profiling are complete; P11 actual shop QR/payment trial is deferred at the user's choice and is carried forward as FP4.** These results do not establish unrestricted production readiness, native-PostgreSQL high-volume throughput or a new committed hosted business-event acceptance. All seventeen migrations are applied/verified on DualCounter `izdemgzdywtxhvgvsian` and remain immutable. Preserve the established frontend, manual GCash/sample QR, enabled checkout, retired accounts/history, accounts/credentials/roles/settings, local work and every original message. The public README is unchanged. The accepted follow-up work began at the user's clean commit `5328679` (`Completed P1-P9 Priorities`); that checkpoint performed no new commit, push, PR, GitHub save or deployment. This October 19 request changes only HandsOff.md. Older pending/payment-API/next-priority statements are historical wherever they disagree with the current checkpoint, chosen in-app-only scope and Project Manager decision gate.
 
 ## README presentation rule — October 18, 2026
 
@@ -27,7 +27,52 @@ also note in the handsoff that do not edit the Readme because that file is prese
 
 ## New — current state and continuation
 
-### Current priorities — P9A, P9B and P10–P12 follow-ups (October 18, 2026)
+### Final priorities — FP1–FP6, waiting for the Project Manager's decision (October 19, 2026)
+
+**FP = Final Priority. Every task below is recorded only and is WAITING FOR THE PROJECT MANAGER'S DECISION BEFORE DOING IT.** The user is the Project Manager and will decide which tasks, if any, to do now and which to leave for later. Numbering the tasks does not authorize starting FP1 or proceeding automatically through the list. A decision to start one FP does not authorize the other FPs. Do not begin implementation, readiness review, new verification runs, profiling, QR replacement/payment trials, Git operations or deployment for an FP until the Project Manager explicitly chooses that task and its scope.
+
+#### Project Manager instruction — verbatim
+
+```text
+list those task as the final tasks and I will decide whether we do it now or later so label it in the handsoff as waiting for the decision of me (the Project Manager) before doing and just like the other P1-P12 name them FP1, FP2 and so on FP means Final Priority.
+```
+
+| Final Priority | Task | Full intended scope / completion boundary | Current status |
+| --- | --- | --- | --- |
+| **FP1** | Release-readiness review | Review what remains necessary before making the system publicly available, using the current application, deployment requirements and the precise limits of existing acceptance. Record concrete release gaps, required decisions and verified readiness; passing development tests does not by itself establish production readiness. A readiness review does not authorize a merge, publication, live cutover or deployment. | **WAITING FOR THE PROJECT MANAGER'S DECISION — not started.** |
+| **FP2** | GitHub release/merge decision | Decide when and how to save/release current work and merge the development branch into the intended release branch. At the preceding read-only check, the working tree was clean on `Backend_Phase` at `15e4c6f` (`P9A and P9B completed`); `main` was an older checkpoint. Recheck branch/commit/diff state when this task is chosen. Do not assume that another implementation commit is needed, reset unrelated work, or merge/push merely because this task is listed. Perform only the Git actions included in the Project Manager's decision. | **WAITING FOR THE PROJECT MANAGER'S DECISION — not started.** |
+| **FP3** | Deployment preparation and deployment | Prepare the agreed hosting/environment configuration and cutover, verify the intended deployed setup, and publish only within the Project Manager's chosen deployment scope. Preserve protected role/data boundaries, current database/history and the established frontend. Configuration, cutover and application deployment remain future work; FP1 or FP2 completion alone is not permission to deploy. | **WAITING FOR THE PROJECT MANAGER'S DECISION — not started.** |
+| **FP4** | Actual GCash QR replacement and manual payment trial | Carry forward **P11**, which the Project Manager deferred: keep the accepted sample until the user replaces it with the shop's actual QR. The user intends to replace the image themselves using the agreed filename/format; provide its location in chat when requested, preserving the existing chat-only path instruction. Check the actual shop-QR scan/manual-reference/payment-record workflow only when the Project Manager chooses the trial and its scope. Do not invent the actual QR, submit an unrequested real payment, add a GCash API requirement or claim that a real payment trial already occurred. | **WAITING FOR THE PROJECT MANAGER'S DECISION — P11 remains deferred; sample retained.** |
+| **FP5** | Native PostgreSQL performance and concurrent-load testing | Extend the completed **P12 disposable profiling** before high-volume use with representative native PostgreSQL workloads, basket sizes and concurrency. Establish measured results against agreed workload/performance expectations; PGlite/WASM timings are not hosted/native throughput. Evaluate optimization only if justified by evidence and included in the Project Manager's selected scope. Preserve exact alert grouping/window/configuration semantics and active/read identity; existing applied migrations remain immutable. This does not reopen or negate completed P12 profiling. | **WAITING FOR THE PROJECT MANAGER'S DECISION — native/high-volume follow-up not started.** |
+| **FP6** | Additional compatibility and accessibility verification | Verify the established system on actual phones/tablets, real screen readers, Safari and Firefox when the required devices/environments and chosen coverage are available. Record exact findings, limits and any separately agreed fixes. Existing desktop Edge emulation does not establish this coverage; these are unverified areas, not confirmed application bugs. Figma comparison and physical-printing verification remain excluded. | **WAITING FOR THE PROJECT MANAGER'S DECISION — not started.** |
+
+The FP list organizes the six remaining/deferred tasks discussed with the user. It does not reopen accepted P1–P9, P9A, P9B, P10 or P12 implementation/verification, mark deferred P11 complete, or add accounting/costing/production features, external payment APIs, email/browser push or shift management. FP4 is the future continuation of P11, not a duplicate new QR task; FP5 is the native/high-volume extension beyond completed P12's disposable measurements.
+
+**Documentation-only result of this request:** FP1–FP6 and their decision gate are saved in HandsOff.md. No application source, public README, database, settings, accounts or migrations were changed; no tests, profiling, payment trial, commit, push, merge or deployment were performed for this request. Existing validation counts remain evidence for their recorded snapshots and were not rerun.
+
+#### Current continuation — wait for the Project Manager to select Final Priorities
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Read the October 19
+FP1–FP6 section, its full original Project Manager instruction, each task's
+scope/status, the README rule and the accepted application checkpoints below.
+FP means Final Priority. ALL SIX are WAITING FOR THE PROJECT MANAGER'S DECISION.
+Do not start any FP, including read-only readiness/profiling/verification work,
+just because it is listed or numbered first. The Project Manager decides now or
+later and which FP/scope to authorize. Selecting one does not authorize the rest.
+Reading/listing the handoff or updating explicitly requested task documentation
+is not permission to implement or run the recorded Final Priorities.
+Preserve completed P1–P9/P9A/P9B/P10/P12 evidence, deferred P11/sample QR,
+the established frontend, manual GCash/in-app-only scope, protected private updates,
+role/data boundaries, accounts/credentials/settings/history and current local work.
+All seventeen applied migrations remain immutable. Leave the public README alone
+unless the user explicitly requests a README edit. No release/GitHub/Git merge,
+payment trial or deployment without the Project Manager choosing its task/scope.
+Figma comparison and physical-printing verification remain excluded.
+Wait for the user's decision; do not replay older pending or continuation scripts.
+```
+
+### Previous accepted priorities — P9A, P9B and P10–P12 follow-ups (October 18, 2026)
 
 The user selected recommendations 1–5 from the backend review, in that order. Recommendations 6–7 (release-readiness review and GitHub save/deployment decisions) are deferred until later. P9 remains implemented within its agreed in-app/manual-GCash scope; the new tasks below extend acceptance and follow-up work without reopening completed P1–P9 implementation.
 
@@ -84,7 +129,7 @@ Evidence is under the **repository's** ignored `.review/`, not the older workspa
 
 P12's qualifying alert identity/revision stays unchanged on every recomputation. Largest-size plans show repeated per-receipt line/modifier aggregation, existing correlated-lookup indexes, and an external-merge signature sort. This is measurable history-dependent work, **not hosted/native latency or multi-connection throughput**. No production SLA was supplied. The decision is to preserve current SQL and avoid choosing a migration from WASM timing alone; before high-volume use, profile native PostgreSQL with representative basket sizes/concurrency, then evaluate reused/materialized canonical signatures or a maintained projection if warranted. Exact configuration/window/overlap semantics and active/read identity must survive any separately requested optimization. No new migration or hosted synthetic load was applied.
 
-#### Current continuation — selected follow-ups accepted within scope; P11 deferred
+#### Previous continuation — selected follow-ups accepted; P11 deferred; current FP decision gate above applies
 
 ```text
 Read the full original follow-up request and five priority descriptions above,
