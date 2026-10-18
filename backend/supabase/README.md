@@ -1,5 +1,17 @@
 # Database workspace — Backend phase
 
+## Current development status
+
+P1–P9 are implemented within the agreed development scope on **DualCounter** (`izdemgzdywtxhvgvsian`). All **seventeen** applied SQL sources are immutable. Checkout remains enabled. Real authentication and roles, protected Users/Inventory, atomic checkout, durable reviews/voids/audit, reports, private automatic updates and saved in-app Owner/Admin notifications are implemented.
+
+GCash uses a replaceable sample QR and cashier-entered reference after checking received payment. Payment-provider APIs, email/browser-push notifications and shift management are outside the chosen scope. The actual shop QR and payment trial remain for later at the user's choice.
+
+Current follow-ups are **P9A final current-system acceptance, P9B hosted notification verification, P10 technical-guide consistency, P11 actual shop QR/manual trial, and P12 measured notification performance**. [HandsOff.md](../../HandsOff.md) records their exact status, original requests and evidence. Prior passing checks do not establish production readiness. Release preparation, GitHub saving and deployment remain for later. The public repository-root README is not a progress log and must not be edited without an explicit request.
+
+The current grant boundary is six SELECT-only public table grants, 25 authenticated SELECT policies, 24 narrowly scoped public function grants (23 authenticated plus the service-only username lookup), two authenticated private-helper grants, and no application table-write grants. Realtime uses private receive-only authorization; the private notification tables have no application table grants. `db:verify` is the executable source for exact grants and migration hashes.
+
+## Historical phase acceptance — P3 through P9
+
 P9's chosen **in-app-only** notification scope is implemented. Its sixteenth
 migration and seventeenth stable-alert-identity follow-up are applied/verified on
 DualCounter. [NOTIFICATIONS.md](NOTIFICATIONS.md)
@@ -75,13 +87,12 @@ keeps the explicitly labeled sample preview separate.
   `izdemgzdywtxhvgvsian`, region Singapore (`ap-southeast-1`).
 - [Project dashboard](https://supabase.com/dashboard/project/izdemgzdywtxhvgvsian)
   and API URL `https://izdemgzdywtxhvgvsian.supabase.co`.
-- PostgreSQL **17.11**; thirteen applied migrations match local content hashes.
+- PostgreSQL **17.11** at the recorded hosted verification; all **seventeen** applied migrations match local content hashes.
 - All 25 business tables have RLS and authenticated SELECT-only policies. Exactly
   six tables have authenticated SELECT grants; no table write grants exist.
-  Management/profile/ledger table grants remain closed. Twelve restricted public
-  RPC grants and one private role helper were the P5 boundary. P6 now adds five
-  restricted public RPC grants and one private read-only POS image helper;
-  there are seventeen public grants and two private helpers in total.
+  Management/profile/ledger table grants remain closed. The historical P5/P6
+  counts were twelve/seventeen public function grants. The current boundary is
+  **24 public function grants and two private helpers**, verified by `db:verify`.
   P5 adds protected aggregate Users/Inventory services and a private image bucket;
   real signed-in browser/Auth/PostgREST/Storage acceptance passes.
 - Database password and administration connection settings are stored only in
@@ -112,7 +123,8 @@ remote checkpoint. Deployment and production data changes are separate work.
   The first test monitor's timeout and its retained fixtures are documented in
   CHECKOUT.md/HandsOff.md. Nine P6 products and seven stock items are archived
   with zero balances. Eleven sales/payments, 41 movements, 144 audits and revision
-  62 are intentional history. Checkout ends disabled at the user's request.
+  62 are intentional P6 history. That temporary P6 window ended disabled; the
+  later user-requested activation is complete and checkout remains enabled.
 
 - Applied `migrations/20261017060000_inventory_revision_scope.sql` scopes the
   revision UPDATE for the API safe-update guard.
@@ -252,13 +264,13 @@ an already seeded database.
 
 P3's narrow account RPCs establish real account/profile lifecycle. P4's approved,
 applied migration adds Owner/Admin/Staff checks, caller-scoped sales reads and a
-limited POS selling-card projection. Checkout remains unavailable. P5 supplies protected aggregate
+limited POS selling-card projection. P6 supplies enabled transactional checkout; P5 supplies protected aggregate
 catalogue and inventory commands. Existing `createUserDatabaseClient` remains the
 caller-token client. Never substitute unrestricted service credentials for it.
 The administration password/pg connection is for development schema tooling only,
 not the Express request data path. P3 configures ignored runtime files separately.
 
-Current hosted verification confirms ten exact migration hashes, 25 SELECT-only
+Historical P6 hosted verification confirmed ten exact migration hashes, 25 SELECT-only
 policies, six restricted table grants, two private helpers, seventeen public RPC
 grants, zero unindexed foreign keys, 16 checkout scenarios, 15 inventory scenarios,
 11 permission scenarios and 12 rollback smoke checks. Private image-bucket
@@ -279,7 +291,9 @@ were not rerun for P5/P6 acceptance. Separate real Auth/browser/API/Storage
 acceptance and two-session inventory revision/receipt contention pass. P6 now
 adds separately observed real concurrent checkout/retry/correction tests.
 Rolled-back SQL checks alone do not establish those results. Simultaneous account
-writes and a new whole-browser-suite run remain unverified.
+writes remain a separate verification boundary. Later whole-browser-suite and
+scoped hosted results are recorded in HandsOff.md; do not treat the P6 snapshot
+as the current final-acceptance result.
 
 Balances are sums of canonical append-only movements. Inserting a movement locks
 its batch, rejects negative physical stock and writes audit atomically. Updates,
@@ -289,7 +303,8 @@ events. Canonical movement SKU/name/unit snapshots survive inventory edits.
 P5 now provides the protected inventory HTTP API and aggregate commands described
 in CRUD.md. P6 now implements verified multi-batch checkout allocation,
 authoritative pricing, full-cart idempotency and real concurrent checkout.
-Provider payment verification/reconciliation remains P9. P6 saves the sale,
+GCash provider API verification is outside the agreed scope; P7/P8 supply saved
+manual review/reconciliation and P9 supplies in-app notifications. P6 saves the sale,
 purchased snapshots, payments, all batch deductions and audit events in
 **one transaction**. Independent SDK requests cannot provide that guarantee. Owner review never
 deducts again; voids do not automatically return stock or refund a payment.

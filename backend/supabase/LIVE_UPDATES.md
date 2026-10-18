@@ -1,6 +1,8 @@
 # P8A — shared frontend and private automatic updates
 
-October 18, 2026. P8A implementation, hosted private transport, visual review and
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
+Historical P8A acceptance on October 18, 2026: implementation, hosted private transport, visual review and
 regression are verified. Root tests pass 147/147; the full browser run passes
 264/264. Final affected coverage is 18 passing cases plus a corrected 4/4 dialog
 rerun, including the additional bundle case (265 distinct cases across runs).

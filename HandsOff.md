@@ -1,6 +1,6 @@
 # Vertwell handoff
 
-Updated October 18, 2026. This is the single handoff file. **P9's agreed scope is implemented: saved in-app notifications for Owner/Admin, with persistent per-account read state, using the established Dashboard. All seventeen migrations, including the merged-alert identity follow-up, are applied and verified on DualCounter. The ordered P1–P9 development implementation priorities now have completion evidence for their agreed scopes; this is not a claim of unrestricted production readiness or a new full-app acceptance run. Backend source/documentation remain local; no commit, push, PR, GitHub save or app deployment was requested or performed.** Preserve the accepted frontend consistency checkpoint, manual GCash/sample QR, enabled checkout, removed development notice, retired accounts/history, real accounts/credentials/roles/settings, local uncommitted work and every original user message. The user will replace their QR later; no GCash API, email or browser-push integration is required. The hosted development project remains DualCounter, reference `izdemgzdywtxhvgvsian`. All seventeen applied migration sources are immutable. Earlier notification-scope-pending, recording-only, payment-API and next-priority continuations are historical wherever they disagree with this checkpoint and the user's chosen scope.
+Updated October 18, 2026. This is the single handoff file. **P1–P9 implementation remains complete within the agreed scope. P9A final current-system acceptance now passes one clean 276/276 browser run plus 160/160 root checks, typechecks, both builds and schema verification. P9B scoped hosted notification verification passes with the exact original read marker restored and all business/notification fingerprints unchanged. P10 technical-guide consistency and P12 disposable performance profiling are complete; P11 actual shop QR/payment trial is deferred at the user's choice.** These results do not establish unrestricted production readiness, native-PostgreSQL high-volume throughput or a new committed hosted business-event acceptance. All seventeen migrations are applied/verified on DualCounter `izdemgzdywtxhvgvsian` and remain immutable. Preserve the established frontend, manual GCash/sample QR, enabled checkout, retired accounts/history, accounts/credentials/roles/settings, local work and every original message. The public README is unchanged. This work began at the user's clean commit `5328679` (`Completed P1-P9 Priorities`); no new commit, push, PR, GitHub save or deployment was performed. Release preparation and GitHub/deployment decisions are explicitly for later. Older pending/payment-API/next-priority statements are historical wherever they disagree with the current checkpoint and chosen in-app-only scope.
 
 ## README presentation rule — October 18, 2026
 
@@ -26,6 +26,89 @@ also note in the handsoff that do not edit the Readme because that file is prese
 **For future continuation:** Apply this README rule before following any checkpoint or continuation below. Continue from the user’s next concrete request; update `HandsOff.md` and relevant technical guides for progress. The application checkpoint below remains the existing implementation baseline. This documentation cleanup does not create a new application task or a new test/production-readiness claim.
 
 ## New — current state and continuation
+
+### Current priorities — P9A, P9B and P10–P12 follow-ups (October 18, 2026)
+
+The user selected recommendations 1–5 from the backend review, in that order. Recommendations 6–7 (release-readiness review and GitHub save/deployment decisions) are deferred until later. P9 remains implemented within its agreed in-app/manual-GCash scope; the new tasks below extend acceptance and follow-up work without reopening completed P1–P9 implementation.
+
+#### Original follow-up request — verbatim
+
+```text
+lets do what you recommended 1-5 the others we do it later 
+
+so continuing the P9, since your recommended number 1 is for P9 lets make it P9A, then  for number 2 since it is still for P9 lets make it P9B and the rest is increment meaning P10 and P11 
+```
+
+The five selected recommendations map to five priorities: **P9A → P9B → P10 → P11 → P12**. P12 is the sequential name for recommendation 5 (notification performance); it must not be silently dropped because the original numbering example ended at P11.
+
+| Priority | Selected task and full intended scope | Status / completion boundary |
+| --- | --- | --- |
+| **P9A** | Final acceptance of the complete current system. At selection, the latest P9 root checks passed 160/160, but there was no fresh whole-app browser run after P9. The last clean full run was 271/271 before P9; P9 had separate affected-case coverage. Establish one final acceptance checkpoint before calling the backend phase finished. | **Complete within recorded acceptance scope.** Final current source passes 276/276 browser cases (10.2m), 160/160 root checks, typechecks, both builds, generated-schema equality and read-only hosted schema verification. Original messages, public README and all seventeen migrations remain unchanged. This does not establish production readiness or new committed hosted business-event acceptance. |
+| **P9B** | Hosted notification workflow verification. P9's hosted migrations, permissions and protected reads were verified. New alert generation, saved read/unread changes and related recovery were exercised in disposable environments. A controlled hosted end-to-end check should strengthen confidence; this is additional verification, not missing implementation. | **Complete for the scoped hosted checks below.** Actual caller-token feeds/marker writes, independent manager sessions, private metadata-only delivery, 409/422/403 rejection, reconnect and fresh-login persistence pass. The exact original marker is restored, with all pre-test business/notification fingerprints and Auth IDs unchanged. Generation-helper coverage is rollback-only; no new committed business command or hosted sale/request-generation claim is made. |
+| **P10** | Technical documentation consistency. Some technical guides still contain older pending, checkout-disabled or outdated migration-count statements. Clarify their current status while preserving historical evidence and original requests. The public README remains untouched unless explicitly requested. | **Complete.** Eleven backend technical guides now distinguish current scope/contracts from historical acceptance and point to the correct active services, seventeen migrations, enabled checkout and manual-GCash/in-app scope. All 41 local documentation links resolve. The public repository-root README and original handoff records remain unchanged. |
+| **P11** | Actual shop QR and payment trial. The replaceable sample QR is implemented. Supplying the real shop QR and checking the actual manual payment workflow remain outstanding. This is mainly operational/frontend work. | **Deferred at the user's choice: keep the sample; actual QR later.** The user will replace the image themselves; its path is provided in chat only as requested. The later requested sample-format adjustment is included in the final accepted source. A real shop-QR scan/payment trial remains unperformed; do not invent an actual QR, provider verification or payment. |
+| **P12** | Notification performance at larger volumes. Detection currently scans the affected cashier's saved receipts, or all receipts when thresholds change. Measure performance with realistic volumes before deciding whether optimization is needed. | **Disposable profiling complete; native/high-volume acceptance is not claimed.** Measured 1,005/5,005/20,005 receipts with warm repeated timings and EXPLAIN plans; the qualifying alert identity/revision remains stable. Work grows with history and warrants native PostgreSQL/concurrency profiling before high-volume use. No optimization, hosted load or SQL migration was applied solely from WASM timings. Any future SQL change must be additive and preserve exact grouping/read identity. |
+
+Release-readiness work, deployment configuration/cutover, a GitHub save and application deployment remain for later; this request does not authorize them. Accounting/tax changes, purchasing-cost valuation, recipe costs/margins, production batches, mixed-category component revenue, external refund policy and historical imports remain separate feature decisions. GCash API, email/browser push, shift management, Figma comparison and physical-printing verification are not added to these priorities.
+
+#### P11 clarification — user's replacement decision
+
+The user selected:
+
+```text
+Keep the sample; actual QR later
+```
+
+The user then asked:
+
+```text
+after updating the Handsoff can you tell me which file path is the Sample QR located so that later on I can change the Image my own and Im just gonna use the same name as the sample image so that no code needed to change
+```
+
+#### Actual acceptance and evidence — P9A/P9B/P10/P12
+
+Evidence is under the **repository's** ignored `.review/`, not the older workspace-parent review folders. These follow-ups started from the user's clean `5328679` commit; none of the new local changes were committed or pushed.
+
+- **P9A:** `.review/p9a-acceptance/full-browser-final.log` records one clean **276 passed (10.2m), exit 0**, using four workers on the current 16-logical-CPU machine. `root-final.log` records **126 backend/API/PostgreSQL + 34 frontend unit = 160 passed, zero failed**. `typecheck-final.log` and `build-final.log` pass for both workspaces. `schema.log` confirms generated-schema equality; `hosted-schema.log` confirms all seventeen hosted hashes, exact table/function/private-helper grants, 25 public RLS/SELECT policies and indexed foreign keys. The existing >500 kB frontend chunk warning remains nonblocking. The final shared QR format adjustment is covered by this final browser/build source. Its path is intentionally provided only in chat, per the user's latest request.
+- **P9A evidence limits:** an earlier root attempt hit sandbox localhost `EACCES`; permitted outside-sandbox execution passed. An initial full browser run was deliberately interrupted for the user's later QR format request; it is not clean acceptance. Earlier successful root/build/typecheck results remain historical alongside the final logs. `audit.mts`, `source-snapshot.json` and `preservation-result.json` confirm all **66 pre-existing fenced original-message/history records**, the unchanged public README, all **17 raw migration sources**, and **198 unchanged application/test/migration source files** across the final acceptance snapshot. Test-owned ports 5180/5181 have no listeners after completion. No new physical-device, screen-reader, Safari/Firefox, paper-print or Figma acceptance is claimed.
+- **P9B:** `.review/p9b-notifications/hosted-final.log` and `result.json` record five scoped checks on DualCounter through actual Auth/PostgREST, the Express API and private WebSockets. Existing Huuujji Owner sessions, Jest Admin and Aquino Staff establish manager access and Staff denial. An actual committed temporary Owner read marker propagates only to that account's independent sessions; Admin state remains independent. Incorrect revisions return 409, recipient overrides return 422, Staff returns 403, native transport rejoins, and a fresh login reads saved state. A deliberately discarded command result is reconciled by reading the saved feed; this is not a claim of a real hosted browser network-failure injection. The original marker, including its original timestamp or absence, is restored exactly with a concurrent-change guard. Only test-created Auth sessions are signed out locally; no email/password/account/settings change occurs.
+- **P9B preservation and generation limit:** `before-first.json`, `before.json` and `after.json` match every public/private business/notification fingerprint, Auth ID set and checkout/active-account/retired-session safety state across both runs. A temporary generation-helper call uses an existing pending-request projection with a disposable identity inside a rolled-back transaction; its alert/evidence do not persist. This is **rollback-only helper coverage**, not a new committed hosted sale/request event or business mutation. The full disposable suite remains the evidence for actual new business-event lifecycle/races. The first hosted attempt failed a test assertion because the hosted Supabase `realtime.send` adds a generated UUID `id` to metadata-only payloads. Read-only function inspection confirmed that behavior; the corrected check allows exactly `id` plus `scopes`, and the final run passes. Both attempts restored the original marker. No runtime permission/payload change or migration was needed.
+- **P10:** `.review/p10-docs/update.mjs` and `before/` retain the reviewed transformations/backups for all eleven `backend/supabase/*.md` guides. Current routing no longer describes Staff POS/reviews/reports as pending; active readiness/manual-payment statements and the current 24 public-function/two-private-helper grant boundary agree with the verified implementation. Earlier phase counts/results remain explicitly historical. All 41 relative documentation links resolve; the public README hash is unchanged. The changed application/technical-guide diff passes whitespace checks; original verbatim handoff whitespace is preserved rather than rewritten for a clean diff claim.
+- **P12:** `.review/p12-notification-performance/{measure.mts,measure.log,result.json,plans.json}` retain the disposable PGlite/WASM workload and plans. Measurement ran after the full browser runner stopped, with no hosted connection or administration imports. Three cashiers, twenty purchased configurations, one line/two modifiers per synthetic receipt and ten-minute receipt spacing exercise saved-history growth; five genuine disposable checkouts retain a separate qualifying alert. Each warmed case has three timed runs. Synthetic receipt projections are detection-query workloads, not new checkout/payment/stock-reconciliation acceptance. All synthetic state is rolled back and the disposable engine is closed.
+
+| P12 total receipts | Affected-cashier receipts | Median affected-cashier detection | Median all-cashier detection |
+| --- | --- | --- | --- |
+| 1,005 | 339 | 72.93 ms | 193.87 ms |
+| 5,005 | 1,672 | 288.58 ms | 878.35 ms |
+| 20,005 | 6,672 | 1,209.24 ms | 3,650.86 ms |
+
+P12's qualifying alert identity/revision stays unchanged on every recomputation. Largest-size plans show repeated per-receipt line/modifier aggregation, existing correlated-lookup indexes, and an external-merge signature sort. This is measurable history-dependent work, **not hosted/native latency or multi-connection throughput**. No production SLA was supplied. The decision is to preserve current SQL and avoid choosing a migration from WASM timing alone; before high-volume use, profile native PostgreSQL with representative basket sizes/concurrency, then evaluate reused/materialized canonical signatures or a maintained projection if warranted. Exact configuration/window/overlap semantics and active/read identity must survive any separately requested optimization. No new migration or hosted synthetic load was applied.
+
+#### Current continuation — selected follow-ups accepted within scope; P11 deferred
+
+```text
+Read the full original follow-up request and five priority descriptions above,
+then the completed P9 checkpoint and relevant original requirements below.
+P9A final current-system acceptance passes 276 browser and 160 root checks,
+typechecks/builds/schema checks. P9B's scoped hosted marker/feed/private transport
+checks pass with exact restoration; new business-event generation coverage remains
+rollback-only/disposable as recorded. P10 technical-guide consistency is complete.
+P11 actual shop QR/manual trial is deferred at the user's choice; preserve the
+accepted shared sample and do not invent real-payment acceptance. Its path is
+provided only in chat, as requested. P12 disposable profiling is complete with
+history-dependent growth documented; native high-volume performance/optimization
+is not claimed. Do not add an optimization migration solely from WASM timings.
+The fifth selected recommendation is P12; it was not dropped or merged into P10.
+Preserve the public README, seventeen immutable migrations, original handoff
+messages, shared frontend, independent manager read state, Owner-only settings,
+manual payments, private metadata-only updates, exact-operation recovery,
+all current accounts/credentials/settings/history and local work.
+Record exact validation scope and any unresolved failures. Do not replay old
+mutation/account-reset helpers or treat disposable tests as hosted acceptance.
+Release preparation, GitHub saving and deployment are explicitly for later.
+Begin from the user's next concrete direction rather than replaying accepted
+checks, old pending continuations or scoped hosted marker writes.
+```
 
 ### Latest completed task — P9 saved in-app notifications (October 18, 2026)
 
@@ -95,7 +178,7 @@ Evidence root: repository `.review/p9-notifications/` (ignored local artifacts).
 - Hosted evidence: `hosted-before/after.json`, `hosted-after16.json`, `hosted-before.log`, `hosted-after17.log`, `hosted-apply.log`, `hosted-apply17.log`, `hosted-schema-final17.log` and inspected `hosted-state.mts`. Local preservation audit confirms all 60 pre-existing fenced message/history records and all fifteen earlier raw migration hashes. All seventeen normalized sources match the hosted ledger, including the unchanged migration sixteen. `merged-identity-before-fix.log` retains the reproduced failure fixed by migration seventeen; final source hashes are in `source-audit.json`.
 - No new real payment, hosted business/read-marker mutation, credential/account/settings change, commit, push, PR, GitHub save or application deployment occurred. User HEAD remains `8eed072e6ccb364f713d3bce6bdac09304fe4968`. Physical devices, real screen readers, Safari/Firefox, paper printing and exhaustive Figma comparison were not performed. Detection currently scans the affected cashier's saved receipts (all receipts when thresholds change); high-volume indexing/projection optimization remains a measured scalability consideration, not an invented external-delivery requirement.
 
-#### Current continuation — P9 in-app scope completed
+#### Previous continuation — P9 in-app scope completed (historical; current follow-ups above)
 
 ```text
 Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo for the user's next request.

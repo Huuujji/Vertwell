@@ -1,5 +1,7 @@
 # P3 authentication — October 17, 2026
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 Real authentication/account lifecycle is implemented and live-tested in the
 development project now named **DualCounter** (`izdemgzdywtxhvgvsian`). The project
 reference/API URL is unchanged; organization/repository remain Vertwell.
@@ -84,7 +86,7 @@ P4 verification confirms both real Auth/profile accounts and settings are unchan
 Account commands already enforce
 their narrower permissions; the service key never replaces caller-scoped access.
 
-## Recovery and remaining hosted setup
+## Recovery and configured development Auth
 
 The browser uses PKCE and requests `/auth/callback` on its own origin. The callback
 explicitly exchanges the one-time code with `exchangeCodeForSession`, requires its

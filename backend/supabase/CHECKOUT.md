@@ -1,6 +1,8 @@
 # P6 atomic checkout — October 17, 2026
 
-## October 18 — stock feedback in the established frontend
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
+## October 18 stock-feedback acceptance — historical checkpoint
 
 The user-approved `20261018020000_pos_stock_feedback.sql` adds two read-only
 POS projections on DualCounter. All fifteen applied migration sources are now
@@ -151,8 +153,9 @@ Client prices, identities, status, stock usage and unknown fields are rejected.
 Payment must equal the recomputed total. Cash tender must cover it; SQL derives
 change. GCash references are unique recorded evidence across sales, including
 voided records. Neither reference entry nor this command verifies a payment
-provider. There is no live collection QR; the cashier records already-received
-payment. Provider integration stays P9.
+provider. The shared form displays the replaceable sample QR; it cannot establish
+a real payment. The cashier checks received payment and records its reference.
+The actual shop image/trial is deferred at the user's choice; provider API integration is not required.
 
 An operation is bound to its actor and exact JSON command. Exact retries return
 the stored receipt before stale-revision validation, without another deduction,
@@ -225,8 +228,10 @@ The separately reviewed activation command is
 `npm run checkout:activate --workspace backend -- --project-ref izdemgzdywtxhvgvsian --enable`.
 It verifies every migration hash and uses the account/catalogue lock order; it
 does not change accounts or stock. Use `--disable` to close new checkout again.
-Temporary activation was exercised only for the approved tests and ended
-disabled. A future request is needed to leave the service enabled for use.
+The original P6 test window temporarily enabled checkout and ended disabled.
+The later explicit request to leave checkout enabled was implemented and verified;
+keep it enabled for the user's current use. Activation is an administration
+operation, not an action automatically performed by ordinary verification commands.
 
 `checkout:verify` runs each shared scenario in a rolled-back transaction and
 compares all public/private counts, protected Auth/profile/settings fingerprints,

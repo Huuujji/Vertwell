@@ -3,7 +3,7 @@ import { money } from '../data/demo';
 import { Art, asset } from './ui';
 
 export function GCashQr({ preview = false }: { preview?: boolean }) {
-  return <><h3>SCAN TO PAY</h3><div className="qr-code"><Art file="QR_gcash.svg" label="GCash payment QR" /><strong>Happy Hentie Café & Hobby Shop</strong></div>{preview && <p className="qr-notice"><img src={asset('ad3e5.png')} alt="" />Preview QR · no payment collected</p>}</>;
+  return <><h3>SCAN TO PAY</h3><div className="qr-code"><Art file="QR_gcash.jpg" label="GCash payment QR" /><strong>Happy Hentie Café & Hobby Shop</strong></div>{preview && <p className="qr-notice"><img src={asset('ad3e5.png')} alt="" />Preview QR · no payment collected</p>}</>;
 }
 
 export function CashPaymentFields({ total, given, disabled, onChange }: { total: number; given: string; disabled?: boolean; onChange: (value: string) => void }) {

@@ -1,5 +1,7 @@
 # Backend database design — October 17, 2026
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 P1 design for the existing frontend; P2 supplies the local foundation. Backend work
 stays local: no commit, push, GitHub save, or deployment until all backend tasks
 are finished and the user authorizes the save. The frontend P0 checkpoint stands.
@@ -96,7 +98,7 @@ AUTHORIZATION.md. P5 protected aggregate services and real hosted acceptance pas
 CRUD.md and HandsOff.md record nine immutable sources, caller-token persistence,
 role checks and inventory contention. P6 transactional checkout is now applied
 and accepted with ten immutable sources and real concurrent caller-token tests;
-see CHECKOUT.md. P7 reviews and P8 reports remain deferred.
+see CHECKOUT.md. P7 reviews, P8 reports, P8A private updates and P9 in-app notifications are implemented; their guides and HandsOff.md retain exact acceptance limits.
 
 ## Column dictionary
 
@@ -188,7 +190,7 @@ The integer/numeric column types alone do not validate incoming JSON syntax.
   push remain outside this scope. See NOTIFICATIONS.md and HandsOff.md for acceptance.
 - Recipe/group/variant/bundle minimum completeness, modifier default constraints,
   fixed-option selection bounds and duplicate full bundle configurations must be
-  enforced by P5 aggregate commands before any role can edit catalogue data.
+  enforced by the implemented P5 aggregate commands whenever permitted roles edit catalogue data.
 - Multi-connection contention and real Supabase Auth/PostgREST/policy behavior
   require a Supabase development environment. Embedded PostgreSQL tests verify
   migrations and constraints, not those live-service properties.

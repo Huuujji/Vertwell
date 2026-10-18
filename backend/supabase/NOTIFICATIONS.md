@@ -1,5 +1,7 @@
 # P9 — saved in-app notifications
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 Implemented October 18, 2026. Migration sixteen is applied and schema/role-verified
 on DualCounter `izdemgzdywtxhvgvsian`, SHA-256
 `163b44c5c6d3dbab6e4fc7fc699a234b2347763d5ca5359a123da7f9981c3e85`.
@@ -21,7 +23,7 @@ requests and potential duplicate/unusual repeated sales. The existing Dashboard
 cards, filters, evidence disclosure and Audit Trail links remain the interface.
 Only Owner can load or change detection settings. Email, browser push and external
 delivery providers are outside this agreed scope. GCash keeps manual QR/reference
-recording; the user will replace `Frontend/public/assets/QR_gcash.svg` later.
+recording; the user will replace the shared JPG sample later. Its actual shop image/payment trial remains deferred.
 
 ## Data and delivery
 
@@ -64,6 +66,36 @@ all receipts after Owner changes thresholds. It currently scans that cashier's
 saved receipts; a high-volume deployment should profile this query before adding
 a maintained signature index/projection. This is not a background worker.
 
+## Measured performance boundary
+
+P12 profiled the unchanged detector in disposable PGlite/WASM PostgreSQL after
+the final browser suite had stopped. The workload has three cashiers, twenty
+purchased configurations, one line/two modifiers per synthetic receipt, ten-minute
+receipt spacing, and a separate five-checkout qualifying burst. Each warmed case
+has three timed runs. Synthetic projections exercise notification queries; they
+are not stock/payment reconciliation or real checkout acceptance evidence.
+
+| Total saved receipts | Affected-cashier receipts | Median affected-cashier detection | Median all-cashier detection |
+| --- | --- | --- | --- |
+| 1,005 | 339 | 72.93 ms | 193.87 ms |
+| 5,005 | 1,672 | 288.58 ms | 878.35 ms |
+| 20,005 | 6,672 | 1,209.24 ms | 3,650.86 ms |
+
+The qualifying alert's identity/revision remained unchanged on every repeated
+recomputation. `EXPLAIN (ANALYZE, BUFFERS)` at the largest size shows repeated
+per-receipt line/modifier aggregation and an external-merge signature sort, with
+the existing line/modifier indexes used for their correlated lookups. Work grows
+with saved history; these measurements do not establish acceptable hosted
+checkout latency, multi-connection throughput or a production SLA.
+
+No optimization or migration was applied from WASM timings alone. Before
+high-volume use, profile native PostgreSQL with representative basket sizes and
+concurrent commands, then evaluate materializing/reusing canonical signatures or
+a maintained projection if that workload confirms the bottleneck. Preserve exact
+configuration/window/overlap semantics and active alert/read identity. Any SQL
+change must be additive; the seventeen existing sources remain immutable.
+HandsOff.md records the measurement artifacts and precise scope.
+
 ## Read state, closures and recovery
 
 Read status persists across logout, login and other sessions of the same account.
@@ -89,7 +121,7 @@ Load failures remain visible rather than appearing as an empty alert queue.
 Existing private WebSocket topics carry only `notifications` invalidations.
 Alert changes target managers; read changes target only the acting account's
 private topic. Reconnect resynchronizes through the protected feed. Messages
-contain no evidence, names, amounts, commands or recipient-supplied IDs.
+contain no evidence, names, amounts, commands or recipient-supplied IDs. Hosted Supabase also appends its own generated UUID delivery `id`; consumers use the resource scopes and do not treat that transport ID as a business record or command.
 The shared interface keeps filters and Owner's unsaved settings draft. New alerts
 and read markers do not submit checkout, inventory, review or account commands.
 

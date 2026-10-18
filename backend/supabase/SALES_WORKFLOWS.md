@@ -1,5 +1,7 @@
 # P7 sales review, void decisions and event history
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 Implemented and accepted on hosted DualCounter `izdemgzdywtxhvgvsian` after the
 user's exact-project approval. SQL connectivity recovered without changing saved
 settings or certificate verification. Hosted rollback scenarios, real Auth/API/
@@ -117,7 +119,7 @@ fallback after live errors.
 single-receipt void/request/decision and `/api/daily-sales-reviews` aliases enforce
 the matching action and target. SQL repeats authorization in the transaction.
 `business_access.services.salesReview` enables the integration only after the
-schema exists. Review/history access works while new checkout remains disabled.
+schema exists. Review/history access also works if checkout is administratively disabled; current checkout is enabled.
 
 Managers have a Dashboard review queue and View all requests link to Audit Trail.
 Audit provides date/search/status/payment/request filters, six-row pagination,
@@ -135,8 +137,8 @@ available to start a mutation. Closing the tab can clear it: inspect recorded
 history before recreating an uncertain action afterward. Dirty review/decision
 forms protect backdrop, Escape, X, Cancel and workspace navigation.
 
-P8 durable financial dashboards/reports/exports and P9 integrations remain
-separate. The existing preview, Daily Sales Values and Print/export behavior stay
+P8 durable financial dashboards/reports/exports and P9 in-app notifications are
+implemented in their separate protected services. The existing preview, Daily Sales Values and Print/export behavior stay
 preserved. Figma comparison and physical printing verification remain excluded.
 
 ## Verification

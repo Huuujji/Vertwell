@@ -1,5 +1,7 @@
 # P5 protected Users and Inventory — October 17, 2026
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 P6 is now accepted in hosted development on top of the accepted P5 boundary. Its
 checkout command joins the same account/catalogue locks and inventory revision,
 so an old physical-count draft cannot overwrite sold stock. The protected POS
@@ -130,8 +132,7 @@ returns bounded batches of one-hour signed URLs. SQL verifies that a referenced
 object exists. No image is required. Unattached uploads are retained; no speculative
 cleanup deletes an image that an uncertain save may have committed.
 
-Configured login opens Inventory/Users for managers and a clear pending POS screen
-for Staff. Checkout/reviews/reports remain deferred. Preview stays explicitly separate.
+Configured login opens the protected management workspace for managers and live POS/own-day sales for Staff. Checkout, reviews, reports and saved in-app notifications are implemented in their later services. Preview stays explicitly separate.
 Existing filters, searches, stock tables and editors are reused. Receiving and stock
 edits/removals require reasons. Saves disable duplicate submissions and keep fields,
 files, wizard passwords and library drafts after failure. Navigation/logout and

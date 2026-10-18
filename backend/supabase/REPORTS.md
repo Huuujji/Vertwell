@@ -1,5 +1,7 @@
 # Durable reports and reconciliation — P8
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 P8 is accepted on DualCounter `izdemgzdywtxhvgvsian`. The thirteenth migration,
 `20261017210000_durable_reports.sql`, has normalized SHA-256
 `d38b737a66604f6722ebb5d06d083a69ee8b43662b9a0d91ded94667dc7ffca9`.

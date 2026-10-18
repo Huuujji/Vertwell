@@ -1,6 +1,8 @@
 # P2A/P5 frontend integration — October 17, 2026
 
-**Current P8A checkpoint:** shared established frontend and scoped private automatic
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
+**Historical P8A checkpoint:** shared established frontend and scoped private automatic
 updates are implemented and verified. Real-account POS also shares configuration,
 receipt and Cash/GCash fields. Protected APIs remain authoritative; drafts, cart,
 filters, revisions and operation recovery are retained. All fourteen migrations
@@ -36,18 +38,11 @@ Backend work stays local until the Backend task list is finished.
 
 ## What runs today
 
-`npm run dev` offers real account login separately from the labeled sample
-application. Configured login opens the protected Inventory/Users workspace for managers and
-a pending live-POS screen for Staff; it never enters a sample workspace. The new
-P5 migration is now applied; unavailable live services show explicit errors. The five
-sample people/catalogue/receipts remain preview data that resets on refresh.
-P2A added no business API, RLS policy or runtime settings. P3 adds restricted
-account endpoints, two migrations and the requested temporary Owner. `/api/auth/me`
-returns the verified active profile/role plus Auth email. P4 adds protected sales,
-access/settings and a limited POS selling-card API, with checkout unavailable.
-`createManagementData` now supplies the protected management bridge; it never
-substitutes sample data after a live error.
-The remaining sections describe the prepared P2A contracts and their dependencies.
+`npm run dev` offers real account login separately from the labeled sample application. Managers have their authorized Dashboard, Inventory, POS, Reports, Audit Trail and Users destinations; Staff have live POS and their own current-day sales. Owner-only review confirmation and alert settings remain protected.
+
+Real adapters use caller-scoped saved data for Users/Inventory, authoritative checkout, reviews/voids, reports and durable notifications. Private WebSocket invalidations reload authorized snapshots while preserving drafts, filters, cart contents and uncertain-operation recovery. Missing or denied services show explicit errors; they never open the preview as a fallback. The five sample people/catalogue/receipts remain separate preview data that resets on refresh. `/api/auth/me` resolves the actual active profile/role and authorized Auth email.
+
+The prepared P2A contracts and later acceptance notes below describe the evolution of this integration, rather than a list of services still awaiting implementation.
 
 `Frontend/src/lib/api-client.ts` supplies caller-session transport, cancellation,
 204 handling and typed network/access/validation/conflict/server errors. It strips
@@ -60,7 +55,7 @@ The database administration password/connection is never used by the frontend/AP
 `createManagementData` in `data/management.ts`, the caller-session transport and
 `ManagementWorkspace`. There is no flag that bypasses SQL permissions and no
 preview fallback. P6 checkout is accepted and gated by database activation;
-review/report integration remains deferred.
+P7 review and P8 report integrations are implemented, with P9 saved in-app notifications.
 
 ## Contract derived from the migration sources
 
@@ -68,8 +63,7 @@ review/report integration remains deferred.
 disposable PGlite database, inspects PostgreSQL columns and generates
 `Frontend/src/lib/data/database.generated.ts`. It includes all 25 tables,
 nullability and LF-normalized migration hashes matching the administration tooling.
-All ten sources, including both P5 live-path repairs and P6 checkout, match the verified hosted migration
-history. The contract generator itself does not prove hosted application and
+All seventeen sources, including P5 repairs, checkout, reviews, reports, private updates, stock feedback and notification follow-ups, match the verified hosted migration history. The contract generator itself does not prove hosted application and
 does not connect to or change the hosted project. Unknown SQL types fail
 generation. Regenerate after reviewed later migrations:
 
@@ -149,11 +143,14 @@ transactional idempotency. Do not automatically replay queued writes after login
 The implementation follows React's [effect cleanup guidance](https://react.dev/reference/react/useEffect)
 and Fetch's [response/cancellation behavior](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch).
 
-## Scheduled service and command mapping
+## Historical service and command mapping — implemented P2A–P9 plan
 
 Account services are implemented under P3 and management aggregate services under
 P5. The entries below preserve the original integration requirements; CRUD.md
-documents their current implementation and hosted acceptance boundary:
+documents their implementation and hosted acceptance boundary. Later P6–P9 work
+is accepted in CHECKOUT.md, SALES_WORKFLOWS.md, REPORTS.md, LIVE_UPDATES.md and
+NOTIFICATIONS.md. The future-tense entries below preserve the original plan, not
+new tasks; the later in-app/manual-GCash scope supersedes its external-verification entry:
 
 | Priority | Integration to complete |
 | --- | --- |

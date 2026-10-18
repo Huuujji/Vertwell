@@ -1,5 +1,7 @@
 # P4 business permissions — October 17, 2026
 
+**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+
 **P4 is accepted: implemented locally, applied and verified in hosted development.** The user explicitly
 approved this P4 migration and its verification on DualCounter
 (`izdemgzdywtxhvgvsian`), resolving the earlier automatic approval rejection.
@@ -75,10 +77,10 @@ is a narrowly projected definer function: active selling-card fields only, with
 no recipes, physical quantities, batches, stock links or library drafts.
 That P4 projection retains `checkoutReady: false`. P6 adds the separate protected
 checkout catalogue and database activation contract; hosted/caller-token and
-concurrent acceptance now pass. The approved test window ended disabled.
+concurrent acceptance pass. The temporary P6 window ended disabled; later user-requested activation is complete and checkout remains enabled.
 See CHECKOUT.md for the current readiness and receipt boundaries.
 
-Settings updates are the sole new business mutation. The command serializes
+Settings updates were P4's sole new business mutation. Later protected commands retain their own permission and transaction boundaries. The command serializes
 against account changes and other settings writers, rechecks active Owner,
 compares the current revision (null only for initial creation), validates database
 bounds, and commits the settings plus actor/name/role audit together. Revisions
@@ -86,7 +88,7 @@ advance even within one transaction. The audit's `entity_type` is `alert_setting
 and its constant entity ID `00000000-0000-0000-0000-000000000001` identifies the
 singleton; the authenticated actor has a separate `actor_id`. Denied, stale,
 invalid or audit-failed writes change neither settings nor audit. No setting or
-fake Owner is seeded; this does not implement P9 alert delivery/detection.
+fake Owner is seeded. P4 alone did not implement alert delivery/detection; P9 now provides it through the protected in-app notification service.
 
 ## HTTP routes
 
@@ -164,7 +166,7 @@ after the verifier fix. Evidence is in workspace-parent
 No runtime UI changed; no browser or real Auth/PostgREST checks were rerun during
 this acceptance. Cross-connection account-write contention remains a verification
 boundary; sequential last-Owner cases run only in disposable SQL. Keep admin and
-Huuujji active and unchanged. P5 is next; unfinished business services remain closed.
+Huuujji active and unchanged. P5 was the next priority at that historical checkpoint; P5–P9 are now implemented within their agreed scopes.
 
 Implementation references: [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security),
 [PostgreSQL policies](https://www.postgresql.org/docs/17/ddl-rowsecurity.html),
