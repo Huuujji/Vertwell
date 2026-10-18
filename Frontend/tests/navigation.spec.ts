@@ -95,7 +95,7 @@ test('drawer stays scrollable on short screens and cart survives all owner desti
   await navigate('POS');
   await page.getByRole('button', { name: 'Add Mango Matcha Latte to order', exact: true }).click();
   for (const name of ['Dashboard', 'Inventory', 'Reports', 'Audit Trail', 'Users', 'POS']) await navigate(name);
-  await expect(page.locator('.total-row')).toContainText('75.00');
+  await expect(page.locator('.total-row')).toContainText('84.00');
   await trigger.click();
   await drawer.getByRole('button', { name: 'Log out' }).focus();
   expect(await drawer.evaluate(dialog => dialog.scrollTop)).toBeGreaterThan(0);

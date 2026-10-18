@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
+import { testRealtime } from '../../../backend/scripts/test-realtime';
 import { integrationSchemaSource } from '../../../backend/scripts/integration-schema';
 import { createApiClient, ApiError } from '../../src/lib/api-client';
 import { databaseSchema } from '../../src/lib/data/database.generated';
@@ -25,6 +26,7 @@ before(async () => {
   await database.exec(`create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create table auth.users(id uuid primary key, email text, raw_app_meta_data jsonb default '{}'::jsonb);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;`);
+  await testRealtime(database);
   for (const file of (await readdir(new URL('migrations/', sqlRoot))).filter(file => file.endsWith('.sql')).sort()) {
     await database.exec(await readFile(new URL(`migrations/${file}`, sqlRoot), 'utf8'));
   }

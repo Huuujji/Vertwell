@@ -20,7 +20,14 @@ function pagination(query: Record<string, unknown>) {
 businessRouter.get('/access', requireAuth, async (_req, res) => {
   const { data, error } = await res.locals.database.rpc('business_access');
   if (error) businessError(error);
-  res.json({ ...data, services: { inventoryCrud: data?.services?.inventoryCrud === true, checkout: data?.services?.checkout === true, salesReview: data?.services?.salesReview === true, reports: false } });
+  res.json({ ...data, services: { inventoryCrud: data?.services?.inventoryCrud === true, checkout: data?.services?.checkout === true, salesReview: data?.services?.salesReview === true, reports: data?.services?.reports === true } });
+});
+
+businessRouter.get('/reports', requireAuth, requirePermission('reports.read'), async (req,res)=>{
+  if(Object.keys(req.query).length)throw new HttpError(422,'Report snapshots do not accept scope or identity overrides.');
+  const {data,error}=await res.locals.database.rpc('read_reports');
+  if(error)businessError(error);
+  res.json(data);
 });
 
 businessRouter.get('/sales-workflow', requireAuth, requirePermission('sales.read'), async (req,res)=>{
@@ -79,7 +86,7 @@ businessRouter.get('/pos/catalogue', requireAuth, requirePermission('pos.read'),
 });
 
 businessRouter.get('/pos/checkout-catalogue', requireAuth, requirePermission('pos.read'), async (req, res) => {
-  const { data, error } = await res.locals.database.rpc('read_checkout_catalogue', pagination(req.query));
+  const { data, error } = await res.locals.database.rpc('read_checkout_catalogue_stock', pagination(req.query));
   if (error) businessError(error);
   res.json(data);
 });
@@ -109,6 +116,12 @@ businessRouter.post('/pos/quote', requireAuth, requirePermission('checkout.creat
   res.json(data);
 });
 
+businessRouter.post('/pos/stock', requireAuth, requirePermission('checkout.create'), async (req,res)=>{
+  if(!req.body||typeof req.body!=='object'||Array.isArray(req.body)||Object.keys(req.body).some(key=>key!=='lines')||!Array.isArray(req.body.lines))throw new HttpError(422,'A cart is required for stock feedback.');
+  const {data,error}=await res.locals.database.rpc('read_checkout_stock',{lines:req.body.lines});
+  if(error)businessError(error);res.json(data);
+});
+
 businessRouter.post('/pos/availability', requireAuth, requirePermission('checkout.create'), async (req,res)=>{
   if(!req.body||typeof req.body!=='object'||Array.isArray(req.body)||Object.keys(req.body).some(key=>!['productId','lines'].includes(key))||!Array.isArray(req.body.lines))throw new HttpError(422,'A product and current cart are required.');
   const {data,error}=await res.locals.database.rpc('check_checkout_product',{product_id:uuid(req.body.productId),lines:req.body.lines});
@@ -119,6 +132,23 @@ businessRouter.post('/checkout', requireAuth, requirePermission('checkout.create
   if (!req.body || Array.isArray(req.body) || typeof req.body !== 'object') throw new HttpError(422, 'A checkout command is required.');
   const { data, error } = await res.locals.database.rpc('checkout', { command: req.body });
   if (error) businessError(error);
+  res.json(data);
+});
+
+businessRouter.get('/notifications', requireAuth, requirePermission('dashboard.read'), async (req,res) => {
+  const {data,error}=await res.locals.database.rpc('read_notifications',pagination(req.query));
+  if(error)businessError(error);
+  res.json(data);
+});
+businessRouter.patch('/notifications/:id/read', requireAuth, requirePermission('dashboard.read'), async (req,res) => {
+  const body=req.body;
+  if(!body||Array.isArray(body)||typeof body!=='object'||Object.keys(body).some(key=>!['revision','read'].includes(key))||
+    typeof body.revision!=='string'||!/^[1-9][0-9]{0,18}$/.test(body.revision)||typeof body.read!=='boolean')
+    throw new HttpError(422,'Enter the current notification revision and read state.');
+  const {data,error}=await res.locals.database.rpc('set_notification_read',{
+    notification_id:uuid(req.params.id),expected_revision:body.revision,is_read:body.read,
+  });
+  if(error)businessError(error);
   res.json(data);
 });
 
@@ -149,7 +179,7 @@ businessRouter.patch('/alert-settings', requireAuth, requirePermission('alerts.w
 const pending: [string, string, BusinessAction, string?][] = [
   ['get', '/dashboard', 'dashboard.read'],
   ['post', '/inventory', 'inventory.write'], ['patch', '/inventory/:id', 'inventory.write'],
-  ['delete', '/inventory/:id', 'inventory.write'], ['get', '/reports', 'reports.read'],
+  ['delete', '/inventory/:id', 'inventory.write'],
 ];
 for (const [method, path, action, target] of pending) {
   const register = method === 'get' ? businessRouter.get.bind(businessRouter) : method === 'patch' ? businessRouter.patch.bind(businessRouter)

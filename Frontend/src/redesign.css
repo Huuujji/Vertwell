@@ -454,18 +454,29 @@ select:not([multiple]) { appearance: none; background-image: url("data:image/svg
 .workspace .status.expiring { color: #9a480b; border-color: #e69742; background: #fff0dc; }
 :is(.admin-workspace, .staff-workspace) .workspace-main .time-field .date-input input { border: 0; border-radius: 0; background: transparent; margin: 0; padding: 10px 12px; box-shadow: none; width: 100%; font-variant-numeric: tabular-nums; }
 .time-field .date-input > button { flex: 0 0 44px; min-height: 44px; color: #78654b; }
-:is(.admin-workspace, .staff-workspace) .product-details-modal .modal-footer { padding: 16px 24px; border-top: 1px solid #e5dfd4; }
-:is(.admin-workspace, .staff-workspace) .product-details-modal .modal-footer .actions { margin: 0; }
+:is(.admin-workspace, .staff-workspace) :is(.product-details-modal, .bulk-final-modal, .recorded-receipt-modal, .workflow-modal) .modal-footer { padding: 16px 24px; border-top: 1px solid #e5dfd4; flex-shrink: 0; }
+:is(.admin-workspace, .staff-workspace) :is(.product-details-modal, .bulk-final-modal, .recorded-receipt-modal, .workflow-modal) .modal-footer .actions { margin: 0; }
+.workspace .workflow-modal[open] { display: flex; flex-direction: column; overflow: clip; }
+.workspace .workflow-modal .modal-header { flex-shrink: 0; }
+.workspace .workflow-modal .modal-body { overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
+.workspace .live-pos .receipt-history-table { min-width: 640px; table-layout: auto; }
+.workspace .live-pos .receipt-history-table th { width: auto; }
+.receipt-history-table :is(td:nth-child(3), td:nth-child(4)) { white-space: nowrap; overflow-wrap: normal; }
+.recorded-receipt-modal :is(p, small) { overflow-wrap: anywhere; }
 .search-select-control button { display: grid; place-items: center; }
 
 .admin-workspace :is(.product-details-modal, .discard-modal, .bulk-final-modal)[open] { display: flex; flex-direction: column; overflow: clip; }
 .admin-workspace :is(.product-details-modal, .discard-modal, .bulk-final-modal) :is(.modal-header, .modal-footer) { flex-shrink: 0; }
 .admin-workspace :is(.product-details-modal, .discard-modal, .bulk-final-modal) .modal-body { overflow-y: auto; min-height: 0; overscroll-behavior: contain; }
 /* Protected POS reuses the catalogue, order and modal layouts. */
-.live-pos .product-card { overflow-wrap: anywhere; }
-.live-pos .product-card > span { font-size: .85rem; }
-.live-pos .live-pos-option { display: flex; align-items: center; gap: .65rem; width: fit-content; max-width: 100%; margin: .6rem 0; }
-.live-pos .live-pos-option input { flex: 0 0 auto; width: 20px; height: 20px; min-height: 20px; }
-.live-pos fieldset { margin: 1rem 0; padding: 1rem; border: 1px solid #ded8ca; border-radius: 12px; }
-.live-pos-component { margin-left: .75rem; padding-left: .75rem; border-left: 2px solid #d5c291; }
-.live-pos [aria-label="Recorded sales"] { margin: 1rem 0; padding: 1rem; background: #fff; border: 1px solid #ded8ca; border-radius: 12px; overflow-wrap: anywhere; }
+.product-card { overflow-wrap: anywhere; }
+.live-pos-component { display: block; margin-left: .75rem; padding-left: .75rem; border-left: 2px solid #d5c291; }
+.pos-heading { min-width: 0; }
+.pos-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.pos-title-row > h1 { min-width: 0; }
+.pos-title-row > button { flex-shrink: 0; }
+.workspace .pos-history { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; }
+.order-panel .staff-order-breakdown { padding-top: 12px; font-size: 13px; color: #70675b; }
+.order-panel .staff-order-breakdown p { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.reports fieldset.report-controls { min-inline-size: 0; border: 0; margin-inline: 0; }
+.live-pos section[aria-label="Recorded sales"] { margin: 1rem 0; padding: 1rem; background: #fff; border: 1px solid #ded8ca; border-radius: 12px; overflow-wrap: anywhere; }

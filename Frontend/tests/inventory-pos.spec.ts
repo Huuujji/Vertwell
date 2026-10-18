@@ -88,7 +88,7 @@ test('new modifier price and stock snapshots never merge into an older cart conf
   await page.locator('.modifier-option').first().getByLabel('Quantity', { exact: true }).fill('2');
   await saveRecord(page);
   await nav(page, 'POS'); await customize(page); await page.getByRole('checkbox', { name: /Extra cheese/ }).check(); await saveChoices(page);
-  await expect(page.locator('.cart-line')).toHaveCount(2); await expect(page.locator('.total-row')).toContainText('285.00');
+  await expect(page.locator('.cart-line')).toHaveCount(2); await expect(page.locator('.total-row')).toContainText('319.20');
   await page.getByRole('button', { name: 'Pay', exact: true }).click(); await page.getByRole('button', { name: 'CASH PAYMENT' }).click();
   await page.getByLabel('Amount Given:', { exact: true }).fill('400'); await page.getByRole('button', { name: 'Confirm', exact: true }).click();
   await nav(page, 'Audit Trail'); await page.locator('tbody tr').first().click();

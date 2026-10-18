@@ -40,22 +40,23 @@ async function login(page: Page) {
 
 test('configured login uses the real Owner profile, restores it and logs out without exposing sample business data', async ({ page }) => {
   await configured(page); await login(page);
-  await expect(page.getByRole('heading', { name: 'Welcome, Real Owner' })).toBeVisible();
-  await expect(page.getByText('Signed in as')).toContainText('Owner');
+  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
+  await expect(page.locator('.nav-identity')).toContainText('Owner');
+  await expect(page.getByRole('heading',{name:/Welcome,/})).toHaveCount(0);
   await expect(page.getByText('Sample data · resets on refresh', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Welcome, Real Owner' })).toBeVisible();
+  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
   await page.getByRole('button', { name: 'Log out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 });
 
 test('profile denial removes authenticated content and offers explicit retry/logout', async ({ page }) => {
   const policy = await configured(page); await login(page);
-  await expect(page.getByRole('heading', { name: 'Welcome, Real Owner' })).toBeVisible();
+  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
   policy.deny(); await page.reload();
   await expect(page.getByRole('alert')).toContainText('Account inactive');
-  await expect(page.getByRole('heading', { name: 'Welcome, Real Owner' })).toHaveCount(0);
+  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible();
 });
 
@@ -105,7 +106,7 @@ for (const callback of ['expired', 'missing-verifier', 'non-recovery', 'empty', 
   test(`${callback} callback cannot reuse an existing session as password-recovery proof`, async ({ page }) => {
     await configured(page);
     await login(page);
-    await expect(page.getByRole('heading', { name: 'Welcome, Real Owner' })).toBeVisible();
+    await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
     await page.evaluate(kind => {
       if (kind === 'expired' || kind === 'non-recovery') {
         localStorage.setItem('sb-auth-auth-token-code-verifier', JSON.stringify(`test-verifier${kind === 'expired' ? '/recovery' : ''}`));
@@ -118,7 +119,7 @@ for (const callback of ['expired', 'missing-verifier', 'non-recovery', 'empty', 
       ? '/auth/callback?error_code=otp_expired' : '/auth/callback?code=invalid-recovery-code');
     await expect(page.getByRole('alert')).toContainText('invalid or expired');
     await expect(page.getByRole('heading', { name: 'Choose a new password' })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Welcome, Real Owner' })).toHaveCount(0);
+    await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toHaveCount(0);
     await expect(page).toHaveURL('/');
   });
 }

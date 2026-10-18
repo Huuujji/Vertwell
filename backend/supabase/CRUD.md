@@ -3,7 +3,8 @@
 P6 is now accepted in hosted development on top of the accepted P5 boundary. Its
 checkout command joins the same account/catalogue locks and inventory revision,
 so an old physical-count draft cannot overwrite sold stock. The protected POS
-opens only after database activation; the approved test window ended disabled.
+opens only after database activation. The user has since requested activation
+for use; checkout is now enabled and P7 hosted acceptance passes.
 See [CHECKOUT.md](CHECKOUT.md). Existing P5 evidence below is historical and intact.
 
 Implementation is local and the reviewed P5 migration is applied in hosted
@@ -35,6 +36,15 @@ Four additional authenticated RPCs provide `read_inventory`, `inventory_command`
 joins Auth email to profiles in one statement. Admin sees Staff plus its own
 identity; only Staff accounts are writable. Passwords never enter these rows.
 Existing P3 last-active-Owner, signed-in-account and revision protections remain.
+The applied `20261017195000_retired_accounts.sql` adds trusted retirement of
+inactive development accounts. `private.retired_accounts` records the identity,
+time, database administrator and reason without changing its Auth/profile or
+historical rows. Account locks serialize retirement with account/workflow changes;
+retired profiles and retirement evidence cannot be edited through application
+roles. `read_managed_accounts()` omits retired identities in SQL; ordinary inactive
+accounts remain visible. The eight exact P6 fixture IDs were retired after checking
+their evidence, inactivity and zero sessions. No name-prefix filter or profile
+hard deletion was added.
 The wizard now creates actual accounts with operator-supplied initial passwords.
 It sends no invitation or verification email. Email remains read-only in Manage;
 email-change/invitation workflows require their own confirmed-identity flow.

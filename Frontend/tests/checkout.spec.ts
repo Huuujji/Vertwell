@@ -24,7 +24,7 @@ test('Owner checkout uses server VAT/tender/change, persists receipts and preser
   await page.getByRole('button',{name:'Inventory',exact:true}).click();await page.getByRole('button',{name:'POS',exact:true}).click();
   await expect(page.locator('.cart-line')).toHaveCount(1);
   await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();
-  await expect(page.getByLabel('Amount Given',{exact:true})).toBeFocused();await page.getByLabel('Amount Given',{exact:true}).fill('20');
+  await expect(page.getByLabel('Amount Given:',{exact:true})).toBeFocused();await page.getByLabel('Amount Given:',{exact:true}).fill('20');
   await page.getByRole('button',{name:'Confirm payment received'}).click();await expect(page.getByRole('status').filter({hasText:'Order'})).toContainText('Completed');
   await expect(page.getByRole('status').filter({hasText:'Order'})).toContainText('Change ₱6.00');
   await page.reload();await page.getByRole('button',{name:'POS',exact:true}).click();await page.getByRole('button',{name:'Recorded sales',exact:true}).click();
@@ -41,7 +41,7 @@ test('Staff GCash records Pending review, exposes only own-day sales and denies 
   await page.getByRole('button',{name:'View receipt',exact:true}).click();await expect(page.getByRole('dialog')).toContainText('Provider verification is separate');
 });
 test('lost committed response survives refresh and exact retry returns one receipt without another deduction',async({page})=>{
-  await pos(page,'Admin');await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given',{exact:true}).fill('50');
+  await pos(page,'Admin');await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('50');
   const before=await api.read();let dropped=false;
   await page.route('**/api/checkout',async route=>{
     if(dropped){await route.fallback();return;}dropped=true;
@@ -50,16 +50,16 @@ test('lost committed response survives refresh and exact retry returns one recei
   await page.getByRole('button',{name:'Confirm payment received'}).click();await expect(page.getByRole('button',{name:'Retry same checkout'})).toBeVisible();
   await page.getByRole('button',{name:'Close dialog',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('button',{name:'Retry same checkout'})).toBeVisible();await expect(page.getByLabel('Amount Given',{exact:true})).toHaveValue('50');
+  await expect(page.getByRole('button',{name:'Retry same checkout'})).toBeVisible();await expect(page.getByLabel('Amount Given:',{exact:true})).toHaveValue('50');
   await page.getByRole('button',{name:'Retry same checkout'}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
   const after=await api.read();expect(BigInt(after.revision)).toBe(BigInt(before.revision)+1n);
   expect(await page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('vertwell-checkout:')))).toHaveLength(0);
 });
 test('stale checkout retains cart/payment and requires a fresh quote review; invalid whole-cart addition changes nothing',async({page})=>{
-  await pos(page);await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given',{exact:true}).fill('20');
+  await pos(page);await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('20');
   await api.db.query('update private.inventory_state set revision=revision+1 where singleton');
-  await page.getByRole('button',{name:'Confirm payment received'}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Amount Given',{exact:true})).toHaveValue('20');
-  await page.getByRole('button',{name:'Refresh quote and review'}).click();await expect(page.getByRole('dialog',{name:'ORDER CONFIRMATION'})).toBeVisible();
+  await page.getByRole('button',{name:'Confirm payment received'}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Amount Given:',{exact:true})).toHaveValue('20');
+  await page.getByRole('button',{name:'Review current quote'}).click();await expect(page.getByRole('dialog',{name:'ORDER CONFIRMATION'})).toBeVisible();
   await page.getByRole('button',{name:'Close dialog',exact:true}).click();await expect(page.locator('.cart-line')).toHaveCount(1);
 });
 test('server-scoped variants reject oversized quantities and prevent opening options when the cart uses all shared stock',async({page})=>{
@@ -68,11 +68,11 @@ test('server-scoped variants reject oversized quantities and prevent opening opt
   const p={...fixture.product,id:randomUUID(),sku:`P6-${randomUUID()}`,name:'P6 live variants',model:'Variants',stockId:null,
     variants:[{id:randomUUID(),name:'Edition',price:'25',stockId:stock.id,enabled:true}]};
   await fixture.save('product.save',p);await api.db.query('commit');await api.db.query('reset role');
-  await pos(page);await page.getByRole('button',{name:'Add P6 live variants to order'}).click();await page.getByLabel('Variant',{exact:true}).selectOption(p.variants[0]!.id);
+  await pos(page);await page.getByRole('button',{name:'Add P6 live variants to order'}).click();await page.getByRole('radio',{name:/Edition/}).check();
   await page.getByLabel('Quantity',{exact:true}).fill('100');await page.getByRole('button',{name:'Add',exact:true}).click();
   await expect(page.getByRole('dialog')).toBeVisible();await expect(page.getByRole('alert')).toContainText('changed');await expect(page.getByLabel('Quantity',{exact:true})).toHaveValue('100');
   await page.getByLabel('Quantity',{exact:true}).fill('1');await page.getByRole('button',{name:'Add',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.locator('.cart-line')).toContainText('Edition');
-  await page.getByRole('button',{name:'Edit options',exact:true}).click();await page.getByLabel('Quantity',{exact:true}).fill('7');await page.getByRole('button',{name:'Add',exact:true}).click();
+  await page.getByRole('button',{name:'Edit options',exact:true}).click();await page.getByLabel('Quantity',{exact:true}).fill('7');await page.getByRole('button',{name:'Update item',exact:true}).click();
   await page.getByRole('button',{name:'Add P6 live variants to order'}).click();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(page.getByRole('alert')).toContainText('Not enough usable stock');
 });
 test('unavailable recipe defaults stay unchecked and valid explicit choices persist in the quoted cart',async({page})=>{

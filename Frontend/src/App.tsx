@@ -23,6 +23,7 @@ import type { ReportContext } from './pages/Reports';
 import { supabase } from './lib/supabase';
 import { signOut } from './lib/auth';
 import ManagementWorkspace from './components/ManagementWorkspace';
+import { LiveUpdates } from './lib/live-updates';
 import AccountSession, { useAccountSession } from './components/AccountSession';
 
 export default function App() {
@@ -101,7 +102,7 @@ export default function App() {
     else setSales(current => current.map(sale => sale.id === id && sale.voidRequest?.status === 'Pending' ? { ...sale, voidRequest: { ...sale.voidRequest, status: 'Rejected', reviewedBy: identity.name, reviewedRole: identity.role, reviewedAt: new Date().toISOString() } } : sale));
   }
   if (accountSession.status === 'recovery') return <Login accounts={accounts} onPreview={enterPreview} recovery />;
-  if (accountSession.status === 'authenticated') return <ManagementWorkspace key={`${accountSession.identity.profile.id}:${accountSession.identity.profile.role}`} identity={accountSession.identity} />;
+  if (accountSession.status === 'authenticated') return <LiveUpdates key={`${accountSession.identity.profile.id}:${accountSession.identity.profile.role}`} profile={accountSession.identity.profile}><ManagementWorkspace identity={accountSession.identity} /></LiveUpdates>;
   if (accountSession.status !== 'anonymous') return <AccountSession state={accountSession} />;
   if (!identity) return <Login accounts={accounts} onPreview={enterPreview} />;
   const navigation = identity.role === 'Staff' ? pages.filter(p => p === 'POS' || p === 'Audit Trail') : pages;

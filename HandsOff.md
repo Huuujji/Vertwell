@@ -1,10 +1,1467 @@
 # Vertwell handoff
 
-Updated October 17, 2026. This is the single handoff file, merged from the former HandsOff.md UI notes and HANDOFF.md technical/history notes. **Paused at the user's explicit request. Do not resume implementation until requested. The Backend phase has started; keep all Backend code/documentation local and do not commit, push or save it to GitHub until all Backend tasks are finished.** P0 remains complete: the frontend and existing scaffold are saved and verified in https://github.com/Huuujji/Vertwell on `main`. **P1/P2/P2A/P3/P4/P5/P6 are accepted. P7 is implemented and its approved migration is applied/schema-verified; broader hosted acceptance remains incomplete after SQL connection failures. The latest request authorizes checkout activation for the user's own testing and removal of P6 test accounts, superseding the older instruction to leave checkout disabled. Activation attempts timed out; enablement and account removal remain pending. The development notice was removed from source but is unverified. P8/P9 remain later work.** The hosted development project is DualCounter, reference `izdemgzdywtxhvgvsian`. Keep both original Owners unchanged and keep the user-requested Jestine Admin / Jest and Aquino Staff / Aquino accounts active. Original user messages and historical checkpoints remain preserved below.
+Updated October 18, 2026. This is the single handoff file. **P9's agreed scope is implemented: saved in-app notifications for Owner/Admin, with persistent per-account read state, using the established Dashboard. All seventeen migrations, including the merged-alert identity follow-up, are applied and verified on DualCounter. The ordered P1–P9 development implementation priorities now have completion evidence for their agreed scopes; this is not a claim of unrestricted production readiness or a new full-app acceptance run. Backend source/documentation remain local; no commit, push, PR, GitHub save or app deployment was requested or performed.** Preserve the accepted frontend consistency checkpoint, manual GCash/sample QR, enabled checkout, removed development notice, retired accounts/history, real accounts/credentials/roles/settings, local uncommitted work and every original user message. The user will replace their QR later; no GCash API, email or browser-push integration is required. The hosted development project remains DualCounter, reference `izdemgzdywtxhvgvsian`. All seventeen applied migration sources are immutable. Earlier notification-scope-pending, recording-only, payment-API and next-priority continuations are historical wherever they disagree with this checkpoint and the user's chosen scope.
+
+## README presentation rule — October 18, 2026
+
+**Do not edit the repository-root `README.md` unless the user explicitly requests a README change.** It is the public introduction displayed on the GitHub repository and must remain polished and presentable for visitors. Preserve its project description, team members, tech stack, features, and useful setup information.
+
+- Keep task progress, current checkpoints, validation results, pending fixes, original requests, and continuation scripts in `HandsOff.md`. Put detailed technical contracts in the appropriate technical guide.
+- Reading the README for context is allowed. Routine frontend/backend work, completed tests, task completion, and handoff updates do not authorize changing it.
+- Do not add implementation logs, dated checkpoint histories, local machine paths, test-account details, or session-specific instructions to the public README.
+- This rule overrides every older instruction in this handoff or its continuation scripts that says to update the README, synchronize its checkpoint, fix a stale README status, or record acceptance results there. Those instructions are historical and must not be replayed.
+
+The README cleanup in this chat was explicitly requested. It replaces the accumulated progress log with a visitor-facing project introduction, retains all five team members and their roles, and presents the features, access roles, tech stack, local setup, commands, structure, and documentation links. Only `README.md` and this handoff were edited for this request; no application implementation, commit, push, or deployment was performed.
+
+### Original README request — verbatim
+
+```text
+since we already using the handsoff can you change the Readme fix that and tell the handsoff not to change the readme
+
+fix the readme and since this is on github the read me will be the description of our website thats why there are my team members and the techstack and other details that the viewers of repo may see
+
+also note in the handsoff that do not edit the Readme because that file is presented in the Github I mean it is shown in the Github repo so it should be looking Nice and presentable
+```
+
+**For future continuation:** Apply this README rule before following any checkpoint or continuation below. Continue from the user’s next concrete request; update `HandsOff.md` and relevant technical guides for progress. The application checkpoint below remains the existing implementation baseline. This documentation cleanup does not create a new application task or a new test/production-readiness claim.
 
 ## New — current state and continuation
 
-### Current checkpoint — stopped during requested checkout activation and workspace cleanup (October 17, 2026)
+### Latest completed task — P9 saved in-app notifications (October 18, 2026)
+
+The user resumed the highest-priority task. The full original Backend, Dashboard alert, October 17 Owner-only settings, P8A, consistency and GCash requirements were read, rather than treating an old continuation as new scope. The sample-QR task was already complete. The handoff explicitly left notification channels/recipients/rules open; the user asked for an explanation and then selected in-app delivery. This resolves that P9 scope decision. Email, browser push and external delivery providers are outside the agreed task, rather than unfinished P9 requirements.
+
+#### Current request and scope decision — verbatim
+
+```text
+Read HandsOff.md and implement the Task highest-priority. Follow my full original message, not just the continuation script.
+```
+
+In response to the notification-scope question, the user wrote:
+
+```text
+describe the options for me to understand
+```
+
+After explanation of in-app, in-app plus email and in-app plus browser push, the user's selected answer was:
+
+```text
+Option 1: In-app notifications only (recommended)
+```
+
+The selected in-app option was described as saved alerts/read status across logins for Owner/Admin, covering pending void requests and unusual repeated sales, while preserving the established design, original evidence, existing thresholds, Owner-only settings and human review. This complete context governs the implementation; no external-delivery provider or recipient list was inferred.
+
+During the final identity-fix application and verification, the user explicitly continued the active task:
+
+```text
+continue
+```
+
+#### Implementation against the full original intent
+
+| Requirement | Result |
+| --- | --- |
+| In-app delivery for Owner/Admin, including while Dashboard is closed | Database events create durable alerts in the business transaction. The Dashboard loads the protected saved feed on entry/reconnect; generation does not depend on a browser or scheduled job. |
+| Established frontend design | Existing shared `AlertCenter` cards, category filters, counts, evidence disclosure, Audit Trail links and responsive styles are reused. No second real-account UI or new notification shell was introduced. Preview remains its labeled in-memory mode. |
+| Original actor/name/role/time, trigger and affected orders | Private current records and append-only versions save the original request or repeated-sale evidence, receipt IDs/numbers, recorded times, rule and exact purchased basket/configuration identity. Updates retain prior evidence. |
+| Group repeated alerts without calling them misconduct | Rolling-window detection retains the existing five orders/two minutes defaults and Owner-configured thresholds; overlapping windows merge and separate bursts stay separate. Sorted basket lines/JSON keys compare consistently, while original modifiers, nested options, product/variant/SKU, price, cashier and payment distinguish baskets. |
+| Read state across logins and independent managers | Each authenticated profile has its own durable read/unread marker. Its own sessions synchronize; another manager's status is independent. New evidence/rules advance the alert revision and make it unread again. |
+| Read is not approval, resolution, refund or punishment | Markers cannot change a sale, payment, request decision, stock or account. Decided void requests leave the active feed with preserved history. Duplicate alerts that no longer qualify leave it with the explicit system closure reason `No longer matches current receipts or detection settings`, without claiming human review. Renewed requests get a new unread identity. |
+| Owner-only settings and protected roles | Existing permission matrix, public table grants and private-helper grants are unchanged. Only Owner reads/edits settings. Owner/Admin receive alerts through management-authorized RPCs; Staff/inactive/anonymous/service clients are denied. No caller-supplied recipient ID is accepted. |
+| Safe automatic updates, drafts, filters and recovery | Existing private topics carry metadata-only `notifications` invalidations. Alert changes target managers; read changes target only the acting account. Reconnect reloads through the caller-scoped API. Incoming feed changes preserve filters/settings drafts and never repeat a business command. |
+| Stale/failed/lost responses | Read commands require the displayed revision and desired boolean state. A changed/closed alert returns 409 and loads current evidence. Failed/uncertain responses reload saved state without an automatic write retry; a confirmed saved result clears a lost-response error. Mixed pagination snapshots and malformed data fail visibly instead of showing a false empty queue. |
+| Preserve existing work and clarified GCash scope | Manual payments, replaceable `Frontend/public/assets/QR_gcash.svg`, reference guidance, authoritative checkout/stock, reviews/reports, retired history, real accounts/credentials/settings and all prior user messages remain. No new GCash API, email or push dependency. |
+
+Implementation details and contracts: `backend/supabase/NOTIFICATIONS.md`. New runtime pieces are `Frontend/src/lib/data/notifications.ts`, the protected notification routes in `backend/src/routes/business.ts`, the shared `AlertCenter` adapter/recovery and the added private-update scope. New meaningful coverage is in `backend/tests/notifications.test.ts`, `Frontend/tests/notifications.spec.ts`, `Frontend/tests/unit/notifications.test.ts` and the API route scenario. Existing test/schema/verifier expectations were extended for seventeen migrations; no old applied SQL source was edited.
+
+#### Hosted application and preservation
+
+- Applied `20261018030000_in_app_notifications.sql` to DualCounter `izdemgzdywtxhvgvsian` through the permitted exact-target database command. SHA-256: **`163b44c5c6d3dbab6e4fc7fc699a234b2347763d5ca5359a123da7f9981c3e85`**. It is immutable, along with its fifteen predecessors.
+- Final review then reproduced a real edge case: after changing detection windows merged formerly separate bursts, a later recomputation could choose an older archived alert instead of the current active one. The extended boundary/grouping regression failed on that identity mismatch, then passed with the additive `20261018040000_stable_notification_identity.sql`. This seventeenth migration changes only the private lookup ordering to prefer an active overlapping alert. It does not rewrite migration sixteen or mutate stored rows/grants. Applied SHA-256: **`c66acb91112e4e5b56f997d92deca7b7c9d4b33508600207ec34da4cf31fc32f`**. Stable active identity and read state now survive merged bursts and unchanged subsequent detection. All seventeen sources are immutable.
+- Adds three private RLS tables (`review_notifications`, `notification_versions`, `notification_reads`), tightly scoped definer helpers/triggers and two authenticated RPCs (`read_notifications`, `set_notification_read`). No new public table, application table grant/write policy, private-helper execution grant, account or business mutation is introduced.
+- Existing pending requests and qualifying saved receipts are backfilled into notification storage only. Hosted state gained **one alert and one evidence version**, with zero read markers at verification; no illustrative sales or actors were seeded.
+- Final `db:verify` passed for all **17** hashes, the existing 25 public RLS tables, exact table/function/private-helper grants and indexed public foreign keys. Fresh before/after read-only fingerprints match every pre-existing public/private business table and all Auth IDs. Notification records/read state also match their post-migration-sixteen snapshot after the follow-up. Checkout is enabled, four accounts are active and retired sessions remain zero. Saved settings remain unchanged (no alert-settings row was invented).
+- Hosted read-only SQL checks under existing active Owner/Admin/Staff identities confirm management feed reads and Staff denial; they also verify zero application grants on the new private tables. This did not log into hosted Auth or execute a hosted checkout, stock/account save, void/review or read-marker mutation. New event propagation, writes and lost/stale responses are exercised in disposable integration/browser fixtures; prior actual hosted private-transport acceptance remains the P8A evidence.
+
+#### Verification actually completed and limits
+
+Evidence root: repository `.review/p9-notifications/` (ignored local artifacts).
+
+- Final root acceptance on migration seventeen: **160/160 passed**, comprising **126 backend/API/PostgreSQL** and **34 frontend unit** cases, in `root-final17.log`. This includes the nine new notification SQL cases, the new API scenario and two new frontend transport/snapshot cases. SQL coverage includes close/reopen persistence, private reads/markers, unchanged business state, exact retries, changed evidence, request decisions/renewals, Owner thresholds, ACLs, rollback, nested identity, exact window boundaries, separated/merged bursts, stable active identity/read state and migration backfill. Earlier `root-accepted.log` remains evidence before the final identity regression/follow-up.
+- Final typechecks and both production builds passed (`typecheck-final17.log`, `build-final17.log`). The existing frontend >500 kB bundle warning remains; the final build also reports informational plugin timings. UI refinements clarify that saved detection rules continue during a settings-read failure and clear a network error once the intended saved read state is confirmed; final focused browser checks/typechecks/builds cover these refinements.
+- **31 distinct affected browser cases pass across the broad and final focused runs.** The broad run (`browser-accepted.log`) passed **30/31 (3.1m)**; its one stale-marker test depended on background-read timing. It was made deterministic by committing new evidence after the outgoing command had captured its revision and submitting it explicitly to the disposable API. The final five notification cases on migration seventeen (`browser-final17.log`) passed **5/5 (1.0m)**, covering that stale 409, cross-session/per-account state, real local logout/login, reconnect, rejected/lost responses, void closure, Staff isolation and layouts. Earlier `notifications-final-browser.log` records a 5/5 run before the follow-up. This is **not** a claim of one clean 31-case run, a fresh 276-case whole-app run or new hosted business-write acceptance. The remaining 26 existing cases cover preview alerts, checkout and operation recovery, reviews/voids, scoped private updates, safe drafts/cart/filter/role resets and five-size role-page presentation.
+- Owner/Admin cards were captured and visually inspected at **1440×900, 820×1180, 390×844, 320×568 and 820×400**: ten final full-page captures in `visuals/`. Browser assertions cover keyboard read/unread actions, complete cards, preserved count/controls, no page-level horizontal overflow and no page errors. Capture code returns to scroll zero before full-page screenshots; earlier mid-page sticky-navigation stitching was a capture artifact, not an application layout change. Previous accepted all-role frontend/preview presentation remains the baseline.
+- The first sandboxed root/API run failed on loopback `EACCES`; the first browser attempt could not launch Edge. Permitted outside-sandbox runs resolved those environment failures. Early SQL checking caught an ambiguous marker upsert conflict target; it was corrected before hosted application. Test-only failures included the existing workflow payload/RLS semantics, logout label/session initializer, a synthetic fixture cast, failure-response shape and routing a simulated request through Vite rather than the disposable API. Logs are retained; no failed run is represented as clean acceptance.
+- Hosted evidence: `hosted-before/after.json`, `hosted-after16.json`, `hosted-before.log`, `hosted-after17.log`, `hosted-apply.log`, `hosted-apply17.log`, `hosted-schema-final17.log` and inspected `hosted-state.mts`. Local preservation audit confirms all 60 pre-existing fenced message/history records and all fifteen earlier raw migration hashes. All seventeen normalized sources match the hosted ledger, including the unchanged migration sixteen. `merged-identity-before-fix.log` retains the reproduced failure fixed by migration seventeen; final source hashes are in `source-audit.json`.
+- No new real payment, hosted business/read-marker mutation, credential/account/settings change, commit, push, PR, GitHub save or application deployment occurred. User HEAD remains `8eed072e6ccb364f713d3bce6bdac09304fe4968`. Physical devices, real screen readers, Safari/Firefox, paper printing and exhaustive Figma comparison were not performed. Detection currently scans the affected cashier's saved receipts (all receipts when thresholds change); high-volume indexing/projection optimization remains a measured scalability consideration, not an invented external-delivery requirement.
+
+#### Current continuation — P9 in-app scope completed
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo for the user's next request.
+Read this current checkpoint and every relevant full original request below.
+P9's chosen scope is IN-APP ONLY for Owner/Admin: pending voids and unusual
+repeated sales, saved evidence/versions and durable per-account read state.
+It is implemented; migrations sixteen and seventeen are applied and verified on
+DualCounter izdemgzdywtxhvgvsian. All seventeen applied SQL sources are immutable.
+The follow-up preserves active alert identity/read state when bursts merge.
+The earlier notification-scope-pending scripts are historical. Do not invent
+email, browser push, provider credentials, GCash API or automatic punishments.
+Preserve the established shared frontend, private metadata-only updates,
+Owner-only settings, human review, safe drafts/filters and exact-operation recovery.
+The user will replace Frontend/public/assets/QR_gcash.svg with their shop QR later.
+Keep checkout enabled and all existing accounts/credentials/settings/retired history
+and local changes intact. The ordered development priorities now have recorded
+completion within their agreed scopes; deferred production/costing/accounting,
+external refunds and mixed-category component revenue remain separate decisions.
+No new whole-app/production-ready or hosted business-write claim follows from
+the scoped tests. Source/docs remain local; no GitHub save or deployment was
+requested by this implementation. Wait for the user's next concrete direction.
+```
+
+### Previous completed task — GCash sample QR and reference guidance (October 18, 2026)
+
+**The new implementation request below supersedes the previous stop for this task.** Read the full original task-documentation request and GCash scope clarification preserved below, as well as the established frontend/P8A requirements. The user asked to leave a sample and will supply their actual QR later; obtaining that QR is not a prerequisite to completing this sample-asset task. Notification delivery remains separately scoped, and no payment-provider API is required.
+
+#### Request authorizing this implementation — verbatim
+
+```text
+Read HandsOff.md and implement the Task highest-priority. Follow my full original message, not just the continuation script.
+```
+
+#### Implementation against the original requirements
+
+| Original requirement | Implemented result |
+| --- | --- |
+| Leave a sample QR named `QR_gcash` for later manual replacement | Shared `GCashQr` renders `/assets/QR_gcash.svg` in real-account and preview checkout. The existing illustrative artwork is visibly labeled `SAMPLE GCASH QR`; SVG title/description also identify its purpose. No actual payment destination was invented. |
+| Tell the user exactly where the asset is | `C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/public/assets/QR_gcash.svg`. This path is also documented in README.md and is the file to replace later. The original `8bd48.svg` is retained. |
+| Explain the expected reference format in the input placeholder | Shared `GCashPaymentFields` uses `13 digits, no spaces`. A persistent, accessible hint says `Enter exactly 13 digits without spaces or dashes, e.g. 1234567890123.` The shorter placeholder fits all reviewed screen sizes; the hint remains after typing. |
+| Keep manual QR/reference payment recording | Existing `[0-9]{13}`, 13-character limit, required reference, amount checks, duplicate-reference protection, saved evidence, manual Owner review, authoritative prices/stock and operation recovery are retained. The format describes the existing application contract; this task did not research or change GCash's external reference formats. |
+| Retain the established frontend design | Both modes reuse the same QR and field presentation, existing artwork, styling, focus handling and scrolling payment dialog. Preview retains `Preview QR · no payment collected`. Legitimate real/preview data and operation differences remain. |
+| Keep notifications separate and preserve existing private updates | No delivery channel, recipient policy, email/SMS provider or automated action was invented. Accepted private WebSocket updates and all prior business workflows remain unchanged. |
+
+The QR asset, shared QR component, placeholder, and imports in `LivePos.tsx`/`Pos.tsx` were already present as interrupted local edits. This request authorized completing and verifying them. This resumption refined the shared placeholder, added a persistent hint linked with `aria-describedby` and a unique React ID, added descriptive SVG metadata, and updated the current documentation. It did not reset or overwrite those pre-existing files.
+
+#### Replacing the sample later
+
+- Replace `Frontend/public/assets/QR_gcash.svg` with the shop's actual QR as a valid SVG, retaining the filename. Both checkout modes reference this one asset through `Frontend/src/components/PaymentFields.tsx`.
+- If the supplied QR is PNG/JPEG instead, save it with its real extension and update the `GCashQr` asset filename in that shared component. Do not rename raster bytes to `.svg`.
+- The current asset is illustrative and cannot establish a real payment. Staff must manually check received payment before recording its reference; actual shop-QR scanning/payment acceptance remains for when the user supplies the asset.
+
+#### Verification actually completed in this task
+
+- `npm run typecheck --workspace Frontend`: **passed**, including frontend integration types.
+- `npm run build --workspace Frontend`: **passed**. The pre-existing >500 kB bundle warning remains.
+- `node --import tsx --test --test-name-pattern='GCash references' backend/tests/checkout.test.ts`: **1/1 passed** against a disposable local database. Existing checks cover duplicate references, rejected invalid amounts/reference fields and the saved `providerVerified: false` evidence distinction.
+- `npm run test:e2e --workspace Frontend -- checkout.spec.ts`: **7/7 passed (37.2 seconds)**. Coverage includes Staff GCash/Pending review and own-day permissions, Owner cash/VAT/tender/change, saved receipts, lost-response exact retry, stale quotes, stock safeguards, recipe defaults and responsive checkout. The first sandboxed attempt could not launch Edge (one launch failure; six tests did not run); the permitted outside-sandbox rerun completed cleanly.
+- Local visual/interaction review: **3 roles × 2 modes × 5 sizes = 30 reviewed layouts**, with **60 captures** and six contact sheets visually inspected. Sizes: 1440×900, 820×1180, 390×844, 320×568 and 820×400. The real-account adapter used test-owned sessions and a disposable API/database, separately from preview. Verified loaded sample artwork, complete placeholder fit, hint association, focus, native rejection of empty/short/letter/space/dash references, acceptance of a 13-digit value, contained page/dialog widths and actions reachable through existing scrolling. No page errors were recorded; opening/reviewing these forms changed no fixture inventory or sale state and submitted no payment. The capture helper's first run tried scrolling the outer dialog instead of its existing scrollable body; the helper was corrected and the complete run passed without another application change.
+- Evidence: workspace-parent `.review/october-18-gcash-task/visuals/result.json`, all screenshots/contact sheets, pre-task source/handoff snapshots and migration hashes. Capture helper: repository `.review/gcash-visual-review.mts` (local ignored review aid).
+- `git diff --check` on the updated documents reports seven pre-existing trailing spaces in verbatim original messages. Those messages were preserved rather than reformatted; the new checkpoint and README changes add no trailing whitespace.
+- No hosted account login or hosted business mutation, real payment, account/credential/settings change, migration application, commit, push, PR or deployment occurred. All fifteen migration sources are unchanged from this task's baseline. Original fenced user/authorization/history records remain preserved. This scoped verification is not a new full browser/backend suite or hosted payment acceptance.
+
+#### Current continuation — sample task complete; remaining P9 scope
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo for the next user request.
+The October 18 sample-QR/reference task is implemented and locally verified.
+Read its full original request and GCash clarification preserved below.
+The replaceable sample is Frontend/public/assets/QR_gcash.svg; the user will
+provide/replace their actual shop QR themselves later. Keep a real SVG at that
+path or explicitly wire the supplied raster format in the shared GCashQr component.
+The reference placeholder/hint explain the existing exact 13-digit application rule.
+Preserve manual payment checks, saved evidence, duplicate-reference protection,
+Owner review, authoritative quotes/stock and exact-operation recovery.
+No GCash API/payment-provider integration is required. P9 is not fully complete:
+notification delivery still needs channels, recipients and delivery rules defined
+with the user before implementation. Do not infer email/SMS providers or policies.
+Keep accepted shared frontend/private automatic updates and all existing work,
+accounts, credentials, roles, settings, enabled checkout and retired history.
+All fifteen applied migrations remain immutable. Keep Backend work local;
+no commit, push, PR, GitHub save or deployment while Backend is unfinished.
+```
+
+### Previous stop — documentation-only GCash request (historical; superseded by the implementation request above)
+
+**Historical stop checkpoint.** The user requested adding requirements to this handoff for a future task. The assistant misread that as permission to change the application. The user corrected this and explicitly stopped the work. After that stop, only read-only inspection and that handoff update were performed. The application edits and asset listed below were not reverted, because the user said to stop editing the system. They were not user-approved implementation or completed P9 acceptance at that checkpoint; the later implementation request and actual verification are recorded above.
+
+#### Original task-documentation request — verbatim
+
+```text
+also add there that I will put the Gcash QR code later myself just leave a sample QR there and name it QR_gcash and tell me the location of that file in the assets so that I can find it to replace later, and also make a placeholder text for inputing the Reference number, the placeholder should tell the staff what is the format of reference that is expected by the system
+```
+
+#### User correction and stop instruction — verbatim
+
+```text
+wait dont edit the system I only told you to add it in the handsoff task stop what you are doing right now and list the things you are doing in the handsoff
+```
+
+#### Requirements to carry into the future task
+
+- The user will provide and replace the actual GCash QR themselves later. The future task must leave a sample named `QR_gcash` in the assets and clearly tell the user its exact file location. Do not block task recording on obtaining the actual shop QR or invent a payment destination.
+- The path chosen in the interrupted work is `C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/public/assets/QR_gcash.svg`, served locally as `/assets/QR_gcash.svg`. The file currently exists as an unintended local implementation change. Its extension is `.svg`; later replacement should preserve that filename/format or be explicitly wired to another supplied image format in an authorized task. Do not merely rename PNG/JPEG bytes to `.svg`.
+- The reference-number placeholder must explain the system's expected format to staff. Current frontend validation expects exactly **13 digits**, without spaces or dashes. The text inserted before the stop was `13 digits, no spaces (e.g. 1234567890123)`. This is an explanation of the current validation, not a newly researched GCash format or a request to change payment validation.
+- Retain the established frontend design in real-account and preview checkout. GCash remains QR/manual reference entry with existing payment evidence, duplicate-reference protection, Owner review, authoritative prices/stock checks and operation recovery. GCash API/payment-provider integration is not required.
+- These requirements are recorded for a future explicitly requested task. Do not continue implementation merely because the partially implemented files exist.
+
+#### Exact application changes made before the stop — still present
+
+| File | Change made by the assistant in this interrupted turn |
+| --- | --- |
+| `Frontend/public/assets/QR_gcash.svg` | Created a sample from the existing `8bd48.svg` artwork and added a visible `SAMPLE GCASH QR` label within the SVG. The original artwork file was retained. This is a placeholder, not a shop payment QR. |
+| `Frontend/src/components/PaymentFields.tsx` | Added the shared `GCashQr` presentation using the new asset and existing QR styles. Added `placeholder="13 digits, no spaces (e.g. 1234567890123)"` to the shared reference input. Existing `[0-9]{13}` pattern and 13-character maximum remain. This file already existed as untracked local work before this turn; do not remove the whole file to undo these edits. |
+| `Frontend/src/components/LivePos.tsx` | Imported/rendered `GCashQr` in the real-account GCash payment form. Replaced that form's explanatory sentence with `Check the received GCash payment, then enter its reference number.` Existing checkout/payment commands were retained. |
+| `Frontend/src/pages/Pos.tsx` | Imported/rendered the same `GCashQr` component in preview in place of its inline QR markup. Preview's no-payment notice remains through the shared component. |
+
+All three edited application files contained pre-existing local work. Do not reset them to Git HEAD or overwrite unrelated changes. No source rollback was performed after the stop. The previous turn's already-recorded P9 scope clarification in HandsOff.md, README.md and backend/supabase/REPORTS.md is separate from these unintended application edits; those other documents were not edited again in this interrupted implementation turn.
+
+#### Checks and browser activity already performed before the stop
+
+- `npm run typecheck --workspace Frontend`: **passed**.
+- `npm run build --workspace Frontend`: **passed**; generated the frontend build output. The existing >500 kB bundle warning remained. This was not a root/backend build.
+- `npm run test:e2e --workspace Frontend -- checkout.spec.ts --grep 'Staff GCash'`: the first sandboxed attempt failed before the browser test could run because Edge could not launch. An approved rerun outside the sandbox **passed 1/1 (12.1 seconds)** using the disposable local test database. No new test was written, no full browser suite was run and this is not P9 acceptance. The test runner also generated its normal ignored test artifacts.
+- Opened a temporary background browser tab at `http://localhost:5173/`, entered Owner preview without credentials, added one Butter Cookie Pouch to an in-memory sample cart and opened the QR payment dialog. No payment was submitted, even in preview; no hosted business write or real-account login was performed.
+- Visually inspected the sample QR and the reference placeholder in that preview dialog. At a 320×568 viewport, a read-only DOM check recorded dialog width/scroll width both 269, reference pattern `[0-9]{13}`, maximum length 13 and the new `/assets/QR_gcash.svg` URL. A viewport reset was requested before the stop. This is limited preview evidence, not broad responsive or hosted GCash acceptance.
+- The temporary preview tab was left as it stood when the stop arrived; no further browser interaction, cleanup, checkout or verification was performed afterward. Its sample cart is browser memory only. Test-owned servers had already completed their normal teardown; no additional server/process changes were made after stopping.
+- No database/schema/account/settings changes, actual payment, migration, commit, push, PR or deployment were performed in this interrupted work. All fifteen applied migration sources remain untouched.
+
+#### Current continuation — documentation-only stop
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Work is stopped by the user.
+Read the latest two verbatim messages and exact change/check inventory above.
+The user requested handoff task recording only, not system implementation.
+Do not resume application edits, tests, browser actions, source rollback or P9
+merely because local sample-QR/placeholder changes are already present.
+Those edits are recorded, unaccepted and not reverted. Preserve all unrelated
+pre-existing local work; PaymentFields.tsx was already an untracked existing file.
+The user's future intent is a replaceable sample QR named QR_gcash, an exact asset
+path for their later manual replacement, and a reference-format placeholder.
+GCash uses manual reference recording; no provider API integration is required.
+Wait for the user's next explicit task direction. Keep hosted data/accounts,
+credentials/settings/history, migrations and local work unchanged; no GitHub save
+or deployment while Backend work remains unfinished.
+```
+
+### Previous P9 scope clarification — GCash QR and manual reference entry (October 18, 2026)
+
+**Historical scope-recording checkpoint; implementation now follows the completed sample task above.** The user's intended GCash workflow is a shop QR plus staff-entered reference number. Automated GCash API/payment-provider verification is not a required P9 deliverable or Backend completion gate. Earlier lists and continuations that described it as required are superseded by this decision; their original text remains preserved as history.
+
+#### User clarification — verbatim
+
+```text
+about the P9 the payment providers we talked about this that using Gcash API will need to pay for license so I thought that we just put the QR there and the staff will input the Reference number of the Gcash
+```
+
+#### Intended payment workflow and remaining work
+
+1. Display the shop's actual GCash payment QR in the real-account checkout, using the established frontend layout. The preview QR is a design example and must not be treated as the real shop's payment destination. Use a shop-approved QR asset; it has not been supplied or configured by this clarification.
+2. The customer scans that QR and pays through GCash. Staff manually check the received payment and enter its reference number in the POS; the application records the payment evidence with the sale. Preserve the existing amount/reference validation, duplicate-reference safeguards, authoritative checkout, purchased snapshots and exactly-once stock consumption.
+3. Preserve the existing Owner Daily Sales Review and manual receipt/reference reconciliation. A manually recorded reference is not automatic provider verification; use accurate manual-payment wording in checkout, receipts, Audit Trail and reports.
+4. Do not add GCash API onboarding, payment-provider credentials, licensing/procurement, automated provider verification, webhooks or API-based refunds as required tasks. Any future request for such an integration is a separate scope decision.
+5. Notification delivery remains the outstanding P9 integration area and still needs its channels, recipients and delivery rules defined. Existing private automatic WebSocket updates are complete and must be preserved. Deferred production/accounting/costing features remain separate decisions, not requirements introduced by this clarification.
+
+**Current implementation boundary:** real checkout already supports manual GCash reference entry and saved payment evidence. Its current GCash form has no shop QR; preview shows the example QR. Connecting the actual shop QR to real checkout is remaining work, not something implemented by this documentation update. No checkout code, hosted data, settings, accounts or migrations were changed here.
+
+#### Current continuation — follow the clarified P9 scope
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo for the user's next request.
+Read the full current P9 clarification and original user message above, then the
+accepted frontend consistency/P8A checkpoints and applicable original requirements.
+GCash is a shop-QR/manual-reference workflow. API/payment-provider verification is
+not required, even where older historical notes described it as pending P9 work.
+Manual reference recording already exists. Real checkout still needs the actual
+shop-approved QR asset connected through the established frontend presentation;
+do not substitute the sample QR or invent payment-destination details.
+Preserve manual payment checks, saved reference/amount validation and uniqueness,
+Owner review, receipts/audit/reports, server quotes, stock safeguards and recovery.
+Define notification channels/recipients/rules before implementing their delivery.
+This clarification records scope only; no payment or notification implementation
+has been started here. Keep completed private updates and all current data/accounts,
+credentials/settings/history and local work. All fifteen applied migrations remain
+immutable. No commit, push, PR, GitHub save or deployment while Backend is unfinished.
+```
+
+### Latest completed checkpoint — October 18 frontend consistency
+
+**The October 18 frontend consistency priority is implemented and verified within the recorded browser scope.** The remaining presentation fixes, populated-state visual review and clean final full browser run are complete. This supersedes the saved stop checkpoint below. P9 remains pending; Backend as a whole is not complete. All work remains local. The original October 18 messages, full review, P8A requirements and historical stop/approval records remain unchanged.
+
+#### Changes in this resumption
+
+- Added shared `CartItem` and `OrderItemCount` presentation to preview and protected POS. Modifier prices use the established plus prefix, configuration/SKU rows wrap consistently, and Staff count uses the singular at one item. Deliberate combining, fresh authoritative quotes, stock limits and exact-operation recovery remain unchanged.
+- `TransactionTable` now formats original ISO timestamps centrally using the established short Philippines date/time display. Receipt details and audit events retain their fuller existing timestamps and original saved values.
+- Corrected the recorded-sales panel selector that also styled its heading button. The receipt icon retains a 44-pixel touch target; shared POS title rows reserve the same height across roles and five sizes.
+- Saved receipt history uses the established history-table styles, including Staff, with contained horizontal scrolling. The saved-receipt dialog reuses `OrderReceiptDetails`, accurate totals/tax/tender/change and purchased nested component snapshots, with a scrolling body and fixed close action.
+- Live sales review/request/void dialogs keep headers and actions visible while their bodies scroll. The final single/bulk warnings in preview and real mode use the shared fixed modal footer. Native recorded-receipt metadata disclosure and original decision/request history remain accessible. Go back retains the entered reason; submitted actions still use the existing revisioned, idempotent command contract.
+- Extended existing consistency coverage for equal POS heading heights, canonical short audit timestamps, all-role populated configuration/cart/SKU presentation, Staff singular/plural count, saved receipts and fully visible final actions at five sizes.
+
+#### Status against the full original consistency requirements and review
+
+| Full original requirement/finding | Status | Implemented and verified evidence |
+| --- | --- | --- |
+| Established frontend throughout real login, review findings as an open starting point | **Completed** | Shared navigation, Dashboard, Inventory, Users, POS, Reports, Audit tables/details/dialogs; broad review additionally found and fixed populated cart, saved receipt/table and scrolling void review presentation. Compared every allowed destination for Owner/Admin/Staff using legitimate separate data. |
+| Export Report Summary | **Completed** | Existing shared `ExportReportReview` now visually reviewed at five sizes, including populated saved ingredient balances, empty saved data, payment summaries, notes and matching controls. |
+| Reports ordering, ingredient section, tables and explanations | **Completed** | Shared controls, Transactions before balances, headings, coverage count, accessible color/text legend and method disclosure retained; populated saved record has 5 kg opening, 2 kg used, 3 kg remaining and 60% remaining. Actual source records differ from preview. |
+| POS cart summary | **Completed** | Shared role-specific `CartSummary`, including empty totals and recorded tax-inclusive amounts, retained; populated configured carts and amount/stock regressions verified. |
+| POS stock and increment limits | **Completed** | Existing scoped stock feedback/default/whole-order limits retained; fixture/API/database tests cover recipes, modifiers, variants, bundles and authoritative quote behavior. No new hosted catalogue fixtures were created. |
+| Audit details and selection summary | **Completed** | Shared receipt/selection details, aligned Total Due and original historical review/payment/void/request/events retained; short table timestamps centralized. Expanded metadata, long reasons and fixed actions checked without submitting a hosted business action. |
+| Owner/Admin login default | **Completed** | Dashboard default and readiness behavior retained. |
+| Recorded sales heading | **Completed** | Shared heading and correctly scoped panel style retain matching title height and catalogue positioning; history remains explicitly expandable for receipt/recovery access. |
+| Sales Overview | **Completed** | Nine-day initial range and shared overview without redundant summary retained. |
+| Every allowed role/page/editor/empty state/dialog/responsive interaction | **Completed** | Main-page comparisons plus populated cart, recipe-stock, Reports, export, receipt, selection, metadata and void states at 1440×900, 820×1180, 390×844, 320×568 and 820×400. Browser suite covers keyboard/focus/discard, edit and operation safety, account/inventory draft conflicts and automatic updates. |
+| Legitimate saved data, roles, validation, recovery and provider capability | **Completed** | Protected adapters and server validation retained; no preview samples/QR copied into real operation. GCash remains received-payment evidence. Provider verification is still P9. |
+| Original requirements, migration hashes, data/accounts and local work | **Completed** | All 52 pre-existing fenced text records retained. Fifteen applied migration hashes and fresh hosted read-only business/Auth/settings preservation verified. No commit, push, PR, deployment or hosted business mutation. |
+| Complete this priority before P9 | **Completed** | This priority has its own final visual acceptance and clean 271/271 browser run; it is not inferred from P8A or cumulative reruns. P9 remains pending and was not started. |
+
+P8A requirements 1–2 are preserved through the shared established presentation and existing identity/navigation. Requirements 3 and 6 retain the accepted private WebSocket transport, permission-scoped reloads and immutable migration design; hosted two-session/role-denial/reconnect evidence remains the previously completed evidence, not a claim of a newly repeated hosted transport test. Requirements 4–5 retain protected real data, accurate amounts/snapshots, draft/cart/filter/selection preservation, conflicts, exact-operation recovery and logout/role reset. All six requirements remain verified for this continuation.
+
+| Original P8A requirement | Status in this accepted continuation |
+| --- | --- |
+| 1 — use the established frontend in every permitted tab | **Completed:** shared presentation, all-role/five-size comparisons and populated workflow review. |
+| 2 — remove repeated Welcome/user-name content | **Completed/preserved:** identity remains in established navigation and Staff counter locations. |
+| 3 — automatic WebSocket updates without routine Refresh | **Completed/preserved:** prior actual hosted transport evidence plus final cross-session business-update/reconnect regressions. |
+| 4 — real saved data, role boundaries and business workflows | **Completed/preserved:** final protected API/database/browser checks, accurate amounts/snapshots/exports and read-only hosted preservation. |
+| 5 — safe drafts, carts, filters, revisions and recovery | **Completed/preserved:** final conflict, reconnect, uncertain-operation, scope-reset, focus and discard regressions. |
+| 6 — protected scoped transport and immutable migrations | **Completed/preserved:** accepted private transport retained; all fifteen applied sources unchanged, with no new grants or migration. |
+
+| Original P8A completion criterion | Status and final evidence |
+| --- | --- |
+| 1 — allowed real/preview destinations | **Completed:** all 14 destinations at five sizes use established presentation; identity and ordinary-refresh removals retained. Legitimate data, permission and provider differences remain. |
+| 2 — responsive and safe interaction | **Completed within scope:** final main/populated comparisons, receipt/cart/SKU/stock/export/detail/selection/void review, keyboard/focus/discard and fully visible actions. Figma and physical printing excluded as requested. |
+| 3 — protected cross-session automatic updates | **Completed/preserved:** previously verified actual hosted transport/denied joins/native reconnect retained; final local suite verifies changed business values, authorized scopes, draft/cart preservation and reconnect. No newly repeated hosted business-mutation test is claimed. |
+| 4 — meaningful checks and exact limits | **Completed:** 148 root checks, final typechecks/builds, clean 271 browser cases and 65 extra dialog captures; hosted and disposable evidence distinguished below. |
+| 5 — accounts, history and local work | **Completed:** fresh hosted read-only preservation, immutable applied migrations and all original message blocks; checkout enabled, retired identities/history retained and no GitHub/deploy operation. |
+
+#### Evidence and limits
+
+Evidence root: `C:/Users/ASUS/Documents/Personal/Vertwell/.review/october-18-consistency-resume/`. Final screenshot cases refresh the earlier `october-18-consistency/visuals/` captures; extra inspection screenshots are in the new `dialogs/` folder. Preserve the earlier logs and all original handoff messages.
+
+- Root checks: `root-tests-accepted.log`, **148 passed, 0 failed**: 116 backend/API/PostgreSQL plus 32 frontend unit checks on the finished snapshot.
+- Final typechecks and production builds: `typecheck-final.log` and `build-final.log`. The existing >500 kB frontend bundle warning remains nonblocking.
+- Fresh read-only hosted preservation: `hosted-state.log`/`hosted-state.json`, all business fingerprints/Auth IDs unchanged, checkout enabled, four active accounts, retired sessions zero, fifteen applied hashes unchanged. No hosted Auth login, account update, business command or migration was submitted by this resumption.
+- Final full browser result: `full-browser-accepted.log`, **271 passed, 0 failed**, 16.8m, exit 0. One clean full run on the final unchanged source snapshot, including all six extended consistency cases. This supersedes the earlier incomplete 266/3 and cumulative results.
+- Extra dialog inspection: `extra-dialogs-accepted.log`/`dialogs/result.json`, **passed**: 65 screenshots over all three roles and five sizes, expanded metadata, visible review headers/actions, long final reasons, Go back draft preservation, unchanged fixture business state and zero page errors; uses a disposable local database and separate local browser. No hosted fixtures or claims of new hosted mutation propagation.
+- `tested-source-snapshot.json`: all 167 application/test/migration files match the source snapshot used for the accepted browser run. `source-audit.json`: all 52 pre-existing fenced text records and all fifteen applied migration hashes preserved.
+- Early sandbox checks failed before Edge could start or API loopback could listen. Reviewed unsandboxed local execution resolved those environment failures. Early heading comparison detected a real 32-pixel shift from the over-broad panel selector; corrected afterward. Keep both failures and the diagnostic log.
+- The initial extra-dialog helper selected a retained hidden POS history table after navigation and timed out; scoping the locator to the visible table fixed the helper. The final helper and full browser run pass.
+- Intermediate scoped run: six passing cases, followed by further receipt/table/dialog refinements; not final acceptance. Two full-suite attempts were deliberately stopped to finish receipt markup and extended visual findings. Their retained interrupted logs are not clean full runs.
+- Hosted catalogue lacks available configurable products; populated recipe/variant/bundle/configuration evidence uses disposable fixtures and is labeled accordingly. Real/preview use legitimate different values, accounts and history. Actual hosted transport verification remains from the completed earlier checkpoint because this resumption changes presentation, not transport/security.
+- Physical printing, Figma comparison, Safari/Firefox, physical devices and screen-reader acceptance remain outside the performed verification. No claim of pixel-identical business values or exhaustive proof against future inconsistencies.
+- `git diff --check` still reports preserved pre-existing trailing whitespace in `ManagementWorkspace.tsx`, `Dashboard.tsx` and verbatim original handoff text. Those lines are not part of this resumption's fixes; original messages were not reformatted to silence the check.
+
+#### Final visual acceptance and previous continuation — P9 payment scope superseded by the clarification above
+
+Refreshed and inspected comparisons for Dashboard, Inventory, Users, POS/Staff history, Reports/export/populated balances, cart configurations, receipt/details/selection, metadata and final warnings across all five sizes. Extra actual-viewport captures confirm that the earlier sticky-navigation overlap in element screenshots is a capture-position artifact, not content lost in the application. Narrow/short dialogs scroll their bodies and keep headers/actions visible. Data/role-specific numbers, histories, actual SKU lengths, missing-history notices and GCash capabilities remain legitimate differences. No unresolved presentation finding remains from this review; future concrete issues can still be reported.
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Read this accepted
+October 18 consistency checkpoint, the preserved full original concern, review
+and priority instruction, and the original P8A six requirements/five criteria.
+The October 18 priority is complete within its stated scope; the saved stops
+and recording-only/P9-next scripts below are historical. Do not replay them.
+Continue from the user’s next concrete request. If the user requests the next
+Backend priority, P9 external payment verification/notifications remains pending;
+read its original requirements and current provider capabilities before acting.
+Keep real data/roles/history, enabled checkout, retired identities, protected
+private updates, safe drafts/carts/filters/revisions/recovery, stock models and
+accurate recorded amounts/snapshots/exports. All 15 applied SQL files are immutable.
+Do not replay old hosted fixture/mutation/reset helpers or restore fingerprints.
+Keep every original message unchanged. No commit, push, PR, GitHub save or
+application deployment until all Backend work is finished. Figma comparison
+and physical printing remain excluded.
+```
+
+### Previous saved stop checkpoint — October 18 frontend consistency (historical; completed above)
+
+The following is the unchanged historical stop record. Its incomplete status and stop-only authorization were superseded by the new implementation request and accepted checkpoint above.
+
+**Stopped at the user's request. The October 18 frontend consistency priority is partially completed, not accepted as complete.** P9 remains pending and must not start ahead of this priority. P8A's earlier completed checkpoint is historical acceptance of its own scope, not acceptance of these follow-up changes. No further implementation or application testing is authorized by this save request. Resume only when the user requests it.
+
+The complete original concern, review request, full follow-up review and priority instruction remain verbatim in **Original October 18 frontend consistency priority and full requirements** below. The original P8A message, all six requirements and all five completion criteria also remain unchanged in **P8A original request and acceptance requirements (October 18, 2026)**. The status tables here supplement those full requirements; neither these tables nor the continuation script replace them.
+
+#### Request starting this task — verbatim
+
+```text
+Read HandsOff.md and implement the October 18 highest-priority. Follow my full original message, not just the continuation script.
+```
+
+#### Approved hosted migration — exact question and answer
+
+```text
+Approve applying the tested migration `20261018020000_pos_stock_feedback.sql` to DualCounter (`izdemgzdywtxhvgvsian`) and verifying it? It adds two read-only POS functions for referenced stock quantities and quantity limits; business rows, accounts and existing checkout rules stay unchanged.
+```
+
+```text
+Approve this DualCounter migration and verification
+```
+
+That approval was used: the migration is already applied and verified. Do not ask for the same approval again or attempt to apply/edit the migration again. Automatic approval review initially rejected the hosted access change before this explicit approval. A later verification command was rejected after disposable checkout-fixture code was mistaken for hosted writes. Separately generating and inspecting the hosted read-only script resolved that concern; verification then passed. No rejected action was bypassed. There is no outstanding approval block at this stop.
+
+#### Latest stop/save instruction — verbatim
+
+```text
+Let’s stop for now. Stop implementation and update HandsOff.md to save the current progress.
+
+Preserve my full original priority requirements without summarizing or rewriting them. For each requirement, record whether it is completed, partially completed, or still pending, including any unverified work.
+
+Record the changes made, validation results, known issues, and anything interrupted. Update the continuation script to point to the original priority requirements and tell the next chat exactly where to resume.
+
+Do not mark the whole priority task complete unless every requirement is implemented and verified.
+```
+
+#### Status against every follow-up requirement and reviewed finding
+
+The references in the first column identify the unchanged original text below. **Completed** applies only to the stated requirement and evidence; it does not mean that the whole priority or final broad acceptance is complete.
+
+| Original requirement / finding | Status at this stop | Implemented, verified and still outstanding |
+| --- | --- | --- |
+| Central instruction: use the established frontend after real-account login; fix any inconsistency, with the review as a starting point rather than a closed list | **Partially completed** | Shared presentation now covers Reports, export review, stock balances, POS totals/stock feedback, receipt details and selection summaries. All role-permitted destinations were exercised and compared across five sizes. Final visual review and the additional presentation observations listed below remain unfinished. Do not infer completion from P8A or cumulative test counts. |
+| Full review: Export Report Summary | **Partially completed** | Shared `ExportReportReview` uses established report facts, grouped sales/inventory totals and Cash/GCash figures; separate embedded tables/section-count presentation removed. Affected browser checks pass, including populated saved balances. Final visual inspection of the latest populated export captures is still pending. |
+| Full review: Reports page ordering and ingredient section | **Partially completed** | Transactions now precede ingredient balances; shared controls, five-column transactions, padded heading, availability/partial counts, legend and explanation/disclosure. Real history/reconciliation/payment details and full export document retained. Populated test verifies 5 kg received, 2 kg used, 3 kg remaining and 60% remaining across five sizes. Final latest populated visual review remains pending. |
+| Full review: POS cart summary, including empty cart and Owner/Admin subtotal/VAT/total arrangement | **Completed** | Shared `CartSummary` gives all roles subtotal, VAT and tax-inclusive Total due, with zero totals when empty. Preview cart now agrees with its tax-inclusive confirmation. Corrected tax expectations pass; exact server quote/tender/change and checkout regressions pass. The separate modifier/SKU presentation observations below remain part of the broader consistency sweep. |
+| Full review: POS available quantities, ingredient requirements/remaining stock and disabled quantity increments at limits | **Completed** | Scoped stock projection, shared `SelectionStock`, retail remaining quantities and whole-cart maximums implemented. Unavailable defaults stay unchecked; stale default responses cannot overwrite later choices. Backend/API/fixture tests, hosted protected read and affected checkout/dialog/update checks pass. Hosted catalogue has no available configurable product; recipe/variant/bundle coverage uses legitimate disposable fixtures, not hosted business records. This does not establish a newly fixed overselling bug: the existing authoritative quote already prevented invalid stock use. |
+| Full review: Audit Trail details aligned Total Due and fuller selection summary | **Partially completed** | Shared `OrderReceiptDetails`/`SelectionSummary`, aligned Total Due, purchased lines, empty state, filter labels and action sizing. Existing receipt history, requests, snapshots, stale-action recovery and review events retained. Populated role/size checks and final-void Go back focus pass. Latest metadata-disclosure/final-warning captures still need final visual inspection; audit timestamp density remains an additional review item below. |
+| Full review: Owner/Admin initially opening Inventory instead of Dashboard | **Completed** | Real Owner/Admin default to Dashboard once protected access is ready, with no transient Inventory fallback. Updated navigation, role destination and hosted browser checks pass. |
+| Full review: Recorded sales button adding a row above POS filters/catalogue | **Completed** | The receipt control is beside the shared POS heading; the separate row is removed. Five-size checks pass. Small heading-height differences caused by the actual receipt icon remain a final comparison item, not a claim of pixel-exact acceptance. |
+| Full review: Sales Overview initial range and extra summary row | **Completed** | Real default now matches preview's nine-day range; redundant summary row removed. Dashboard/Reports and real/preview destination checks pass. |
+| Broader scope: every allowed Owner/Admin/Staff page, editor, table, empty state, dialog and responsive layout; keyboard/focus and safe edits | **Partially completed** | All 14 role-permitted destinations captured at five sizes; existing Inventory/Users editors, focus/discard, cross-session drafts, checkout, review and report workflows exercised. Additional configured-cart combining interaction implemented and specifically verified. Final visual acceptance, remaining source observations and a clean full suite on the final snapshot are still pending. |
+| Preserve legitimate actual data, role access, saved history, real validation/recovery and payment-provider differences | **Completed for this change's verified scope** | Protected caller-token APIs, role-denied reads/joins, exact-operation recovery, stock models, tax/snapshots and historical reports remain. Hosted business fingerprints and Auth IDs unchanged; checkout enabled, four active accounts, retired sessions zero. New read projections expose only referenced checkout stock. Provider verification remains P9 and was not represented as implemented. |
+| Do not copy preview sample data or preview-only QR into real-account behavior | **Completed** | Real mode uses protected saved data; preview retains its own examples. Real GCash remains received-payment evidence. No hosted business fixtures, new accounts or password changes were used to manufacture matching screens. |
+| Preserve original messages, applied migration hashes, local uncommitted work and no-GitHub boundary; exclude Figma comparison and physical printing | **Completed at this checkpoint** | All 47 pre-existing fenced text records and the full original review are retained. All 15 applied migration sources are immutable, with the earlier 14 unchanged. Prior local work is retained; no commit, push, PR, GitHub save or application deployment. Figma comparison/physical printing remain excluded. |
+| Finish and verify this priority before P9 | **Still pending** | This follow-up priority is incomplete. P9 external provider verification/notifications and Backend completion remain pending. |
+
+#### Carried-forward P8A requirements after these changes
+
+Read the unchanged full P8A requirements and completion criteria below, including the original user message. Its earlier acceptance is preserved; this table records what this follow-up changed or rechecked.
+
+| Original P8A requirement, in its original order | Status for this follow-up checkpoint |
+| --- | --- |
+| 1 — established frontend for every role-permitted tab | **Partially completed** for this follow-up's final acceptance: shared components and comparisons made, but outstanding consistency review/visual acceptance remains. Historical P8A acceptance is not revoked or used to complete this new priority. |
+| 2 — remove repeated Welcome/user-name content | **Completed/preserved**: existing shared navigation/title presentation retained; destination/auth checks pass. |
+| 3 — remove routine Refresh and use automatic WebSocket updates | **Completed/preserved**: hosted private transport, authorized reloads, denied joins and native reconnect verified; final 16 checkout/dialog/update regressions pass. |
+| 4 — working real data, roles, stock models, tax, history and exports | **Completed/preserved within recorded checks**: backend/API/PostgreSQL, affected browser checks and unchanged hosted business fingerprints; no sample fallback or permission expansion. |
+| 5 — drafts/cart/filter/selection safety, revisions, reconnect and scope reset | **Completed for affected regression checks**: dirty inventory/payment/customization state, stale conflicts, retry, logout/role scope tested. Explicit Dashboard investigations now reset competing prior selection/filter; identical explicit POS additions/edits combine after a fresh quote. Full final-suite acceptance remains pending. |
+| 6 — protected scoped WebSocket design and reviewed immutable migrations | **Completed/preserved**: existing private transport/policies retained. Separately approved read-only POS projection migration applied and exact grants/hashes verified. All 15 applied sources immutable. |
+
+P8A completion criteria 1 and 2 need the remaining follow-up visual/design acceptance before this priority can be closed. Criterion 3's affected transport/business-update checks pass with hosted/local evidence distinguished. Criterion 4 has recorded results but no clean full browser run on the final snapshot. Criterion 5's account/data/history/local-work preservation checks pass. The complete original criteria remain unchanged below.
+
+#### Changes made before the stop
+
+- Shared presentation added: `CartSummary.tsx`, `ExportReportReview.tsx`, `StockBalanceSection.tsx`, `ReportControls.tsx`, `ReportTransactions.tsx`, `OrderReceiptDetails.tsx`, `SelectionSummary.tsx` and `SelectionStock.tsx` in `Frontend/src/components/`. Existing preview and real adapters use these components. `useCheckoutStock.ts` supplies debounced/abortable scoped stock reads and refreshes after catalogue events.
+- Updated real `LiveReports.tsx`, `LiveFinancialOverview.tsx`, `ManagementWorkspace.tsx`, `PosHeading.tsx`, `LivePos.tsx`, `LiveProductOptions.tsx`, `LiveSales.tsx`; preview `Reports.tsx`, `Pos.tsx`, `SalesHistory.tsx` and `CustomizeProduct.tsx`; shared `redesign.css`/`sales-workflow.css`. Removed live-only Audit sizing overrides, wrapped long saved IDs/reasons, matched manager-only filters, and added a native Recorded receipt details disclosure to the void review. `Modal` title-change focus is used for the final irreversible-warning Go back control.
+- Extra interaction found during inspection: explicit Dashboard investigations now clear competing audit filters/multi-selection and reveal the intended receipt/page. Mixed select-all state is preserved. Protected historical receipt/review/void information remains available.
+- Last implementation before stopping: `combineCheckoutLines` in `Frontend/src/lib/data/checkout.ts`, called by `LivePos` for explicit cart additions/edits. Identical product/variant/sorted-option configurations combine; different configurations remain distinct. A fresh authoritative whole-cart quote precedes accepting the combined cart. Stored pending commands and automatic incoming events are not rewritten. Specific browser case and the final 16 checkout/dialog/update regressions pass.
+- Backend API adds protected `POST /api/pos/stock`; checkout catalogue uses the new scoped wrapper. Caller-token DTO decoding normalizes decimal stock quantities. Added migration, grant verification allowlist/count updates, generated schema/hash updates, backend/API tests and documentation in `backend/supabase/CHECKOUT.md`. Existing checkout mutation/rules and business tables remain unchanged.
+- New `Frontend/tests/frontend-consistency.spec.ts` has six cases for role/size presentation, stock/default/limit behavior, populated details/selection/void, Dashboard investigation, populated stock Reports/export, and configured-cart combining. Existing expectations were updated for Dashboard entry, Export CSV labels, filter labels and tax-inclusive cart totals while retaining business assertions.
+- The workspace already contained extensive uncommitted P6/P7/P8/P8A work. A file being modified/untracked in `git status` does not mean it was created in this follow-up. Do not reset, clean, delete or commit those changes. Tracked baseline patch and original handoff copy are in workspace-parent `.review/october-18-consistency/`.
+
+#### Applied hosted change and preserved state
+
+Applied only `backend/supabase/migrations/20261018020000_pos_stock_feedback.sql` to DualCounter (`izdemgzdywtxhvgvsian`) using the approval above. Its SHA-256 is `7e738185ac211ca9b9bebcbd79017f61986c7256d0b7a536cb0bbcbd2d53c2c8`. **All fifteen applied migration sources are now immutable.** The fourteen predecessors have their original hashes. Do not edit an applied SQL file or use an old fourteen-migration expectation.
+
+The two added functions are `read_checkout_stock(jsonb)` and `read_checkout_catalogue_stock(integer,integer)`. They are stable security-definer projections with empty search paths, active checkout-actor checks, authenticated-only execution, enabled/valid configurations, bounded input and only referenced usable/required/remaining stock/per-line whole-order limits. No direct business-table grants, costs, batches, unrelated inventory or new mutation permission. Existing protected configuration resolution/unit conversion/usable-stock exclusions remain authoritative.
+
+Fresh hosted checks used two independent existing Huuujji Owner sessions plus Jest Admin and Aquino Staff. Generated login links were not emailed, no accounts/passwords were changed, and test sign-out used local scope. Only metadata-only transport invalidations were emitted; no hosted checkout, inventory/account save, review or void business command was submitted. Disposable SQL/browser fixtures cover changed business values and configurable products. Final read-only comparison passes for all business table fingerprints and Auth IDs, profiles/settings/retirement and checkout state: checkout enabled, four active accounts and zero retired-account sessions. The migration ledger alone gained the approved fifteenth migration.
+
+#### Validation results and exact limits at the stop
+
+Evidence root is `C:/Users/ASUS/Documents/Personal/Vertwell/.review/october-18-consistency/`; helper sources and state snapshots are in repository `.review/` (ignored). Keep earlier failing logs as evidence; do not describe them as clean passes.
+
+| Check / evidence file | Actual result and limit |
+| --- | --- |
+| `root-final.log` | **148 passed, 0 failed**: 116 backend/API/PostgreSQL and 32 frontend unit checks, including generated schema equality. This root run preceded the final cart-combining edit; backend source was unchanged afterward. |
+| `frontend-unit-final.log`, `typecheck-final.log`, `frontend-build-final.log` | After the final cart edit: **32 frontend unit checks pass**, root typecheck passes, frontend build passes. Earlier `build-final.log` records both production builds passing. Existing frontend >500 kB bundle warning remains nonblocking. |
+| `full-browser.log` | **266 passed, 3 failed**, 269 cases loaded, 18.1 minutes. The three failures were stale before-tax cart-total expectations in navigation/redesign tests (75 vs 84; 255 vs 285.60; 240 vs 268.80). The running suite had loaded those older expectations; corrected tax-inclusive expectations later pass. This is not a clean full run, and later source/test changes were made. |
+| `final-focused.log` | **6 passed**, 1.2 minutes: the three corrected failures, populated role/size receipt/selection/void with final-warning focus, Dashboard investigation reset, populated saved ingredient Reports/export. Includes latest narrow-ID wrapping/disclosure/focus changes. Final screenshot inspection remains unfinished. |
+| `cart-combining.log` | **1 passed**, 16.7 seconds: repeat option A combines, option B stays separate, editing B to A merges to quantity 3, exact tax-inclusive 45.36 confirmation, no stock mutation, preview repeated addition also combines. |
+| `cart-regression-final.log` | **16 passed**, 1.9 minutes, exit 0: `checkout.spec.ts`, `live-dialogs.spec.ts`, `live-updates.spec.ts`, after the cart edit. This already-running check finished; no new application tests were launched after the stop request. No test run remained active at the checkpoint. |
+| Browser coverage across these runs | **271 distinct current cases exercised across different code snapshots**, with scoped passing reruns; this is not a single clean 271-case run on the final snapshot. A final full-suite run remains pending on resumption. |
+| `hosted-migration.log`, `hosted-verify.log`, `hosted-final-state.log` | Approved migration applied; all 15 hashes, exact grants/RLS/access boundaries verify. Final hosted business fingerprints/Auth IDs unchanged; checkout and retirement state preserved. |
+| `hosted-browser.log`, `hosted-browser-final.log`, `hosted/result.json` | Hosted read-only verification passes: actual private WebSocket delivery, permitted reloads, denied Staff management/other-user/anonymous joins, native reconnect, dirty inventory and payment preservation, scoped POS stock API. These runs precede the last cart/disclosure edits; affected final regressions are disposable, not a claim of fresh final hosted UI acceptance. |
+| Existing Reports/export coverage | Passing backend/frontend checks retain complete CSV/recorded values and matching generated Print/PDF bytes. No physical-printing verification. |
+| `source-audit.json` | Checkpoint documentation audit checks all 47 earlier fenced text records unchanged, prior 14 migration hashes, and recorded before/after business fingerprints/Auth IDs. It is a local preservation audit, not a new hosted business check. |
+
+Earlier investigation logs retain a sandbox loopback EACCES, an invalid unsellable fixture's missing manufacturing/expiry dates, old 14/20 migration/function counts, stale navigation/CSV labels and a login-helper race, and narrow-phone long-ID overflow. Those were addressed and affected checks passed. Do not hide the failures or confuse them with the separate still-pending final visual/full-suite acceptance.
+
+Visual evidence: `hosted/` contains **205 PNGs** (140 main pages, 20 export, 45 real/preview payment/configuration). `visuals/` contains **270 PNGs** (140 main pages, 20 export, 5 populated recipe/stock, 80 populated details/selection/void, 10 real final-void warnings and 15 populated stock Report/card/export). Sizes are 1440×900, 820×1180, 390×844, 320×568 and 820×400. Hosted main and extra contact sheets for all five sizes were inspected; earlier populated local sheets and selected full-size POS/void images were inspected. The latest local metadata-disclosure/final-warning and populated stock Report/export captures still require refreshed contact sheets and full-size review. Screenshot capture, containment assertions and passing tests do not replace that final visual inspection. Mobile element screenshots can include a sticky navigation overlay from capture positioning; assess the actual UI before treating that artifact as a product bug. No measured horizontal overflow/page errors were reported in the passing checks, but no complete final visual sign-off is claimed. Safari, Firefox, physical devices and screen-reader acceptance were not performed.
+
+#### Known remaining work and interruption details
+
+1. **Still pending: finish final visual review** of latest populated stock Report/card/export, receipt metadata disclosure and final-void warning across the five sizes, refreshing contact sheets where needed. Compare with the unchanged established preview using each mode's legitimate data. Hosted configurable recipe/variant/bundle states are unavailable; use disposable fixtures and label that evidence accurately.
+2. **Still pending: assess additional observed presentation differences** under the original open-ended consistency instruction. `LivePos.tsx` Staff Current Order count always says “items” for quantity 1; preview uses the singular. Live cart modifier rows lack preview's `cart-modifier` styling/plus-price prefix, and SKU text lacks the preview configuration label/class. `LiveSales.tsx` uses medium `manilaTime` strings while preview audit uses a shorter date/time format. The receipt icon can slightly increase POS heading height on small/short screens. These were observed in source/comparison and were not changed before the stop; determine the appropriate shared presentation on resumption. Do not change legitimate saved data/history merely to force identical text.
+3. **Still pending: final full browser validation on the finished snapshot**, after any remaining authorized fixes, plus meaningful affected checks if those fixes change behavior. Current unit/type/build and 1+16 scoped cart checks pass. Do not claim the earlier 266/3 run or cumulative reruns as one clean final suite.
+4. **Interrupted acceptance/documentation, not an in-flight hosted migration:** the approved migration and read-only verification finished. The last implementation (configured-cart combining) was saved and its focused/regression checks finished. Final review and complete acceptance were not finished when the user stopped work. No half-written migration or business transaction is awaiting continuation. No commit/push/PR/deploy was started.
+5. `repo/.review/consistency-checkpoint.md` had been an unused premature completion draft with placeholders. It has been replaced by this actual incomplete stop checkpoint. Never use an old completion draft or historical P9-next script as acceptance. Do not rerun old `.review/consistency-refinements.mjs`/hosted preparation/mutation/reset helpers blindly; inspect their targets and assumptions first. No destructive cleanup is needed to resume.
+
+#### Current continuation — resume the incomplete October 18 priority only after a new user request
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Work is stopped at the
+user's request. Do not resume implementation or application tests merely because
+this handoff is read; wait for a new request to resume this priority.
+
+Read this saved incomplete checkpoint and the ORIGINAL October 18 frontend
+consistency section immediately below in full: original backend/UI concern,
+post-P8A review request, entire follow-up review, and verbatim priority instruction.
+Also read "P8A original request and acceptance requirements (October 18, 2026)"
+(its full user message, six requirements and five completion criteria), the
+completed P8A baseline, earlier applicable original frontend priority messages,
+README and any applicable AGENTS.md. This continuation is navigation only;
+never replace the user's full original requirements with a script or summary.
+
+Resume at "Known remaining work and interruption details" in this checkpoint:
+inspect latest populated Report/export and receipt/final-void visual evidence,
+then assess the recorded Staff count/cart modifier-SKU/audit-time/heading-height
+presentation differences. Use shared established presentation and retain real
+data/permissions/history/validation/recovery/provider capability. Finish the
+open-ended all-role consistency review; do not restrict it to the review table.
+The final cart-combining change already has 1 focused and 16 checkout/dialog/
+update checks passing, with 32 units, root typecheck and frontend build passing.
+Inspect retained logs before rerunning checks. After remaining fixes/review,
+obtain a clean full browser result on the final code snapshot and record exact
+visual/functional acceptance and limits. The earlier 266 passed/3 failed run
+and cumulative coverage of 271 cases are not a clean final-suite acceptance.
+
+Approved migration 20261018020000_pos_stock_feedback.sql is ALREADY applied and
+verified on DualCounter izdemgzdywtxhvgvsian. All 15 applied SQL sources are now
+immutable; do not reapply/edit them or request the same approval. Use recorded
+before/after state in repo/.review/consistency-state-before.json and -after.json
+as evidence only, never as data to restore. Do not replay historical mutation,
+reset, checkout or account helpers against hosted data. Hosted review used no
+business mutations and the real catalogue lacks available configurable products;
+use legitimate disposable fixtures for those states and label evidence clearly.
+
+Preserve enabled checkout, real accounts/credentials/roles/settings, retired
+identities/history, existing local uncommitted work, private automatic updates,
+draft/cart/filter/valid-selection state, original revisions, exact-operation
+recovery, stock models, accurate amounts/tax/configuration snapshots, report
+coverage/explanations and matching Print/PDF. Do not copy preview samples/QR
+into real payment behavior. Keep every original message/review unchanged.
+No commit, push, PR, GitHub save or app deployment until all Backend tasks finish.
+Figma comparison and physical printing remain excluded. This priority is NOT
+complete. Do not start P9 until every requirement is implemented and verified.
+```
+
+### Original October 18 frontend consistency priority and full requirements (preserved)
+
+**Original recording status (historical): recorded only at the time of the request.** Implementation subsequently started and is now stopped, partially completed, as recorded in the current saved stop checkpoint above. The complete original messages and full follow-up review below remain the requirements reference. The historical recording continuation does not replace them or describe current completion.
+
+The established frontend is the design reference for real-account login. Connecting the database must not create another independently designed user interface. Reuse the established presentation and connect legitimate saved data and protected actions through appropriate adapters. Review every allowed Owner/Admin/Staff page, editor, table, empty state, dialog and responsive layout for remaining inconsistencies; the recorded findings are concrete starting points, not a closed list that excuses other differences discovered during the task. Preserve required differences in actual data, role access, saved history, real validation/recovery and payment-provider capability without using those differences to justify unrelated redesigns. Do not copy sample data or the preview-only QR into real-account behavior to make screens appear identical.
+
+The prior P8A acceptance is preserved as history and a functional baseline. This follow-up review found remaining presentation and interaction differences after that acceptance. Do not mark this new priority complete from P8A's passing checks or screenshots; implement and verify the remaining consistency work against the full intent below.
+
+#### Original concern about backend integration and a separate real-account UI — verbatim
+
+```text
+while we are doing the P8A lets review what we did in the backend
+
+I want to know why the UI is not the same as what we did in the Frontend its like we make another new UI for the Backend which is not good so lets review first on what we did 
+
+you can see the UI in preview mode is not the same like when you login using a real account that is connected in the database
+```
+
+#### Request to review again after P8A — verbatim
+
+```text
+now that the P8A is done can you review again any inconsistency with the UI
+```
+
+#### Full follow-up UI inconsistency review — verbatim, not summarized
+
+This is the complete review response discussed with the user. It records observations and their evidence limits, not fixes already implemented. Keep its full detail when starting the new task.
+
+```text
+**Yes—some UI inconsistencies remain after P8A.** The shared styling and POS dialogs are much closer, but these areas still differ:
+
+| Area | Remaining inconsistency |
+|---|---|
+| **[Export Report Summary](C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/src/components/LiveReports.tsx:85)** | Preview uses clearly grouped report details and summary cards. Real mode uses paragraphs, payment figures, embedded tables, and a section-count list. It still feels like a separately designed dialog. |
+| **[Reports page](C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/src/components/LiveReports.tsx:73)** | Preview shows Transactions before ingredient balances; real mode puts ingredient balances first. The live ingredient section also lacks the preview’s padded heading, balance-availability count, and matching explanation layout. |
+| **[POS cart summary](C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/src/components/LivePos.tsx:147)** | Preview displays a zero total when the cart is empty. Real mode hides totals until a quote exists. Owner/Admin summaries also use different arrangements of subtotal, VAT, and total. |
+| **[POS stock feedback](C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/src/components/LiveProductOptions.tsx:48)** | Preview shows available quantities and ingredient requirements/remaining stock. Real mode mainly shows availability messages. Its quantity “+” controls also remain enabled at stock limits, whereas preview disables them. The backend quote still validates the proposed quantity; this review did **not** establish a new overselling bug. |
+| **[Audit Trail details](C:/Users/ASUS/Documents/Personal/Vertwell/repo/Frontend/src/components/LiveSales.tsx:159)** | The shared transaction table matches, but the details panel still differs. Preview uses an aligned **Total Due** row and a fuller selection summary; real mode presents the total inline with payment information and organizes review details differently. |
+
+There are smaller navigation and presentation differences too:
+
+- Real Owner/Admin login opens **Inventory**; preview opens **Dashboard**.
+- The live-only **Recorded sales** button pushes the POS filters/catalogue downward, particularly on short screens.
+- Sales Overview initially shows **today** in real mode versus **nine days** in preview; live mode also adds another summary row above it.
+
+**Reports and Export Report Summary are the clearest remaining design gaps**, followed by POS stock feedback and cart presentation.
+
+I checked the running preview, final P8A real-account screenshots across five screen sizes, and current source. Real-account observations used the saved final captures. No files or database records were changed.
+```
+
+The source line numbers above identify the reviewed snapshot and may move during implementation. Review evidence is in workspace-parent `.review/october-18-p8a-resume-hosted/` and `.review/october-18-p8a-resume-dialogs/`, including real/preview main-page, POS and dialog captures/contact sheets. The follow-up review also inspected the running preview; it did not perform a fresh real-account login or establish new live acceptance. Existing passing tests do not establish absence of the remaining design differences.
+
+#### User instruction making this the next highest priority — verbatim, not summarized
+
+```text
+okay
+I want you to add this in the Handsoff file a priority fixes for the Frontend, also when putting this in the handsoff file dont summarize it I want the intent to be in the message it is important that what I had in mind is passed on.
+this will be another Task and by putting this in the handsoff I will start the task in a new chat
+
+add what we talked about the inconsistency this will be a priority task to fix any inconsistency with the frontend 
+
+this shouldnt be a problem if the AI didnt create a new UI for the Real Account login.
+```
+
+#### Previous continuation — frontend consistency recording only (historical; superseded by the current saved stop checkpoint)
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo when the user starts the
+new frontend consistency task. It is recorded only; do not start implementation
+merely because this handoff exists. Read this highest-priority section in full:
+the original concern, post-P8A review request, entire review response and the
+latest verbatim user instruction. Read the last completed P8A checkpoint and its
+original requirements, earlier applicable original frontend priorities, README
+and any applicable AGENTS.md. This script does not replace the full messages.
+
+The user's central requirement is that real-account login use the established
+frontend design. Do not create another independently designed real-account UI.
+Fix remaining presentation, interaction and navigation inconsistencies throughout
+the allowed Owner/Admin/Staff pages, tables, editors, dialogs and screen sizes.
+Use the full review's specific findings as starting points and inspect other
+states for differences. Share established presentation while keeping legitimate
+real-data, server validation, permission, history and recovery behavior intact.
+Do not make preview data or its sample QR function as real business data/payment.
+
+No fix or acceptance for this new priority has been performed in its recording.
+P8A's prior tests/captures remain a baseline, not completion of this follow-up.
+Compare real-account and preview presentation with their legitimate separate data;
+verify affected responsive, keyboard/focus, dirty-form and business workflows.
+Record actual changes, checks, evidence limits and any remaining inconsistencies.
+Preserve private automatic updates, current accounts/roles/credentials/settings,
+retired history, enabled checkout, stock models, accurate amounts/tax/snapshots,
+matching Print/PDF output, existing APIs/security and local uncommitted work.
+All fourteen applied migration sources remain immutable. Do not replay historical
+mutation/reset helpers or revert current data to old review fingerprints.
+No commit, push, PR, GitHub save or deployment until Backend tasks finish.
+Figma comparison and physical-printing verification remain excluded.
+Finish this priority before P9; P9's provider/notification scope remains pending.
+```
+
+### Latest completed checkpoint — P8A real-account design and private updates (October 18, 2026)
+
+**P8A is implemented and verified against its original six requirements and five
+completion criteria.** This supersedes the saved stop below. P9 remains pending;
+Backend as a whole is not complete. All work remains local. The full original
+October 18 message, earlier original priority messages, approvals and stop records
+remain unchanged below. Read them as the requirements, not just the continuation.
+
+#### Request resuming this work — verbatim
+
+```text
+Read HandsOff.md and implement the P8A highest-priority. Follow my full original message, not just the continuation script.
+```
+
+#### Status against the original requirements
+
+| Original P8A requirement | Status | Verified result |
+| --- | --- | --- |
+| 1 | **Completed** | All 14 role-permitted real/preview destinations inspected at five sizes. Real data populates the established pages and shared presentation. POS now also shares `ProductOptions`, `CheckoutSummary`, `CashPaymentFields` and `GCashPaymentFields`; old live-only fieldset/font overrides are removed. Live single/bulk/final voids use the established dialog classes. Navigation, Inventory/Users, Daily Sales Review, Reports, calendars, time controls, focus and discard handling retain their established components. |
+| 2 | **Completed** | No repeated Welcome/name heading on the real destinations; identity stays in navigation and the established Staff counter heading. All ten authentication cases pass, including restoration, denial, logout and recovery. |
+| 3 | **Completed** | No ordinary Refresh control. Actual hosted private WebSocket delivery, permitted authoritative reloads, denied joins and native reconnect pass. Disposable PostgreSQL workflows verify inventory, accounts/settings, checkout/stock/payment, requests/decisions, review, void/audit and readiness invalidations; browser contexts verify cross-session state changes. See the explicit hosted/local distinction below. |
+| 4 | **Completed** | Protected reads, real saved records, exact report calculations/exports, recorded tax, four stock models and workflow recovery retained. Dashboard duplicate detection now preserves original purchased modifier/nested configuration identity and ignores JSON object-key order. Equal-price different configurations are tested independently of the current catalogue. No sample fallback or permission expansion. |
+| 5 | **Completed** | Inventory and account drafts retain original revisions and explicitly reject concurrent stale saves. Customization choices/quantity and Cash/GCash input survive events; changing a variant retains entered modifiers. Escape/backdrop/close use discard protection for live options/payment drafts. Filters, valid selection, cart and recovery stay mounted; logout removes channels and a new Staff scope cannot retain manager data. Reconnect resynchronizes without repeating mutations. |
+| 6 | **Completed** | Existing approved metadata-only private Broadcast design retained. All 14 migration hashes, existing narrow grants, receive-only policy, nine triggers, five private definer functions and denied subscriptions verify successfully. No schema/security change or migration application was needed in this continuation. |
+
+| Original completion criterion, in its existing order | Status and evidence |
+| --- | --- |
+| 1 | **Completed.** Owner/Admin six destinations each, Staff POS/own-day Sales History; real/preview use legitimate separate data and existing role boundaries. No extra Welcome shell or routine Refresh. |
+| 2 | **Completed within the requested browser scope.** Desktop 1440×900, tablet 820×1180, phone 390×844, narrow phone 320×568 and short tablet 820×400; main pages and affected POS dialogs inspected, with shared editor/review/export/focus/discard workflows covered by regression. Figma comparison and physical-printing verification remain excluded. |
+| 3 | **Completed with distinct evidence.** Two independent hosted Owner sessions plus Admin/Staff verify actual transport/denials/authorized reloads/reconnect. Disposable business commands and independent browser contexts verify changed values, stale drafts, cart/payment, account scope and review/void/report propagation. Hosted metadata signals did not manufacture business records. |
+| 4 | **Completed.** Final results and exact scope are recorded below; mocked transport is explicitly separate from hosted acceptance. |
+| 5 | **Completed.** Final read-only before/after business fingerprints and Auth IDs match this session's baseline; prior profiles/settings/retirement/checkout state also match the earlier checkpoint. All 40 pre-existing fenced text records and 14 applied migration sources are preserved. No commit, push, PR, GitHub save or deployment. |
+
+#### Changes finishing the interrupted work
+
+- Restored the established **Daily sales values** disclosure text. The earlier
+  October 15/16 timeout failures and all ten authentication cases now pass.
+- `lib/data/dashboard.ts`, `data/demo.ts` and `data/audit.ts` retain immutable
+  purchased configuration and modifier snapshots for duplicate evidence. A pure
+  PostgreSQL-backed unit scenario distinguishes same-priced nested configurations,
+  preserves original modifier names, and recognizes equivalent JSON key order.
+- Extracted preview POS presentation into shared option/variant/bundle, receipt,
+  Cash and GCash components. Live data adapters still obtain authoritative whole-
+  order quotes and retain exact-operation uncertain-checkout recovery. Bundle
+  contents and nested purchased options are visible in the cart/confirmation.
+  Live GCash records received-payment evidence; the sample QR remains preview-only.
+  Provider verification remains P9. No fake live payment QR was introduced.
+- Live options/payment drafts now use existing discard/focus handling. Existing
+  cart lines survive dialog cancellation and navigation. Variant changes retain
+  selected modifiers; new quotes revalidate the whole order. Original revisions,
+  live scope reset and background-read protections are retained.
+- Added four browser cases in `live-dialogs.spec.ts`, the receipt-identity unit
+  case, and one comprehensive database business-event invalidation case. Adapted
+  live checkout assertions to the established radio controls, Update item action
+  and shared cash-field label. Existing behavioral assertions were retained.
+
+#### Final verification and precise limits
+
+- **147/147 root checks**, exit 0: **115 backend/API/PostgreSQL + 32 frontend unit**.
+  Final root typecheck and both production builds pass. Generated schema equality
+  passes. Existing frontend >500 kB bundle warning remains nonblocking.
+- **264/264 full browser cases passed (16.2m), exit 0**. A final affected run after the last POS/void/typography
+  refinements is **18 passed plus a corrected 4/4 dialog rerun, covering all 22 affected cases**. The extra bundle case was added after
+  the full runner loaded its test list: **265 distinct current browser cases are
+  covered across the full and focused runs**, not one clean 265-case full run.
+  The first affected run had one new-fixture failure and three unrun serial cases:
+  its two variants incorrectly shared one stock SKU. The fixture now uses distinct
+  stock records; all four dialog cases pass. No database constraint was weakened.
+  Logs retain that failed run. The previous 178-pass/18-fail/65-unfinished run
+  remains historical.
+- Read-only hosted `db:verify` confirms all **14 exact hashes** and existing grant
+  boundaries. Private transport schema audit confirms one authenticated receive
+  policy, nine triggers, five private definer functions with empty search paths,
+  no forbidden execute grants, enabled checkout, four active accounts and zero
+  retired-account sessions. No applied migration was edited or reapplied.
+- Actual hosted private WebSockets pass: two independent Huuujji Owner sessions,
+  Jest Admin and Aquino Staff; Staff manager/other-user and anonymous denial;
+  authorized Inventory/Users/POS/history/Dashboard/Reports reloads; unsaved draft
+  preservation and actual native socket disconnect/rejoin. These used metadata-
+  only invalidations, not new hosted sales, stock, account or review fixtures.
+  Local SQL/business/browser tests establish changed-value workflow propagation.
+- Loaded real/preview visual evidence comprises **140 main-page captures and 45
+  POS-dialog captures**. All five main and dialog contact sheets were inspected.
+  The final **30 role/size POS captures** replace their earlier counterparts after
+  removal of old live-only typography rules; their five contact sheets were also
+  inspected. No measured page/dialog horizontal overflow or browser page errors.
+  Live option/variant/bundle dialogs use disposable legitimate test data because
+  the existing hosted catalogue has no available configurable product to open.
+  Local five-size customization/payment/bundle captures supplement hosted Cash/
+  GCash/confirmation and preview configurable-dialog captures.
+- The old hosted fingerprint was already out of date **before** this session's
+  hosted verification: inventory operations 65→66, workflow operations 12→13,
+  audits 221→236, reviews 2→3 and review memberships 3→15. Current records were
+  preserved, not reverted. Fresh before/after fingerprints match every public/
+  private business table and all Auth IDs. Counts remain 12 profiles/Auth users,
+  four active/eight retired, 22 sales/payments, 61 stock movements, 236 audits,
+  three reviews, four requests and four cash movements. Profiles, settings,
+  retirement and checkout activation also match the earlier checkpoint.
+- Sign-in tokens stayed in memory; no password reset/email/account creation,
+  business mutation or saved setting change. Only verification-created Auth
+  sessions were signed out locally. Physical devices, screen readers and other
+  browser engines are not claimed. Figma and physical printing stay excluded.
+
+Local evidence is in workspace-parent `.review/october-18-p8a-resume-*`: root tests,
+typecheck/build/schema, full/focused browser logs, trigger checks, hosted result/
+captures/contact sheets, final POS captures, state before/after and source audit.
+Test helpers under `repo/.review/` are ignored local evidence, not runtime code or
+instructions to replay mutation/account-reset helpers.
+
+#### Previous continuation — P9 after P8A (historical; superseded by the frontend consistency priority above)
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. P8A is implemented and
+verified; the previous saved stop is historical. Read this latest checkpoint,
+the full original October 18 P8A message and its six requirements/five criteria,
+the earlier full original priorities and carried-forward decisions before changes.
+P9 external integrations is the next priority after a new request; its provider
+and notification scope still needs definition. Do not treat recorded GCash
+references/sample QR as provider verification or invent a separate October 18 task.
+Preserve shared preview/real components, automatic private updates, drafts/cart/
+filters/recovery, original receipt identity, Daily sales values, recorded tax,
+four stock models, matching exports and enforced roles. All fourteen applied
+migrations are immutable. Preserve existing real accounts/credentials/settings,
+retired account history and enabled checkout. Use current read-only baselines;
+do not restore older checkpoint data or replay historical mutation/reset helpers.
+Keep Backend work local until all Backend tasks finish: no commit, push, PR,
+GitHub save or deployment. Figma and physical-printing verification stay excluded.
+```
+
+
+### Previous saved stop checkpoint — P8A partially completed (historical; superseded above)
+
+**Implementation stopped. P8A is NOT complete.** The user stopped work during the
+full browser regression. No implementation fixes or new acceptance runs were made
+after that instruction. The remaining work below requires a new user request.
+Earlier checkpoints and continuations are historical wherever they disagree with
+this checkpoint. P9 remains deferred; the user clarified that P8A itself is the
+October 18 task, so no separate October 18 priority has been invented.
+
+#### Latest stop/save instruction — verbatim
+
+```text
+Let’s stop for now. Stop implementation and update HandsOff.md to save the current progress.
+
+Preserve my full original priority requirements without summarizing or rewriting them. For each requirement, record whether it is completed, partially completed, or still pending, including any unverified work.
+
+Record the changes made, validation results, known issues, and anything interrupted. Update the continuation script to point to the original priority requirements and tell the next chat exactly where to resume.
+
+Do not mark the whole priority task complete unless every requirement is implemented and verified.
+```
+
+#### Requirement-by-requirement status at the stop
+
+The complete original October 18 message, all six requirements and all five
+completion criteria remain unchanged in **P8A original request and acceptance
+requirements (October 18, 2026)** below. These status references supplement that
+text; they do not replace or rewrite it. The earlier original priority messages,
+including October 17/16/15 and their carried-forward requirements, also remain
+verbatim in this file and must be read when assessing regression preservation.
+
+| Original P8A requirement | Status | Implemented and verified evidence / remaining scope |
+| --- | --- | --- |
+| 1 | **Partially completed** | Main real-account destinations reuse established page/components. Real and preview Owner/Admin/Staff pages were captured and inspected at five sizes. Full dialog-by-dialog parity, keyboard/focus and dirty-form coverage remain to audit, particularly live POS customization/payment forms. The summary disclosure spelling regression below remains unfixed. |
+| 2 | **Completed** | Repeated real-account Welcome/name shell removed across allowed tabs; identity remains in established navigation/Staff heading locations. Hosted real/preview captures and the five new browser cases verify the main destinations. Authentication test assertions were updated but their focused rerun is pending; this does not establish full Auth regression acceptance. |
+| 3 | **Partially completed** | Routine Refresh removed; private Supabase WebSockets drive authoritative reads. Actual hosted delivery, denial, resource reloads and native socket reconnect passed. Local SQL-trigger/fixture tests cover business changes. Complete regression and exhaustive affected business-event coverage are still pending; hosted verification used metadata invalidations, without manufacturing business records. |
+| 4 | **Partially completed** | Saved-data adapters, existing protected APIs, cent-safe reporting and workflow recovery retained. Last hosted fingerprints preserved all existing business rows/Auth IDs. Earlier 145 root checks and 16 affected browser checks passed. Full regression was interrupted with failures; Dashboard receipt identity omission found in source review still needs investigation/fix/verification. |
+| 5 | **Partially completed** | Deferred background reads preserve open edits, original revisions, filters, cart/payment input and valid selection. Stale draft rejection, two sessions, native reconnect and account demotion passed affected tests. Full logout/role/scope and all editor/dialog combinations are not exhaustively verified; focused Auth rerun and remaining regression are pending. |
+| 6 | **Completed** | Reviewed private metadata-only Broadcast design implemented; exact-target migration explicitly approved and applied. All 14 hashes and existing grant boundaries verified. Local security tests and hosted joins/denials/schema audit passed. No blanket business-table grants, client publish policy or public business data broadcast added. Future fixes must preserve this verified boundary. |
+
+| Original P8A completion criterion, in its existing order | Status at stop |
+| --- | --- |
+| 1 | **Completed for the main destination presentations.** 14 role-permitted destinations, legitimate separate real/preview data, no extra Welcome shell or routine Refresh, inspected at all five sizes. Exhaustive dialogs remain under criterion 2 and requirement 1. |
+| 2 | **Partially completed.** Desktop/tablet/phone/narrow/short main pages inspected; existing focus cases observed passing, but complete shared-dialog/dirty-form parity audit and interrupted responsive regressions remain. Figma and physical-printing exclusions are preserved. |
+| 3 | **Partially completed.** Two independent hosted Owner sessions plus Admin/Staff transport, authorized reloads, denied topics, draft and reconnect verified; local business-trigger/workflow cases passed. Full affected event/session matrix and remaining regression are not complete. |
+| 4 | **Partially completed.** Meaningful backend/database/browser and real hosted transport evidence exists, but the complete browser run failed/interrupted and latest frontend unit rerun is pending. No overall acceptance claim. |
+| 5 | **Completed for preservation at the recorded fingerprint checkpoint.** Existing rows/Auth IDs, enabled checkout, credentials/settings/history and local work preserved; no historical mutation helper replay, commit, push, PR or application deployment. A final post-session fingerprint recheck remains pending and must not be implied by the earlier evidence. |
+
+#### Changes already made before the stop
+
+- `Frontend/src/lib/live-updates.tsx` adds private role-scoped subscriptions,
+  coalesced resource invalidation, reconnect/focus/online resynchronization,
+  connection status and deferred reads during edits. `App.tsx` scopes the provider
+  by account/role; `auth-session.ts` handles identity invalidation. `request-state.ts`
+  holds/cancels background reads during open editors and only reloads on release
+  when work was actually deferred. No automatic retry of business mutations.
+- Real Management/POS/Audit/Reports/Dashboard views use shared `CatalogueCard`,
+  `PosHeading`, `SalesHistoryHeader`, `TransactionTable`, `DailyReviewQueue`,
+  `SalesOverview`, `ReportSummary` and `StockBalanceCard`, alongside existing
+  navigation, Inventory/Users, calendars, time fields, modal/actions and controls.
+  Preview uses the same extracted presentation components. Live service/data
+  adapters retain real permissions, historical amounts and saved workflow recovery.
+  Normal Refresh/Welcome shell removed; explicit error Retry and quote recovery
+  retained. Main-page reuse does not prove every live POS dialog is identical.
+- `LiveDashboard.tsx` feeds saved reports into the existing Dashboard; financial
+  overview shares its snapshot/category. `lib/data/dashboard.ts` is display-only;
+  absent payment displays `Unrecorded`. `data/durable-reporting.ts` supplies daily
+  totals and shared report summaries while retaining integer-cent calculations.
+- Inventory/Users announce open drafts before background updates can replace their
+  source. Owner alert settings use the existing revision-protected API and dirty
+  guards/manual Save. Admin no longer attempts the forbidden Owner-settings read.
+  Notification/provider delivery remains P9; no saved hosted setting was changed.
+- `backend/supabase/migrations/20261018010000_private_live_updates.sql` is **applied**
+  on DualCounter `izdemgzdywtxhvgvsian`, following the user's exact approval preserved
+  below. Normalized SHA-256:
+  `4251947b6f0a74e55bc20af18373462091f2c2616f14bae66bb534480ffe13e3`.
+  One authenticated receive policy, nine source triggers, five private definer
+  functions with empty search paths; metadata-only manager/catalogue/self topics.
+  Existing narrow grants unchanged. **All fourteen applied migrations are now
+  immutable, including the thirteen accepted predecessors. Do not edit/reapply.**
+- Added disposable PGlite Realtime scaffolding, three transport security/database
+  checks and five browser scenarios in `Frontend/tests/live-updates.spec.ts`.
+  Existing integration schemas, fixtures, package test lists and manual-Refresh
+  assertions were adapted. `backend/supabase/LIVE_UPDATES.md` documents the contract.
+  The authentication test source was updated during the full run after its old
+  assertions failed; those edits remain unverified by a fresh focused run.
+- All earlier uncommitted P8 work remains in place. No commit, push, PR, GitHub
+  save, application deployment, credential reset or account replacement occurred.
+  Local `.review` scripts/logs/screenshots are evidence, not production code or
+  instructions to replay one-time edits or historical mutation helpers.
+
+#### Validation results and precise limits
+
+| Check | Recorded result | Scope / limits |
+| --- | --- | --- |
+| Root tests | **145/145 passed:** 114 backend/API/database and 31 frontend unit | Before the last shared-heading/summary refinements. Latest frontend unit rerun remains pending. Log: `../.review/october-18-p8a-tests-final.log`. |
+| Typecheck and builds | **Passed** after final presentation refinements | Latest build log: `../.review/october-18-p8a-build-verified.log`; only the existing >500 kB frontend chunk warning. A future fix needs appropriate fresh checks. |
+| Affected browser suite | **16/16 passed** | Five new live-update cases plus five report and six sales-workflow cases, after the deferred-read/PDF identity fix and before final presentation refinements. Log: `../.review/october-18-p8a-final-behavior.log`. All five new live-update cases also passed in the later interrupted full run. |
+| Full browser suite | **Interrupted: 178 passed, 18 failed, 0 skipped; 65 of 261 have no completed result** | 196 result lines were recorded before Ctrl-C; exit 1, no successful final suite summary. Log: `../.review/october-18-p8a-full-browser.log`, last write about 04:20:48 Asia/Manila October 18. The 65 include any in-flight cases canceled by the stop. Do not report 261 passed or infer unrun cases. |
+| Applied database verification | **Passed** | `../.review/october-18-p8a-db-verify.log`: all 14 migration hashes, existing public/private privilege boundaries. Earlier 30 local DB cases and three new private-transport cases passed (included in root coverage). |
+| Hosted Realtime schema audit | **Passed** | `../.review/october-18-p8a-realtime-schema.log`: exact receive policy, nine triggers, five private definer functions, forbidden execute grants absent; checkout enabled, four active accounts, no retired sessions. |
+| Actual hosted WebSockets and browsers | **Passed** | `../.review/october-18-p8a-hosted-final.log` and `../.review/october-18-p8a-hosted/result.json`. Two independent Huuujji Owner sessions, Jest Admin and Aquino Staff; authorized delivery/reloads, Staff manager/other-user and anonymous denial, draft preservation and actual native socket disconnect/rejoin. No business mutation or account creation; no tokens saved. This is separate evidence from local protocol mocks. |
+| Loaded real/preview visual review | **Completed for main pages** | Final 140 PNGs (70 real + 70 preview), 14 allowed role/destination combinations at 1440x900, 820x1180, 390x844, 320x568 and 820x400. All five final contact sheets inspected; no horizontal overflow/page errors. Captures waited for loaded Reports/export state. Earlier loading-state captures are superseded. Folder: `../.review/october-18-p8a-hosted/`. Full dialog parity remains unverified. |
+| Business/Auth preservation | **Passed at the last recorded before/after comparison** | `.review/p8a-state-before.json` / `p8a-state-after.json`: identical public/private business fingerprints and Auth IDs, migration count 13 to 14. Final fingerprint/schema rerun after the last read-only hosted run was not performed before stopping. |
+
+The preservation checkpoint contains 12 profiles/Auth users (four active/eight
+retired), 22 sales and payments, 61 stock movements, 221 audits, two reviews, four
+void requests, four cash movements, inventory revision 87 and enabled checkout.
+No hosted business fixture, saved setting, password or role changed. Hosted
+verification used normal sign-in sessions and metadata invalidations; normal Auth
+sign-in timestamps changed. Only sessions created for this verification were
+signed out locally; unrelated sessions were preserved. Earlier failed helper runs
+and sandbox loopback restrictions are retained in separate logs; they are not
+successful acceptance evidence. One hosted QA helper's manual socket-disconnect
+method was corrected to close the native socket; the final native reconnect check
+passed. No application reconnect defect was established by that helper failure.
+
+#### Known issues, unverified work and interruption details
+
+1. **Unfixed source regression:** shared `SalesOverview.tsx` currently renders
+   `Daily Sales Values`; the established copy is `Daily sales values`. Six
+   `october-15-ui.spec.ts` and five `october-16-ui.spec.ts` cases timed out at the
+   exact established disclosure label (11 failures). Restore the established copy
+   after resumption, then rerun these affected tests; do not weaken assertions to
+   accept an accidental design change. No fix was made after the stop request.
+2. **Seven authentication failures need a fresh run:** the full runner had loaded
+   old Welcome/identity assertions. `Frontend/tests/authentication.spec.ts` now
+   checks `.nav-identity` and absence of the repeated Welcome heading, but the
+   amended tests have not been rerun. A passing rerun is still required; do not
+   assume every failure is resolved merely because the assertions were edited.
+3. **Dashboard source-review finding, not yet reproduced end to end:**
+   `Frontend/src/lib/data/dashboard.ts` maps saved receipt lines using
+   name/category/quantity/price but omits modifier/nested configuration identity.
+   Inspect the existing duplicate-activity signature and preserve original receipt
+   snapshots where necessary, so differently configured same-priced receipts are
+   not conflated. Investigation, any fix and a meaningful pure test are pending.
+4. **UI acceptance gap:** compare every relevant live/preview dialog and editing
+   workflow, especially POS customization/payment forms, against the established
+   frontend while preserving authoritative quote/recovery. Shared Modal/actions,
+   passing focus/workflow cases and main-page screenshots do not establish full
+   dialog parity. Remaining responsive cases in the interrupted run are unverified.
+5. **Finish regression only after a new request:** inspect/fix concrete findings,
+   rerun affected suites and then complete the interrupted full regression as
+   warranted. Run current unit/typecheck/build/schema checks after any source
+   fixes. Do not convert the previous 145/16 successes into current full acceptance.
+6. **Final preservation/documentation acceptance pending:** record a final read-only
+   hosted fingerprint/schema check if continuing acceptance; retain exact original
+   requirements and update phase docs only to proven outcomes. Existing README and
+   older P8 checkpoints do not supersede this P8A stop status. P9 stays deferred.
+7. **Runner stopped:** the full browser command was interrupted through its owned
+   execution session (13950), returning exit 1. Subsequent process/port inspection
+   found no Playwright/P8A hosted helper and no listeners on owned test ports
+   5180/5181. The pre-existing `npm run dev --workspace Frontend` Vite on 5173
+   (started October 17, PID 8808 at inspection) was left running. Hosted final
+   helper had already completed and closed its owned browser/API/server resources.
+
+#### Current continuation script — resume P8A only after a new user request
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Work is STOPPED at the
+user's request; do not resume implementation merely because this script exists.
+After a new request to continue, read the full "P8A original request and acceptance
+requirements (October 18, 2026)" section: the verbatim original user message, all
+six requirements, and all five completion criteria. Also read the preserved full
+October 17/16/15 and earlier applicable priority messages and carried-forward
+requirements, the accepted P8 checkpoint, and this latest saved stop checkpoint.
+This continuation is navigation, not a substitute for those original requirements.
+P8A is PARTIALLY COMPLETED, not accepted; P9 remains after it.
+
+Resume with the known concrete findings: restore SalesOverview's established
+"Daily sales values" spelling and rerun affected October 15/16 browser cases;
+rerun the already-amended authentication.spec.ts (seven old-assertion failures in
+the interrupted run). Inspect/fix/test Dashboard receipt modifier/configuration
+identity preservation. Audit live/preview dialog and edit parity, especially POS
+customization/payment, without losing authoritative quotes or uncertain recovery.
+The 261-case full suite stopped with 178 passed/18 failed/65 unfinished; consult
+../.review/october-18-p8a-full-browser.log. Do not treat unrun cases as passing.
+Complete meaningful regression and current unit/typecheck/build/schema checks
+after fixes; record exact results and remaining limits. Main-page loaded visual
+review and actual hosted private transport already passed in the final evidence
+listed above; repeat only when new findings/changes justify it.
+
+The explicitly approved migration 20261018010000_private_live_updates.sql is
+APPLIED to DualCounter izdemgzdywtxhvgvsian. All fourteen applied migrations are
+immutable; do not edit/reapply or replay historical mutation/account-reset helpers.
+Preserve real accounts/credentials/roles/settings, eight retired accounts/history,
+enabled checkout, drafts/cart/filter/recovery, four stock models, recorded tax,
+historical snapshots, Daily Sales Values and matching exports. Final read-only
+fingerprint/schema verification after the last hosted session remains pending.
+Use local disposable fixtures for business mutation checks; hosted evidence so
+far used authorized sessions and metadata invalidations, with zero business writes.
+Do not rerun one-time .review/p8a-refactor.mjs, p8a-wire.mjs or
+p8a-shared-tables.mjs edits. Preserve all existing uncommitted work. Keep Backend
+work local: no commit/push/PR/GitHub save/application deployment while unfinished.
+No Figma comparison or physical-printing acceptance. Do not mark P8A complete
+until every original requirement is implemented AND verified; record per-item
+status and exact evidence. Only then identify P9 as next (scope still to define).
+```
+
+### Previous in-progress P8A checkpoint — historical, superseded by the saved stop above
+
+**Implementation is in place; final acceptance is in progress. P8A remains ahead
+of P9 until the checks below finish.** The real-account Welcome shell and ordinary
+Refresh controls are removed. Real accounts reuse the established frontend page
+components and shared Dashboard/chart, POS heading/cards, Audit heading/table/review
+queue, report summary/balances, fields and dialogs. Real and preview data remain
+separate. Protected reads now refresh from private Supabase WebSocket invalidations.
+Draft revisions, carts/payment inputs, filters, selection, uncertain actions and
+PDF snapshot identity remain protected. See
+[LIVE_UPDATES.md](backend/supabase/LIVE_UPDATES.md) for the complete contract.
+
+#### Scope clarification and hosted authorization — verbatim
+
+```text
+implement P8A then update the handsoff that the next task will be the Oct 18 before the P9
+```
+
+After clarifying that P8A is the only recorded October 18 task:
+
+```text
+then lets do right now the P8A (Oct 18)
+```
+
+In response to the exact-project migration/verification approval request:
+
+```text
+Approve this DualCounter migration and verification
+```
+
+This explicitly approved `20261018010000_private_live_updates.sql` and verification
+on DualCounter `izdemgzdywtxhvgvsian`. Automatic approval review initially rejected
+the hosted application because the earlier implementation request did not name
+this exact remote change. The user approval resolved that rejection. No workaround
+was used. The migration is now applied, with normalized SHA-256
+`4251947b6f0a74e55bc20af18373462091f2c2616f14bae66bb534480ffe13e3`.
+All fourteen applied migrations, including the thirteen accepted predecessors,
+are immutable. Existing narrow grants, roles and business rows are unchanged.
+
+#### Checks completed and remaining at this checkpoint
+
+- Root tests pass 145/145 (114 backend/API/database and 31 frontend unit checks).
+  Typechecks and both builds pass. The latest shared-heading/summary refinements
+  still need the final recorded unit/build verification.
+- Sixteen affected browser cases passed before the last presentation refinements,
+  including two-session inventory changes/stale draft rejection, cart/payment
+  preservation, reconnect, account demotion, checkout-to-Dashboard/Reports updates,
+  once-only stock use, review/void recovery and exact Download PDF/Print bytes.
+- Hosted private transport is verified with two independent Huuujji Owner
+  sessions, Jest Admin and Aquino Staff. Staff management/other-user subscriptions
+  and anonymous subscriptions are denied. Real browsers reload all affected
+  authorized resources, preserve a draft and recover from actual socket loss.
+  These are real Supabase WebSockets, separate from local protocol fixtures.
+- All public/private business fingerprints and every Auth ID match the baseline:
+  12 profiles/Auth users (four active/eight retired), 22 sales/payments, 61 stock
+  movements and 221 audits. Checkout remains enabled. No persistent business
+  fixture, account, password or saved setting was changed. Normal Auth sign-in
+  timestamps changed; created sessions are signed out locally.
+- **Still running:** the complete 261-case browser suite and final loaded-data
+  real/preview captures at five sizes. Seven legacy Auth assertions expect the
+  intentionally removed Welcome heading; their tests now check navigation identity
+  and need a focused rerun. One preview test exposed a summary-title capitalization
+  change; restore its established `Daily sales values` spelling before its rerun.
+  Final visual review, migration/fingerprint recheck and acceptance documentation
+  are still pending. Do not mark P8A complete from this in-progress checkpoint.
+
+Backend work remains local: no commit, push, PR, GitHub save or application
+deployment. No historical mutation helper or account-reset workflow was replayed.
+P9 remains deferred; the user clarified P8A itself is the October 18 task, so there
+is no separately specified October 18 follow-up to invent.
+
+#### Previous in-progress continuation — historical, superseded by the saved stop above
+
+```text
+Read the full original October 18 P8A message and requirements below, the current
+implementation checkpoint, and all applicable preserved original requirements.
+Do not reapply the fourteen immutable migrations or replay historical mutation
+helpers. P8A implementation and the explicitly approved DualCounter migration
+are in place. Finish the pending full/focused browser checks, final loaded-data
+real/preview visual review and any concrete findings, then record exact results.
+Preserve all real accounts, credentials, settings, retired accounts/history,
+enabled checkout, drafts/cart/recovery, stock snapshots and matching exports.
+P9 is still after P8A and needs its own provider/notification scope. Keep all
+unfinished Backend work off GitHub. Figma and physical-printing review stay excluded.
+```
+
+### P8A original request and acceptance requirements (October 18, 2026)
+
+**Original recording status (historical): recorded only.** Implementation and acceptance now follow the current checkpoint above. The user reported design inconsistencies between real-account login and preview mode and explicitly requested this as the first/top priority. Read the complete original message below. Finish this task before P9 external integrations. Existing P8 functional acceptance does not establish that this new design-parity/WebSocket request is implemented or verified.
+
+#### Original October 18 user message — verbatim, not summarized
+
+```text
+I found some inconsistency in design when I logged in using an account vs in preview mode 
+list this as first top priority to fix in handsoff
+first is there is a welcome and the name of the user in all tab when logging in using an account 
+but when you look in preview mode theres no welcome and something like that 
+
+also there is refresh button we should just remove that and make web socket so that it doesnt need the user to refresh it. 
+
+we need to use the frontend design that we successfully made when we are doing frontend and not make another UI for the backend 
+```
+
+#### Requirements and preserved intent for P8A
+
+1. **Use the successfully completed frontend as the design reference for real login.** Compare the established preview presentation with the real-account presentation for every role-permitted tab: Dashboard, Inventory, POS, Reports, Audit Trail and Users. Reuse the existing page components, navigation, spacing, typography, controls, tables, dialogs and responsive layouts, adapting data/services as needed. Backend integration must populate the established interface rather than introduce a separate visual shell or a second UI for the same workflows. This is comparison against the implemented frontend; do not reopen the removed exhaustive Figma-comparison task.
+2. **Remove the repeated Welcome/user-name content added to every real-account tab.** The user specifically identified this difference from the preview design. Keep identity display in the locations already established by the frontend and preserve legitimate page titles. Inspect all accessible pages, not only the first page after login.
+3. **Remove the normal manual Refresh button and implement automatic WebSocket updates.** Changes made by the current user or another authorized session must appear without pressing Refresh or reloading the page. This work is part of P8A now and must not be postponed as an unspecified P9 synchronization task. Do not simply hide the button while leaving stale data or substitute polling and claim the requested WebSocket behavior is complete.
+4. **Keep the working data and role boundaries.** Display real saved data after real login. Design reuse must not fall back to preview accounts or sample records, re-enable retired accounts, replace real accounts, or weaken existing API/database permissions. Preserve checkout, Daily Sales Values, recorded tax, historical snapshots, report coverage/explanations, matching exports, four stock models and existing successful business workflows.
+5. **Keep edits safe during automatic updates.** Incoming changes must preserve unsaved drafts, cart contents, active filters, pagination and selection where valid. Use existing revisions/conflict handling so an incoming update cannot silently overwrite a draft or repeat a stock/sale action. Reconnect and resynchronize after connection loss; unsubscribe/reset data scope on logout or role/account change. Preserve real error handling within the established design; the user should not need routine manual refresh to see current saved data.
+6. **Choose a WebSocket design compatible with the existing protected data model.** Events/subscriptions and any authoritative reloads must be scoped to the active user's permissions. Preserve the existing narrow grants and private management data; do not introduce blanket business-table access or public broadcasts to obtain updates. Inspect the current API/readiness/revision contracts and hosting constraints before implementing transport. Any required schema/security change belongs in a new reviewed migration; all thirteen accepted migration sources remain immutable.
+
+#### P8A completion criteria
+
+- Real Owner/Admin/Staff sessions show the established frontend design across their allowed destinations, with no extra repeated Welcome/user-name shell and no ordinary Refresh button. Explicitly inspect the real and preview UI side by side using their own legitimate data; design parity does not mean manufacturing identical business values or giving every role identical access.
+- Verify the real-account presentation on desktop, tablet, phone and short screens. Shared components retain existing keyboard/focus handling, dirty-form protection and responsive behavior. Preserve the user's removal of Figma comparison and physical-printing verification from the task list.
+- Verify automatic updates with two independent authorized sessions for the affected inventory, account, checkout/stock, review/void/audit, Dashboard and report views. Confirm reconnect/resync, session/role changes and denied subscriptions/access, as well as unchanged drafts/cart state during an incoming event.
+- Run meaningful affected browser/backend/database checks and record exact results and limits. Local mocked WebSocket/browser transport checks are not evidence of hosted cross-session WebSocket acceptance. Do not label the task complete based solely on removing Welcome or Refresh controls.
+- Preserve real accounts, credentials, settings, existing history, enabled checkout and local uncommitted work. Use existing testing authorization only within its stated scope; do not replay historical mutation helpers or reset accounts to obtain a test session. Keep all work off GitHub until Backend completion.
+
+#### Previous continuation — P8A recording only (historical; superseded above)
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Read the entire October 18
+original user message and P8A requirements above first, then the accepted P8
+checkpoint, ordered priorities, preserved original requests and applicable AGENTS.md.
+P8A is the new highest-priority task and is recorded only. Reuse the established
+frontend design in real-account mode; remove its extra repeated Welcome/user-name
+presentation and normal Refresh button. Implement real automatic WebSocket updates,
+preserving data/role boundaries, drafts, carts, filters and reconnect/resync behavior.
+Compare every allowed tab for each role and verify real authorized cross-session
+updates. Backend data integration must use the completed frontend, not a second UI.
+P1–P8 retain their recorded functional acceptance. That acceptance predates this
+new request. Finish and verify P8A before starting P9 external integrations.
+Preserve accepted migration hashes, real accounts/credentials/settings, retired
+P6 accounts/history, enabled checkout, Daily Sales Values and existing exports.
+No account/data/code/migration/runtime change was made by this documentation task.
+Do not commit, push, open a PR, save Backend work to GitHub or deploy while Backend
+tasks remain unfinished. Figma comparison and physical printing stay excluded.
+Record actual implementation, checks, hosted-transport limitations and the precise
+remaining work when this task is performed. Older P9-next continuations are historical.
+```
+
+### Previous accepted checkpoint — P8 durable reports and reconciliation (October 17, 2026)
+
+**P8 is complete against its ordered completion gate and applicable full original
+Reports requirements. Backend as a whole is NOT complete: P9 remains pending.**
+All seven historical original-message blocks, the previous checkout/notice/P6
+request, stop instruction and Huuujji authorization remain unchanged. They were
+read as requirements; the continuation script was used only for navigation.
+
+#### Request authorizing P8 — verbatim
+
+```text
+Read HandsOff.md and implement the October 17 highest-priority. Follow my full original message, not just the continuation script.
+```
+
+The prior checkpoint expressly identified P8 as the next unfinished priority
+after a new request. This request supplied that continuation. Accepted P6/P7
+mutation helpers were not replayed and no P9 integration was implicitly added.
+
+#### Status against the original P8 and Reports requirements
+
+| Requirement / preserved original intent | Status | Verified implementation |
+| --- | --- | --- |
+| Derive reports from durable sales and movements | Completed | Protected `GET /api/reports` uses one stable SQL/MVCC snapshot; no sample fallback or multi-page mixed revisions. Exact decimals remain strings until integer-cent/base-unit calculations. |
+| Sales, Inventory usage, Combined; same screen/export filters; complete scoped CSV | Completed | One report document powers screen tables and all exports. Four-row UI pages do not limit export data. Category applies to purchased parent products; inventory covers all categories. |
+| Real Download PDF, separate Print, matching documents, useful export review | Completed | PDF download produces an actual file. Print opens the identical cached PDF, with no extra print modal. Export review includes Cash/GCash, item-level used/current quantities and units, coverage, records and disclosures. |
+| Stock opening + receipts/valid movements - consumption/removals = closing per SKU/unit | Completed | Includes explicit corrections, returns, transfers, later batch openings and wastage. Each batch needs an opening; missing or invalid history is disclosed. Movement rows retain original actor/reason/order linkage. |
+| Historical period closing differs from current physical/usable stock | Completed | Full-day dated closing is separate from the snapshot's current recorded physical/usable quantities. Expiry/unsellable flags affect usability, not physical stock without an explicit removal. Archived records remain in history. |
+| Per-ingredient quantity-backed percentages and understandable colors/legend | Completed | Verified opening plus inflows provides each SKU/unit baseline. Green remaining, gold consumption, red/burgundy removals/other outflows, gray unavailable; quantities and percentages accompany colors. Zero and named partial coverage are explicit. |
+| Wide ranges, partial/missing history; no invented opening or percentages | Completed | Local cases verify historical/current differences, ranges preceding the first record, absent openings and non-reconciling data. Earlier stock is unknown, not assumed zero. |
+| Full-day stock versus time-filtered sales/usage | Completed | Time filters narrow receipts and purchased consumption; full-day balances/movement tables retain the selected dates. Unit tests verify their different results for the same saved data. |
+| Ingredient usage by transaction, modifiers and purchased configuration | Completed | Original purchased line/usage/modifier snapshots provide order/product/category/ingredient/SKU/quantity/unit/status/date. An actual recipe/modifier purchase followed by catalogue edits retains original names and 150 g consumption, correctly displayed as 0.15 kg in the stock balance. |
+| Review/payment/stock exceptions and original receipt sets | Completed | Original expected/verified Cash/GCash, counted cash, all adjustments, outcome/explanation and complete original review IDs survive category/time filtering as clearly labeled context. Missing payments/usage/movement mismatches and provider-unverified references are disclosed. |
+| Every void request/decision, original reasons/actor/time; no implied stock return/refund | Completed | Scoped reports retain every request/renewal/decision and named attribution. Actual stock movements remain separate. No provider refund or stock return is inferred from void/review status. |
+| Dashboard financial integration and retained Daily Sales Values | Completed | Saved overview totals and Overall/F&B/Hobby/date/time controls use the same report calculations. Daily Sales Values remains a disclosure. Its report link carries the selected filters. |
+| Current stock Needs attention with thresholds/expiry and actionable links | Completed | Recorded usable stock/reorder thresholds and positive expiring/unsellable batches drive attention; links open the actual Inventory item/batch. The same attention data is in exports. |
+| Preserve date/time UI, no future reports, four-row pagination, no Reports Clear filters | Completed | Shared DateField/TimeField and existing four-row ReportTable are used. Invalid/future ranges cannot export. Repeated timezone suffixes are omitted on screen; export metadata retains Asia/Manila. No removed Clear filters or print UI was restored. |
+| Enforced Owner/Admin/Staff isolation and failed-load/draft protection | Completed | API and RPC resolve current active roles; Staff/direct RPC/anonymous/identity overrides are denied. Failed refresh retains the last view/filters and disables export until retry succeeds. Existing dirty/uncertain command navigation checks pass. |
+| Preserve accounts, history, checkout and no Backend GitHub save | Completed / ongoing restriction | All public/private business fingerprints, profiles and Auth IDs are unchanged; no persistent account/stock/sale/review fixture was added. Checkout stays enabled. HEAD `8eed072`, branch and user changes are preserved; no commit/push/PR/deployment. |
+
+#### Implemented sources and hosted application
+
+- New **`20261017210000_durable_reports.sql`**, normalized SHA-256
+  **`d38b737a66604f6722ebb5d06d083a69ee8b43662b9a0d91ded94667dc7ffca9`**,
+  is tested, applied with exact-project `db:apply`, and schema-verified. All
+  **thirteen** applied migrations are now immutable; the previous twelve hashes
+  match exactly. No table, table write grant, RLS policy or business data changed.
+- `read_reports()` is stable, security-definer, has an empty search path and
+  repeats the existing active Owner/Admin check. It returns complete authorized
+  units/SKUs/stock/batches/movements, sales/items/modifiers/usage, payments,
+  reviews/review-item sets, cash movements and void requests in one snapshot.
+  It does not return profiles, Auth data or private operation commands.
+- `business_access` now advertises manager Reports readiness. One new narrow
+  function grant makes **twenty** permitted public function grants; the existing
+  six SELECT-only table grants, 25 RLS tables and two permitted private helpers
+  remain unchanged. No credential or application table write access was opened.
+- Added frontend report decoding, pure durable calculation/document generation,
+  `LiveReports` and saved financial Dashboard overview, plus protected navigation
+  and Inventory drill-down. Existing preview Report/PDF behavior remains separate;
+  live documents use saved-business-record footers and actual recorded tax.
+- Added local/hosted report scenarios, a disk reopen case, nine calculation
+  cases, five browser cases and migration/grant/API assertions. Regenerated the
+  schema's migration hash comment; public column types did not change.
+- [REPORTS.md](backend/supabase/REPORTS.md) records the contract, calculations,
+  source files, scopes, role boundaries and evidence. README/integration notes
+  identify the accepted P8 boundary and pending P9.
+
+#### Actual final validation, evidence and limits
+
+- Root tests **142/142**: **111 backend/API/PostgreSQL + 31 frontend unit**,
+  exit 0. Final root typecheck and both builds pass; generated-schema equality
+  passes. Existing bundle-size and pg queued-query warnings remain nonblocking.
+- Scoped browser regression **27/27 (2.4m), exit 0**, covering nine management,
+  seven checkout, six workflow and five new Reports cases. After the final
+  item-level export-review/date-label refinement, all **five Reports cases pass
+  again (47.9s)**, including the final pre-history-range correction. This is not a whole-suite run or a claim of a new final-source
+  27-case rerun. The retained draft/role/checkout/workflow checks are covered.
+- Hosted **reports:verify 4/4** passes, with every fixture rolled back and all
+  original business rows, account IDs and activation unchanged. **db:verify**
+  confirms thirteen exact hashes and the grant/RLS boundaries above. The extra
+  disk reopen case is local; it is not a fifth hosted scenario.
+- Real existing-account Auth/API acceptance passes: Huuujji Owner and Jest Admin
+  return identical complete report tables; Aquino Staff is denied through both
+  API and direct PostgREST RPC; anonymous reads and identity overrides are denied.
+  A second real Auth session retrieves the same report tables. No new account,
+  sale, stock, payment, review or audit was created for this acceptance.
+- The real Owner browser loads Reports, downloads combined PDF and Sales CSV,
+  and reloads successfully. No page errors or page overflow at **1440×900,
+  820×400 and 320×568**. Scoped browser transport tests remain distinct from this
+  real Auth/PostgREST check. Generated sign-in links/tokens stayed in memory,
+  no email/password reset was sent, and only created sessions were signed out.
+- **Ten-page fixture and 36-page real combined PDFs** were rendered with
+  Poppler and visually inspected, including review sets, adjustments, ingredient
+  usage and exception tables. An observable Print viewer received identical
+  cached PDF bytes to Download PDF. No physical-device/screen-reader/native
+  printing/paper/Figma verification is claimed or rescheduled.
+- Final before/after fingerprints confirm **every existing public/private
+  business row and every profile/Auth ID unchanged**. The baseline remains
+  **12 Auth/profiles (four active/eight retired), 22 sales/payments, 61 movements,
+  221 audits, two reviews, four requests, four cash movements, inventory revision
+  87, checkout enabled**, with zero retired P6 Auth sessions. Normal authorized
+  Auth sign-in timestamps changed. Credential fields were not read for this
+  audit; no password/profile/settings update was performed.
+- The first sandboxed root test attempt failed on loopback `EACCES`; the
+  permitted rerun passed. Early TypeScript fixture mutability, accessible-select
+  naming, duplicate Daily Sales Values selector and primary missing-opening
+  diagnostic assertions were corrected. Initial failure logs are retained.
+- Automatic approval review rejected an unnecessary credential-field baseline
+  read before execution. The safer revised audit reads business rows, profiles,
+  Auth IDs and retired-session counts only and passes; the rejected query was
+  not executed or bypassed. No approval or connectivity blocker remains.
+- Evidence: workspace-parent **`.review/october-17-p8-*`** — before handoff/diff,
+  initial/final test/typecheck/build/browser logs, hosted before/apply/schema/
+  reports logs, `state-{before,after}.{json,log}`, real acceptance helper/JSON/logs,
+  screenshots/CSV/PDF/page renders/contact sheets and source audit. These remain
+  ignored local evidence. Do not replay old P6/P7 acceptance mutation helpers.
+- Final source audit passes: all **seven historical original-message blocks**
+  and all ten pre-existing verbatim request/authorization/stop blocks match;
+  thirteen applied hashes and six untouched user diffs match. **195** publishable
+  text files contain no secret-key/private-key patterns. Nothing is staged,
+  Login is unchanged and HEAD remains `8eed072`. The initial audit helper treated
+  an untracked new source as a Git error; its retained failure was corrected
+  without staging files, and the full audit passes.
+- The app was already running. Initial sandbox port enumeration hid existing
+  listeners; the redundant hidden launcher **28920** exited on frontend
+  port-in-use and stopped its own child processes. It did not replace or stop
+  the original app. The final permitted inspection confirms existing Vite PID
+  **8808** on **5173** and API PID **5404** on **3001**, with frontend and proxied
+  API health both **HTTP 200** at **`http://localhost:5173/`**. Real acceptance
+  used these existing services. Preserve them and recheck process ownership
+  before any later shutdown. Original launcher **12412** is still active.
+  Attempt logs remain in `.review/october-17-p8-dev*.log`.
+
+#### Previous continuation — P9 after P8 (historical; P8A is now first)
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Read this checkpoint,
+the full seven preserved historical original user-message blocks, the full
+checkout/notice/P6 request and Huuujji authorization, carried-forward decisions,
+and ordered priority criteria. Original requirements control; this is navigation.
+
+P8 durable reports/reconciliation is accepted in hosted DualCounter. P1/P2/P2A/
+P3/P4/P5/P6/P7/P8 are complete at their recorded scope. The next unfinished
+priority is P9: separately define provider verification/reconciliation,
+notification delivery and additional synchronization/integration rules. Do not
+invent provider credentials, refund/accounting/production/costing policies,
+notification recipients or mixed-category component revenue allocation. P8
+manual receipt checking/reference recording is not provider verification.
+
+All thirteen applied migration sources/hashes are immutable. Keep checkout
+enabled, both Owners and Jest/Aquino active, P6 accounts retired, and all original
+and labeled P5/P6/P7 history intact. No new persistent P8 fixture history exists.
+Use the final baseline above; do not restore earlier counts or replay accepted
+mutation helpers. Huuujji testing authorization persists within the requested
+testing scope; do not reset passwords or change profiles/settings.
+
+Preserve HEAD 8eed072 and all user/local changes. Backend remains unfinished
+because P9 is pending: no commit, push, PR, GitHub save or deployment. Keep Daily
+Sales Values, role isolation, four stock models, original snapshots, dirty-form
+protection and saved-data error recovery. Figma comparison and physical printing
+verification remain excluded. The full snapshot currently loads all authorized
+report data; large production export jobs require separate scoping.
+
+Local frontend/API may still run at http://localhost:5173/. Inspect current ports
+and process ownership before changing processes. Evidence is workspace-parent
+.review/october-17-p8-*. Preserve failed logs and the source audit. Report the
+27-case regression plus final five-case rerun accurately, not as a whole suite.
+```
+
+### Previous checkpoint — checkout enabled, P6 accounts retired and P7 hosted acceptance passed (October 17, 2026)
+
+**The user resumed with the original October 17 implementation request. All work
+in the interrupted checkout/notice/P6-account/P7 priority is now implemented and
+verified. This does not complete the Backend phase: P8/P9 remain pending.** The
+full original request remains verbatim in the previous pause checkpoint below;
+all seven older full original-message blocks remain unchanged. Read those sources
+and the carried-forward decisions, not just the continuation script.
+
+#### Additional user authorization — verbatim
+
+In response to the question about an existing Owner for real P7 acceptance:
+
+```text
+you can use the owner account of Huuujji
+```
+
+This superseded the prior no-sign-in restriction for Huuujji only. Existing Jest
+and Aquino supplied Admin/Staff coverage. No new test identities were created.
+Trusted Auth administration generated and consumed sign-in links in memory for
+these exact existing IDs; no email was sent, password reset, credential change,
+saved token or account/profile/settings change was made. The created sessions
+were signed out with local scope, preserving unrelated sessions. Ordinary Auth
+sign-in timestamps necessarily changed and are not claimed unchanged.
+
+#### Status against every requirement of the interrupted priority
+
+| Original requirement / completion gate | Status | Verified result |
+| --- | --- | --- |
+| Read HandsOff.md and follow the full original requirements | Completed | Read all seven historical original-message blocks, the full request in the previous pause, ordered priorities, carried-forward decisions and P7 contract. Their exact text is preserved. |
+| First answer what Refresh data is for | Completed previously; behavior preserved | Reloads saved inventory/accounts to see authorized changes made elsewhere; does not save drafts or reset data. Unsaved/busy/loading protection remains. |
+| First enable checkout so the user can try it | Completed | Certificate-verified SQL recovered on the configured endpoint. The exact-project activation succeeded with `checkoutEnabled: true`; real Owner/Admin/Staff readiness and checkout were verified. Local app/API respond at `http://localhost:5173/`. Leave checkout enabled unless the user asks otherwise. |
+| Remove the exact development-workspace notice | Completed | The existing saved one-line removal in `ManagementWorkspace.tsx` is verified by fresh typechecks/builds and the affected rendered management test. Refresh data remains available. |
+| Remove P6 test accounts; use supplied test accounts | Completed | Eight exact inactive identities from the two P6 acceptance evidence files are retired in SQL and omitted from Users. Real Owner account listing contains exactly the four retained accounts. Original Auth/profile/business rows and linked history survive; P6 sessions remain zero. Huuujji/Jest/Aquino were used for P7; no P7 accounts were provisioned. |
+| Durable Owner receipt verification, expected/verified Cash/GCash, counted cash, all adjustments, exact included orders, explanation and outcome | Completed for P7 | Hosted rollback and real caller-token tests persist the exact review, all four positive adjustment kinds and explained discrepancy; a new real Auth session retrieves it. Admin/Staff confirmation is denied. |
+| Review never deducts stock again; void never implies stock return or refund | Completed for P7 | Real reviews/requests/decisions/bulk/races preserve purchased lines, payments, batch/movement/usage facts and inventory revision between their before/after checks. Prior receipts retain original checkout state alongside current workflow state. |
+| Preserve requests, renewals, distinct reasons, Admin/Owner identity and event history | Completed for P7 | Real Staff request → Admin rejection → renewed request → Admin approval survives another session with both original requests/reasons/decision actors. Staff cannot read another cashier's receipt or other receipt IDs/cash counts in a review. Hosted rollback coverage verifies own/current-Manila-day scope. |
+| Exact single/bulk receipt sets, stale results, actor/content-bound retries and failed-write handling | Completed for P7 | Real bulk returns one `voided`, one `stale`, one `ineligible`, retains exact skipped IDs and replays the original result. Invalid/unauthorized/content-changed commands reject. Local/browser tests cover uncertain/lost-response refresh recovery, retained dirty drafts and saved command replay. |
+| Simultaneous duplicate/review-versus-void/competing decisions and atomic unexpected-failure rollback | Completed for P7 | Both real PostgREST requests were observed waiting on account lock `(171026,3)` in each of three races before release. Duplicate void yields one commit/one replay; review vs void and competing request decisions each yield one 200 and one 409. Hosted injected review/bulk failures roll back all writes. |
+| Dashboard/Audit integration, final warnings, draft protection and durable history | Completed for P7 | Six affected P7 browser cases pass alongside management/checkout cases; the live API persistence/concurrency evidence is separate from their test-owned Auth transports. P8 financial dashboard/report integration remains deferred. |
+| Original October 17 Owner-only alert settings and Item Code removal | Completed previously; preserved | No restoration of Admin settings access or Item Code. Existing accepted frontend behavior remains intact. |
+| Backend stays local until all Backend tasks finish | Active restriction; followed | No commit, push, PR, GitHub save or deployment was performed. User HEAD `8eed072` (`unfinished pos`) and earlier commits are preserved. |
+
+#### Implemented changes and hosted application
+
+- Exact-project `checkout:activate -- --project-ref izdemgzdywtxhvgvsian --enable`
+  succeeded without account/stock changes. No saved connection/TLS settings were
+  modified, and checkout was not disabled after acceptance.
+- New **`20261017195000_retired_accounts.sql`**, SHA-256
+  **`3b83553a84cf320e2e3a30477ca232d8218df2a90c920dd59a0e99b32ad7cd2d`**,
+  was locally tested, applied via exact-project `db:apply`, and schema-verified.
+  All **twelve** applied SQL sources are now immutable; the first eleven match
+  their previous hosted hashes. No public table/column or application grant was added.
+- A private retirement register records profile ID, time, database administrator
+  and reason. The existing account lock serializes retirement/account/workflow
+  writes. Only inactive accounts can be retired; application roles cannot write
+  or read this register, change its evidence or reactivate/change retired profiles.
+  `read_managed_accounts()` excludes retired identities in SQL. Ordinary inactive
+  team accounts remain visible and manageable. Profiles/Auth rows are not hard-deleted.
+- The scoped one-time retirement helper checked the eight exact P6 IDs/usernames/
+  roles, inactivity and zero sessions before retiring them. Its before/after hashes
+  confirm all existing public/private business rows and Auth rows were unchanged.
+  The four retained active accounts and settings are preserved.
+- Regenerated the frontend schema's migration-hash comment; no public wire fields
+  changed. Added two database retirement/security cases and a rendered notice
+  assertion. The P7 rollback helper now compares original row counts rather than
+  assuming review/cash/operation tables are empty; a populated-history regression
+  test protects that correction. P7 production runtime and applied workflow SQL
+  did not need a change.
+
+#### Actual final validation and retained evidence
+
+- Root tests: **128/128** (**106 backend/API/PostgreSQL + 22 frontend unit**),
+  clean exit after the populated-history verifier correction. Fresh root typecheck,
+  both application builds and generated-schema equality pass. The earlier
+  127-pass run predates that extra regression case.
+- Scoped browser run: **22/22 (1.3m), exit 0**, covering nine management, seven
+  checkout and six P7 workflow cases, including the removed notice. This is not a
+  new whole-suite run. Test-owned Auth/Storage transports remain distinct from
+  real hosted Auth/PostgREST acceptance. Existing screenshot capture checks cover
+  1440×900, 820×400 and 320×568; no new physical-device/screen-reader/Figma/printing claim.
+- Final hosted checks pass: **sales-workflow:verify 14/14**, **checkout:verify
+  16/16**, **inventory:verify 15/15**, **permissions:verify 11/11**, **db:smoke
+  12/12**, and **db:verify** with twelve exact hashes, 25 RLS business tables,
+  existing six SELECT-only table grants, nineteen narrow public function grants
+  and only two permitted private helpers. The extra P7 disk close/reopen case is
+  local; earlier references to fifteen hosted workflow scenarios were inaccurate.
+- Real caller-token acceptance passes five evidence groups and all three observed
+  overlap races. Test product/stock records from both runs are archived with zero
+  balances. All **eleven new labeled P7 sales** remain intentional development
+  history; do not delete or reuse them as disposable fixtures.
+- Independent final SQL inspection verifies original business rows against the
+  pre-P7 fingerprints, except the deliberately advanced inventory revision. It
+  confirms **12 Auth/profiles (four active/eight retired), 22 sales/payments,
+  61 movements, 221 audits, two daily reviews, four void requests, four cash
+  movements, inventory revision 87, checkoutEnabled: true**, zero P6 Auth sessions
+  and no active/stuck workflow request. Normal authorized Auth sign-in timestamps
+  are excluded from exact Auth-row equality; credentials/profiles/settings were
+  checked unchanged during real acceptance. These are the new baseline counts.
+- The first real helper stopped after two valid labeled receipts because it used
+  nonexistent `sale_item_stock_usage.batch_id`; cleanup succeeded. Corrected the
+  lookup to `stock_item_id`, retained failed evidence/history, and the full rerun
+  passed with nine additional receipts. This was a helper query error, not a
+  checkout failure or reason to modify frozen SQL.
+- The first final hosted workflow rerun exposed the old empty-table assertion
+  after real reviews existed (`2 !== 0`). Changed only verifier/test source,
+  preserved the failed log, and all fourteen scenarios then passed against the
+  populated final schema. A read-only final-inspection helper also initially
+  needed to scope timestamp-free review items by their parent's creation time;
+  its failed log is retained and the corrected full preservation check passes.
+- Nonblocking existing warnings: frontend bundle chunk size and pg@8's queued-query
+  deprecation in shared SQL fixture helpers. No runtime error, failed required
+  check or outstanding SQL connectivity blocker remains in this checkpoint.
+- Evidence is workspace-parent `.review/october-17-resume-*`: retirement before/
+  apply/after logs and JSON, `p7-live.mts`, passing `p7-live.{json,log}`, retained
+  `p7-live-helper-query-failed.{json,log}`, final workflow baseline failure and
+  passing regression logs, unit/typecheck/build/browser logs, `final-state.{mts,
+  json,log}` and retained final-inspection scope-failure log. Do not replay the
+  one-time retirement or live acceptance mutation helpers.
+- Final source audit passes: seven historical original-message blocks plus the
+  current full request/stop instruction are preserved; all eleven original SQL
+  hashes and all twelve final applied hashes match. No configured server/database
+  secret was found in 184 publishable text files, Login source is unchanged,
+  whitespace checks pass, no files are staged and user HEAD remains `8eed072`.
+  Evidence: `.review/october-17-resume-source-audit.{cjs,json}`.
+- The local app was started in a hidden background process (launcher PID **12412**)
+  using root `npm run dev`, with stdout/stderr in `.review/october-17-resume-dev*.log`.
+  Local frontend HTTP 200 and API health/configuration were verified. Leave it
+  running for the user's checkout testing. Recheck ownership/ports before any
+  later shutdown; do not kill unrelated Node processes.
+
+#### Current continuation — P8 only after a new request for the next priority
+
+```text
+Start from C:/Users/ASUS/Documents/Personal/Vertwell/repo and read the current
+checkpoint, all seven preserved original full user-message blocks, the full
+checkout/notice/P6-account request in the previous pause and the user's Huuujji
+authorization. Original requirements control behavior; this script is navigation.
+
+The interrupted checkout/notice/P6 cleanup and P7 acceptance are complete in hosted
+development. Do not replay the accepted P6/P7 acceptance mutation helpers. The
+precise next unfinished priority is P8 database-backed reports/reconciliation,
+following the ordered P8 completion criteria and full original Reports requests.
+P9 external payment/notification/synchronization scope remains later work.
+
+Preserve user HEAD 8eed072 and all prior work. Keep unfinished Backend changes
+local: no commit, push, PR, GitHub save or deployment. All twelve applied SQL
+sources/hashes are immutable. Keep checkout enabled for the user's own use unless
+they request otherwise; older disabled-checkout instructions are historical.
+P6 accounts remain retired from Users with referenced identities/history intact.
+Both Owners plus Jestine Admin / Jest and Aquino Staff / Aquino remain active;
+never reset credentials, change their roles or remove them as fixture cleanup.
+Huuujji sign-in was explicitly authorized; preserve that authorization within
+the requested testing scope rather than asking again for the same access.
+
+Use the current hosted baseline from final-state.json: 12 Auth/profiles (four
+active/eight retired), 22 sales/payments, 61 movements, 221 audits, two reviews,
+four requests, four cash movements, inventory revision 87, checkout enabled.
+Preserve all original and intentional labeled P5/P6/P7 history. Do not restore
+older counts. Test-only stock/product records are archived with zero balances.
+No new test accounts were created; normal Auth sign-in timestamps changed but
+credentials/profiles/settings are preserved. Recheck live state before new writes.
+
+P8 must derive screen/PDF/CSV/Print scopes from durable sales/movements; reconcile
+opening + receipts/other valid movements - usage/removals to period closing per
+SKU/unit; distinguish historical closing from current physical/usable balances;
+preserve full-day stock versus time-filtered sales/usage, missing-history
+disclosures, matching PDF/Print and complete scoped CSV. Include review/payment/
+stock exceptions without inventing opening balances, percentages or provider
+verification. Keep Daily Sales Values, role isolation, stock models, dirty-form
+protection and original sales/actor snapshots. Owner review never deducts again;
+void does not return stock or refund payments. Figma comparison and physical
+printing verification remain excluded. Do not implement P9 implicitly.
+
+The local app may still be running at http://localhost:5173/; inspect current
+ports/process ownership before starting or stopping it. Current evidence is in
+workspace-parent .review/october-17-resume-*. Keep failed-helper evidence and
+source audit results. Do not present scoped browser checks as a full-suite run.
+```
+
+### Previous checkpoint — stopped during requested checkout activation and workspace cleanup (October 17, 2026)
 
 **Implementation stopped immediately when the user requested this pause. The whole
 priority task is NOT complete.** Only this handoff and pause-record verification
@@ -1336,10 +2793,11 @@ The Backend-start request supersedes old blanket frontend-only and stop-for-revi
 | **P3** | Complete real authentication and account lifecycle | **Complete — live checks, configured Auth and user-confirmed emailed password change/login** | Login/logout, session restoration/expiry, protected identity lookup, account provisioning and complete emailed recovery work with real development accounts. |
 | **P4** | Enforce Owner/Admin/Staff permissions | **Complete — approved migration applied; hosted verification passes** | Caller-scoped API checks, six restricted read grants, 25 SELECT policies, 11 hosted permission scenarios and 12 rollback smoke checks pass; both real Owners/settings remain unchanged. See current checkpoint for verification limits. |
 | **P5 — first milestone** | Protected CRUD and Users/Inventory integration | Complete — real acceptance, nine hosted hashes and final regressions pass | Real browser and Auth/PostgREST/Storage changes persist across refresh/login and another authorized account; denied/invalid actions change nothing. Nine migrations include two hosted-path fixes. |
-| **P6** | Transactional checkout, payments recorded and stock consumption | Complete — hosted/caller-token/concurrent acceptance passes; disabled after approved test window | Sale, purchased snapshots, batch deductions, movement records and audit events save together; duplicate/concurrent requests cannot oversell or deduct twice. |
-| **P7 — current** | Durable Daily Sales Review, voids and audit history | Implemented; applied/schema-verified; broader hosted acceptance incomplete (SQL connectivity) | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
-| **P8** | Database-backed reports and reconciliation | Pending | Screen/PDF/CSV/Print scopes derive from durable records with matching filters, correct historical/current balances and explicit missing-history disclosures. |
-| **P9 — later** | External payment verification, notifications and additional integrations | Pending / details to define | Provider and notification scope, rules and verification are specified separately; existing sample QR/reference entry is not represented as payment verification. |
+| **P6** | Transactional checkout, payments recorded and stock consumption | Complete — hosted/caller-token/concurrent acceptance passes; checkout enabled at user request | Sale, purchased snapshots, batch deductions, movement records and audit events save together; duplicate/concurrent requests cannot oversell or deduct twice. |
+| **P7** | Durable Daily Sales Review, voids and audit history | Complete — hosted rollback, real caller-token persistence and overlap races pass | Reviews/requests/decisions and per-event attribution persist; Owner review never deducts stock again; single/bulk actions handle stale records, retries and partial failures. |
+| **P8** | Database-backed reports and reconciliation | Complete — thirteen hosted hashes, rollback and real Auth/API/browser/export acceptance pass | Screen/PDF/CSV/Print scopes derive from durable records with matching filters, correct historical/current balances and explicit missing-history disclosures. |
+| **P8A — before P9** | Real-account design parity and automatic WebSocket updates | **Complete — implementation, hosted transport and regression verified** | Shared established frontend, no repeated Welcome/routine Refresh, scoped private updates, protected drafts/reconnect, 264 full browser passes plus final affected coverage, 147 root checks and unchanged hosted fingerprints. See the latest checkpoint and original requirements. |
+| **P9 — clarified October 18** | Replaceable GCash QR/manual reference recording and in-app-only notifications | Complete within the user-selected development scope; 17 hosted hashes and preserved state verified | Shared checkout retains the replaceable `Frontend/public/assets/QR_gcash.svg` and reference guidance. Owner/Admin get durable in-app void/duplicate evidence, versions and per-account read state through protected APIs/private updates; settings remain Owner-only and review is human. No GCash API, email or browser-push task is required. See the current checkpoint for 160 root checks, scoped browser acceptance and exact hosted/disposable limits. |
 
 ##### P1 — after the GitHub bridge, finalize the schema before writing migrations
 
@@ -1417,7 +2875,7 @@ Use the current preview policy as the starting point, with any unresolved permis
 - **P6:** Recalculate authoritative prices/configuration requirements and availability on the server. Aggregate all cart demand across recipe/modifier/variant/bundle inputs, convert units and use usable batches in expiry order. Enforce idempotency, applicable reference uniqueness and concurrent-stock safeguards. Save the sale, payment record, purchased price/configuration/usage snapshots, batch balances, movements and audit events in one transaction. Current confirmed policy: Owner checkout completes immediately; paid/fulfilled Staff/Admin checkout consumes stock once and awaits Owner review. Review never deducts again. Historical records retain their recorded stock-commit state. Recording a GCash reference is not verification by a payment provider.
 - **P7:** Persist Owner receipt verification, expected/verified Cash and GCash, counted cash, opening/addition/removal/refund adjustments, explanations, outcome and included orders. Preserve Staff requests and Admin/Owner attribution, exact eligible single/bulk IDs, reasons and event history across requests/reviews/voids. Handle stale records, retries, concurrent decisions and partial failures explicitly. Voids do not automatically restore stock or refund payments; actual returns/wastage/refunds need their own recorded movements.
 - **P8:** Replace preview-derived persistence assumptions with durable sales/movement-based reports. Reconcile opening + receipts/other valid movements - usage/removals to closing per SKU/unit; distinguish historical period closing from current physical/usable stock. Preserve full-day stock balances versus time-filtered sales/usage, partial/missing-history disclosures, matching PDF/Print content and complete scoped CSV. Include review/payment/stock exceptions and do not invent unverified opening balances or stock percentages.
-- **P9:** Define and implement real payment verification/reconciliation and notification delivery as separately scoped integrations. Preserve alert evidence, configurable unusual-sales thresholds and human review; alerts must not automatically void orders or punish accounts. Define live synchronization without silently rewriting modifier copies or historical snapshots. Production batches, component-level mixed-category bundle revenue allocation, stock valuation/recipe costs/margins require explicit business rules and trustworthy source data before implementation. Shift management remains outside the current scope.
+- **P9 — clarified October 18:** Use the shop's actual GCash QR and staff-entered payment reference; preserve existing manual verification/reconciliation, saved payment evidence and Owner review. GCash API/payment-provider verification is not required. The current real checkout already records references but still needs the shop-approved QR connected. Define notification delivery separately, preserving alert evidence, configurable unusual-sales thresholds and human review; alerts must not automatically void orders or punish accounts. Existing private automatic updates are complete. Any additional synchronization must preserve independent modifier copies and historical snapshots. Production batches, component-level mixed-category bundle revenue allocation, stock valuation/recipe costs/margins require explicit business rules and trustworthy source data before implementation. Shift management remains outside the current scope.
 
 #### Remaining frontend verification and scheduled integration — latest user decisions applied
 

@@ -34,7 +34,7 @@ test('dashboard category totals and drill-downs match mixed-order report amounts
   await page.getByLabel('Export format').selectOption('CSV');
   await page.getByRole('button', { name: 'Export report' }).click();
   const pending = page.waitForEvent('download');
-  await page.getByRole('dialog').getByRole('button', { name: 'Export', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Export CSV', exact: true }).click();
   const download = await pending;
   expect(download.suggestedFilename()).toContain('food-and-beverage');
   const stream = await download.createReadStream(); const chunks: Buffer[] = [];

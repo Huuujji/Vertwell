@@ -1,10 +1,18 @@
 import type { Sale } from './demo';
 
+// JSONB object key order is not receipt identity. Preserve nested purchased
+// configuration while comparing it consistently across independently read rows.
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, child]) => [key, canonical(child)]));
+  return value;
+}
+
 // Basket order does not change the evidence for potentially repeated submissions.
 function signature(sale: Sale) {
   const lines = sale.lines.map(line => JSON.stringify([
     line.name, line.category, line.quantity, line.price,
-    line.variant, line.bundle,
+    line.variant, line.bundle, canonical(line.purchasedConfiguration),
     (line.modifiers ?? []).map(option => [option.id, option.name, option.price]).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
   ])).sort();
   return JSON.stringify([sale.cashierId || sale.cashier, sale.method, sale.total, lines]);

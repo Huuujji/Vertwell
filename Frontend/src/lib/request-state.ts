@@ -4,22 +4,35 @@ import { ApiError, requestError } from './api-client';
 type ResourceState<T> = { status: 'idle' | 'loading' | 'ready' | 'error'; data?: T; error?: ApiError };
 
 // key includes authenticated identity and scope at P3–P5; never retain another user's data.
-export function useResource<T>(key: string | null, load: (signal: AbortSignal) => Promise<T>) {
+export function useResource<T>(key: string | null, load: (signal: AbortSignal) => Promise<T>, hold = false) {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<ResourceState<T> & { key: string | null }>({ key: null, status: 'idle' });
   const revision = useRef(0);
+  const currentState = useRef(state); currentState.current = state;
+  const held=useRef(hold);held.current=hold;
+  const activeLoad=useRef<AbortController|null>(null),resumeLoad=useRef(false);
   useEffect(() => {
     if (key === null) { setState({ key, status: 'idle' }); return; }
+    // Opening an editor also cancels an already running background load, so its
+    // response cannot replace the revision on which that draft was based.
+    if (held.current && currentState.current.key === key && currentState.current.data !== undefined) {resumeLoad.current=true;return;}
     const controller = new AbortController();
+    activeLoad.current=controller;
     let current = true; const ticket=++revision.current;
     setState(previous => ({ key, status: 'loading', data: previous.key === key ? previous.data : undefined }));
     Promise.resolve().then(() => load(controller.signal)).then(data => {
       if (current && ticket===revision.current) setState({ key, status: 'ready', data });
     }, cause => {
       if (current && ticket===revision.current) setState(previous => ({ ...previous, status: 'error', error: requestError(cause) }));
-    });
-    return () => { current = false; controller.abort(); };
+    }).finally(()=>{if(activeLoad.current===controller)activeLoad.current=null;});
+    return () => { current = false; controller.abort();if(activeLoad.current===controller)activeLoad.current=null; };
   }, [key, load, attempt]);
+  useEffect(()=>{
+    if(hold&&activeLoad.current&&currentState.current.key===key&&currentState.current.data!==undefined){
+      revision.current++;activeLoad.current.abort();activeLoad.current=null;resumeLoad.current=true;
+      setState(previous=>({...previous,status:'ready'}));
+    }else if(!hold&&resumeLoad.current){resumeLoad.current=false;setAttempt(value=>value+1);}
+  },[hold,key]);
   const reload = useCallback(() => setAttempt(value => value + 1), []);
   const replace=useCallback((data:T)=>{revision.current++;setState({key,status:'ready',data});},[key]);
   const visible: ResourceState<T> = state.key === key ? state : { status: key === null ? 'idle' : 'loading' };

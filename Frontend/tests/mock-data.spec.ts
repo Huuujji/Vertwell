@@ -160,7 +160,7 @@ test('linked catalogue checkout, Owner receipt review, named Admin void and CSV 
   const ingredient = page.getByRole('region', { name: 'Ingredient usage by transaction; scroll to see all columns' });
   await expect(ingredient).toContainText('Mango Matcha Latte'); await expect(ingredient).toContainText('Matcha');
   await page.getByLabel('Export format').selectOption('CSV'); await page.getByRole('button', { name: 'Export report', exact: true }).click();
-  const pending = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export', exact: true }).click(); const download = await pending;
+  const pending = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export CSV', exact: true }).click(); const download = await pending;
   const stream = await download.createReadStream(); const chunks: Buffer[] = []; for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
   const csv = Buffer.concat(chunks).toString('utf8');
   expect(csv).toContain('Stocks used in the selected period'); expect(csv).toContain('Mango puree'); expect(csv).toContain('19 on hand'); expect(csv).toContain('39 on hand'); expect(csv).toContain('0 orders');

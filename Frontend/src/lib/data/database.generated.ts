@@ -10,6 +10,12 @@
 // 20261017070000_nonretryable_business_conflicts.sql: 01eb62e5b42b8397df1a10590b6c9361a0d3da2d69f29d35e680701e869edeac
 // 20261017135332_atomic_checkout.sql: dfbe81cbe9d8817be5880e8f9048c016a4dc5ab5ec1ab40d1559d81cfd74ca9a
 // 20261017150033_durable_sales_workflows.sql: 6cdb4de6334e0e9ecb4d7bf0558f084be1ea4f7fbd52dc29282c3a079b4f8475
+// 20261017195000_retired_accounts.sql: 3b83553a84cf320e2e3a30477ca232d8218df2a90c920dd59a0e99b32ad7cd2d
+// 20261017210000_durable_reports.sql: d38b737a66604f6722ebb5d06d083a69ee8b43662b9a0d91ded94667dc7ffca9
+// 20261018010000_private_live_updates.sql: 4251947b6f0a74e55bc20af18373462091f2c2616f14bae66bb534480ffe13e3
+// 20261018020000_pos_stock_feedback.sql: 7e738185ac211ca9b9bebcbd79017f61986c7256d0b7a536cb0bbcbd2d53c2c8
+// 20261018030000_in_app_notifications.sql: 163b44c5c6d3dbab6e4fc7fc699a234b2347763d5ca5359a123da7f9981c3e85
+// 20261018040000_stable_notification_identity.sql: c66acb91112e4e5b56f997d92deca7b7c9d4b33508600207ec34da4cf31fc32f
 // Decimal wire values are strings; conversion to display numbers is explicit.
 export const databaseSchema = {
   alert_settings: {

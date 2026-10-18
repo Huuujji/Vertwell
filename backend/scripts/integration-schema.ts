@@ -3,6 +3,7 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
+import { testRealtime } from './test-realtime.js';
 
 // Generate from disposable PostgreSQL, never from a privileged runtime connection.
 export async function integrationSchemaSource() {
@@ -14,6 +15,7 @@ export async function integrationSchemaSource() {
     await database.exec(`create role anon; create role authenticated; create role service_role bypassrls;
       create schema auth; create table auth.users(id uuid primary key, email text, raw_app_meta_data jsonb default '{}'::jsonb);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;`);
+    await testRealtime(database);
     for (const file of files) {
       const sql = (await readFile(new URL(file, root), 'utf8')).replace(/\r\n/g, '\n');
       hashes.push(`${file}: ${createHash('sha256').update(sql).digest('hex')}`);

@@ -26,7 +26,7 @@ async function command(saleId:string,kind='sale.void'){
 async function open(page:Page,role:Role='Owner'){
   await api.setup(page.context(),role);await api.restore(page,role);
   await page.getByRole('button',{name:role==='Staff'?'Today’s Sales History':'Audit Trail',exact:true}).click();
-  await expect(page.getByRole('button',{name:'Refresh sales history',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Sales History',exact:true})).toBeVisible();
   await expect(page.getByText('Loading saved sales history…',{exact:true})).toHaveCount(0);
 }
 async function details(page:Page,sale:any){await page.getByRole('button',{name:`View order ${sale.orderNumber}`,exact:true}).click();}
@@ -63,9 +63,9 @@ test('Staff request, Admin rejection, renewed request and Admin approval retain 
   await expect(admin.getByRole('dialog').getByRole('checkbox')).toBeDisabled();await admin.getByRole('dialog').getByRole('button',{name:'Close dialog',exact:true}).click();
   await details(admin,sale);await admin.getByRole('button',{name:'Reject Request',exact:true}).click();await admin.getByLabel('Decision reason').fill('Checked the original receipt');await admin.getByRole('button',{name:'Reject request',exact:true}).click();
   await expect(admin.getByRole('status',{name:'Sales action result'})).toContainText('1 saved');
-  await page.getByRole('button',{name:'Refresh sales history'}).click();await page.getByRole('button',{name:'Request Void',exact:true}).click();await page.getByLabel('Reason for request').fill('New evidence found');await page.getByRole('button',{name:'Send void request',exact:true}).click();
+  await api.flushUpdates();await page.getByRole('button',{name:'Request Void',exact:true}).click();await page.getByLabel('Reason for request').fill('New evidence found');await page.getByRole('button',{name:'Send void request',exact:true}).click();
   await expect(page.getByRole('region',{name:'Order items, payment and review timeline'})).toContainText('New evidence found');
-  await admin.getByRole('button',{name:'Refresh sales history'}).click();await admin.getByRole('button',{name:'Approve Void',exact:true}).click();await admin.getByLabel('Decision reason').fill('Approved after evidence check');await admin.getByRole('button',{name:'Review void',exact:true}).click();
+  await api.flushUpdates();await admin.getByRole('button',{name:'Approve Void',exact:true}).click();await admin.getByLabel('Decision reason').fill('Approved after evidence check');await admin.getByRole('button',{name:'Review void',exact:true}).click();
   await expect(admin.getByRole('dialog')).toContainText('This action cannot be undone');await admin.getByRole('button',{name:'Void order',exact:true}).click();
   await expect(admin.getByRole('region',{name:'Order items, payment and review timeline'})).toContainText('Voided by Test Admin (Admin)');
   const saved=(await state()).items[0];expect(saved.requests.map((r:any)=>r.status)).toEqual(['Rejected','Approved']);expect(saved.events.filter((e:any)=>e.event_type==='Void requested')).toHaveLength(2);
@@ -103,7 +103,7 @@ test('a stale daily review retains counts, verified receipts and notes after ano
 });
 
 test('Dashboard includes the combined review queue; saved history and dialogs fit desktop, short tablet and small phone',async({page})=>{
-  const sale=await buy();await open(page);await page.getByRole('button',{name:'Dashboard',exact:true}).click();await expect(page.getByRole('region',{name:'Daily Sales Review queue'})).toContainText('1 awaiting Owner review');
+  const sale=await buy();await open(page);await page.getByRole('button',{name:'Dashboard',exact:true}).click();await expect(page.getByRole('region',{name:'Notifications and review'})).toContainText('1 awaiting Owner review');
   await page.getByRole('button',{name:'View all requests',exact:true}).click();await details(page,sale);
   const root=fileURLToPath(new URL('../../../.review/october-17-p7-browser/',import.meta.url));await mkdir(root,{recursive:true});
   for(const [width,height] of [[1440,900],[820,400],[320,568]]){

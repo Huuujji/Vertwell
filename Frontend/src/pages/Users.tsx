@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Actions, Art, Modal } from '../components/ui';
 import SearchField from '../components/SearchField';
@@ -16,7 +16,7 @@ const access: Record<Role, string> = {
 export interface AccountCredentials { password: string; operationId: string }
 const emptyDraft = { name: '', username: '', email: '', role: 'Staff' as Role };
 
-export default function Users({ persistent = false, onDirtyChange, accounts, role: signedRole, actorId, onSave, onDelete, notify }: { persistent?: boolean; onDirtyChange?: (dirty: boolean)=>void; accounts: Account[]; role: Role; actorId: string; onSave: (account: Account, credentials?: AccountCredentials) => void | Promise<void>; onDelete: (id: string) => void | Promise<void>; notify: (message: string) => void }) {
+export default function Users({ persistent = false, onDraftOpenChange, onDirtyChange, accounts, role: signedRole, actorId, onSave, onDelete, notify }: { persistent?: boolean; onDraftOpenChange?: (open:boolean)=>void; onDirtyChange?: (dirty: boolean)=>void; accounts: Account[]; role: Role; actorId: string; onSave: (account: Account, credentials?: AccountCredentials) => void | Promise<void>; onDelete: (id: string) => void | Promise<void>; notify: (message: string) => void }) {
   const saving = useMutation((action: { account: Account; credentials?: AccountCredentials } | { id: string }) => 'account' in action ? onSave(action.account,action.credentials) : onDelete(action.id));
   const operation = useRef<{signature:string;id:string} | null>(null);
   const [manageDirty,setManageDirty] = useState(false);
@@ -25,6 +25,7 @@ export default function Users({ persistent = false, onDirtyChange, accounts, rol
   const [filter, setFilter] = useViewState<Role | 'All'>('users-role', 'All');
   const [managing, setManaging] = useState<Account | null>(null);
   const [adding, setAdding] = useState(false);
+  useLayoutEffect(()=>{onDraftOpenChange?.(adding||Boolean(managing));return()=>onDraftOpenChange?.(false);},[adding,managing,onDraftOpenChange]);
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);

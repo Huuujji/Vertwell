@@ -155,7 +155,7 @@ test('three-model checkout shares SKUs; snapshots, Owner review, Admin void and 
   await nav(page, 'Reports'); await page.getByLabel('From', { exact: true }).fill('2026-10-04'); await page.getByLabel('To', { exact: true }).fill('2026-10-04');
   await expect(page.getByRole('region', { name: 'Ingredient usage by transaction; scroll to see all columns' })).toContainText('Iced Caramel Latte');
   await page.getByLabel('Export format').selectOption('CSV'); await page.getByRole('button', { name: 'Export report', exact: true }).click();
-  const pending = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export', exact: true }).click(); const download = await pending;
+  const pending = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export CSV', exact: true }).click(); const download = await pending;
   const stream = await download.createReadStream(); const chunks: Buffer[] = []; for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
   const csv = Buffer.concat(chunks).toString('utf8'); expect(csv).toContain('Model Kit Editions — Deluxe'); expect(csv).toContain('HB005'); expect(csv).toContain('2× Deck Sleeves');
   expect(csv).toContain(`${expectedStock.find(item => item.id === 'HB009')!.quantity} on hand`); for (const name of oldNames) expect(csv).not.toContain(name);

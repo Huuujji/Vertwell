@@ -4,6 +4,7 @@ import { readFile, readdir, mkdir, mkdtemp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
+import { testRealtime } from '../scripts/test-realtime.js';
 
 const sqlRoot = new URL('../supabase/', import.meta.url);
 const owner = '00000000-0000-4000-8000-000000000001';
@@ -15,13 +16,14 @@ async function initialize(database: PGlite) {
   await database.exec(`create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create table auth.users(id uuid primary key, email text, raw_app_meta_data jsonb default '{}'::jsonb);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;`);
+  await testRealtime(database);
   for (const migration of migrations) await database.exec(migration);
 }
 
 before(async () => {
   const files = (await readdir(new URL('migrations/', sqlRoot))).filter(name => name.endsWith('.sql')).sort();
   migrations = await Promise.all(files.map(name => readFile(new URL(`migrations/${name}`, sqlRoot), 'utf8')));
-  assert.equal(files.length, 11);
+  assert.equal(files.length, 17);
   db = new PGlite();
   await initialize(db);
 });
@@ -84,7 +86,7 @@ test('fresh migrations expose only scoped P4 reads and restricted functions, wit
   assert.deepEqual(grants.rows, ['alert_settings','payments','sale_item_modifiers','sale_items','sales','void_requests']
     .map(table_name => ({table_name,grantee:'authenticated',privilege_type:'SELECT'})));
   assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public'`), 19);
+    where n.nspname='public'`), 24);
   for (const role of ['anon', 'authenticated', 'service_role']) {
     assert.equal(await scalar(`select has_schema_privilege($1,'private','USAGE')`, [role]), role === 'authenticated');
     assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
@@ -495,4 +497,42 @@ test('trusted Auth metadata arriving after insertion provisions once and cannot 
   await db.query('update auth.users set raw_app_meta_data=$2 where id=$1',[id,JSON.stringify(command)]);
   assert.equal(await scalar('select role from profiles where id=$1',[id]),'Owner');
   assert.equal(await scalar('select count(*)::int from audit_events'),1);
+});
+
+test('retirement removes inactive accounts from managed lists while preserving profiles and attributed history', async () => {
+  await actor();
+  const retired = await provision({actor_id:owner,full_name:'Old test account',username:'old-test',role:'Staff'});
+  const inactive = await provision({actor_id:owner,full_name:'Inactive team member',username:'inactive-team',role:'Staff'});
+  await db.query('update public.profiles set active=false where id=any($1::uuid[])',[[retired,inactive]]);
+  const before = await scalar('select to_jsonb(p) from public.profiles p where id=$1',[retired]);
+  const audits = await scalar('select count(*)::int from public.audit_events');
+  await rejected('insert into private.retired_accounts(profile_id,reason) values($1,\'Retire fixture\')',/Only inactive/,[owner]);
+  await db.query('insert into private.retired_accounts(profile_id,reason) values($1,$2)',[retired,'User-requested retirement of development fixture']);
+  await asActor(owner);
+  const accounts = await scalar('select public.read_managed_accounts()') as {id:string}[];
+  assert.ok(!accounts.some(account=>account.id===retired));
+  assert.ok(accounts.some(account=>account.id===inactive));
+  assert.ok(accounts.some(account=>account.id===owner));
+  assert.deepEqual(await scalar('select to_jsonb(p) from public.profiles p where id=$1',[retired]),before);
+  assert.equal(await scalar('select count(*)::int from public.audit_events'),audits);
+  await rejected('update public.profiles set active=true where id=$1',/Retired account/,[retired]);
+  await rejected("select public.update_account($1,(select updated_at from public.profiles where id=$1),'Changed','changed','Staff',true)",/Retired account/,[retired]);
+  await asActor(retired);
+  await rejected('select public.current_profile()',/inactive/);
+});
+
+test('application roles cannot retire accounts, read retirement records, restore them or change retirement evidence', async () => {
+  await actor();
+  const target = await provision({actor_id:owner,full_name:'Fixture',username:'fixture',role:'Staff'});
+  await db.query('update public.profiles set active=false where id=$1',[target]);
+  await db.query('insert into private.retired_accounts(profile_id,reason) values($1,\'Development fixture\')',[target]);
+  await rejected('delete from private.retired_accounts where profile_id=$1',/append-only/,[target]);
+  await rejected("update private.retired_accounts set reason='Changed' where profile_id=$1",/append-only/,[target]);
+  for(const role of ['anon','authenticated','service_role']) {
+    await db.exec(`set local role ${role}`);
+    await rejected('select * from private.retired_accounts',/permission denied/);
+    await rejected("insert into private.retired_accounts(profile_id,reason) values($1,'Unauthorized')",/permission denied/,[target]);
+    await rejected('select private.check_account_retirement()',/permission denied/);
+    await db.exec('reset role');
+  }
 });

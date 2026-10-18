@@ -4,12 +4,14 @@ import { mkdir, mkdtemp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { PGlite } from '@electric-sql/pglite';
+import { testRealtime } from '../scripts/test-realtime.js';
 import { inventoryScenarios } from '../scripts/inventory-checks.js';
 const db=new PGlite();
 async function initialize(database:PGlite) {
   await database.exec(`create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth; create table auth.users(id uuid primary key,email text,raw_app_meta_data jsonb default '{}');
     create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;`);
+  await testRealtime(database);
   const root=new URL('../supabase/migrations/',import.meta.url);
   for(const name of (await readdir(root)).filter(n=>n.endsWith('.sql')).sort()) await database.exec(await readFile(new URL(name,root),'utf8'));
 }

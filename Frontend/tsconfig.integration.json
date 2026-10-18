@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "noUnusedLocals": true, "noUnusedParameters": true },
-  "include": ["src", "tests/unit", "tests/fixtures/integration-harness.tsx", "tests/integration-preparation.spec.ts", "tests/authentication.spec.ts", "tests/management.spec.ts", "tests/sales-workflow.spec.ts", "tests/fixtures/management-server.ts"]
+  "include": ["src", "tests/unit", "tests/fixtures/integration-harness.tsx", "tests/integration-preparation.spec.ts", "tests/authentication.spec.ts", "tests/management.spec.ts", "tests/sales-workflow.spec.ts", "tests/reports-live.spec.ts", "tests/live-updates.spec.ts", "tests/live-dialogs.spec.ts", "tests/notifications.spec.ts", "tests/fixtures/management-server.ts"]
 }

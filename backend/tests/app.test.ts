@@ -95,6 +95,24 @@ const permissionMatrix = {
 };
 const ids = { actor:'00000000-0000-4000-8000-000000000001', staff:'00000000-0000-4000-8000-000000000002',
   ownSale:'00000000-0000-4000-8000-000000000003',otherSale:'00000000-0000-4000-8000-000000000004' };
+test('notification endpoints enforce management scope, strict inputs, caller tokens and stale read conflicts',async()=>{
+  await businessTransport(async(request,state)=>{
+    for(const role of ['Owner','Admin','Staff'] as const){
+      state.role=role;
+      assert.equal((await request('/notifications')).status,role==='Staff'?403:200);
+      assert.equal((await request(`/notifications/${ids.ownSale}/read`,'PATCH',{revision:'1',read:true})).status,role==='Staff'?403:200);
+    }
+    state.role='Owner';
+    for(const body of [{revision:1,read:true},{revision:'0',read:true},{revision:'1',read:'true'},{revision:'1',read:true,profileId:ids.staff}])
+      assert.equal((await request(`/notifications/${ids.ownSale}/read`,'PATCH',body)).status,422);
+    assert.equal((await request('/notifications?profileId=forged')).status,422);
+    assert.equal((await request('/notifications/not-a-uuid/read','PATCH',{revision:'1',read:true})).status,422);
+    state.conflict=true;assert.equal((await request(`/notifications/${ids.ownSale}/read`,'PATCH',{revision:'1',read:true})).status,409);
+    assert.ok(state.calls.filter(call=>call.path.endsWith('/rpc/set_notification_read')).every(call=>call.token==='Bearer session-token'&&Object.keys(call.body).sort().join(',')==='expected_revision,is_read,notification_id'));
+    state.conflict=false;state.permissionRole='Staff';assert.equal((await request('/notifications')).status,403);
+  });
+});
+
 async function businessTransport(run: (request: (path: string, method?: string, body?: unknown) => Promise<Response>,
   state: {role:keyof typeof permissionMatrix;active:boolean;permissionRole?:keyof typeof permissionMatrix;conflict?:boolean;calls:{path:string;body:any;token:string|null}[]})=>Promise<void>) {
   const original = globalThis.fetch;
@@ -109,7 +127,7 @@ async function businessTransport(run: (request: (path: string, method?: string, 
     state.calls.push({path:url,body,token});
     if (url.includes('/auth/v1/user')) return Response.json({id:ids.actor,email:'verified@example.invalid'});
     if (url.includes('/rpc/current_profile')) return state.active ? Response.json(profile()) : fail();
-    if (state.conflict && /\/rpc\/(update_account|inventory_command|update_alert_settings)$/.test(url)) {
+    if (state.conflict && /\/rpc\/(update_account|inventory_command|update_alert_settings|set_notification_read)$/.test(url)) {
       return Response.json({code:'PT409',message:'Private provider detail must not leak'},{status:409});
     }
     if (url.includes('/rpc/authorize_business_action')) {
@@ -120,6 +138,9 @@ async function businessTransport(run: (request: (path: string, method?: string, 
     }
     if (url.includes('/rpc/business_access')) return Response.json({profile:profile(),permissions:permissionMatrix[state.role],businessDate:'2026-10-17'});
     if (url.includes('/rpc/read_inventory')) return Response.json({version:1,tables:{},balances:[],revision:'0'});
+    if (url.includes('/rpc/read_reports')) return Response.json({version:1,tables:{},businessDate:'2026-10-17'});
+    if (url.includes('/rpc/read_notifications')) return Response.json({version:1,items:[],total:0,unread:0,snapshot:'empty',hasMore:false});
+    if (url.includes('/rpc/set_notification_read')) return state.permissionRole==='Staff'?fail():Response.json({id:body.notification_id,revision:body.expected_revision,read:body.is_read});
     if (url.includes('/rpc/read_managed_accounts')) return Response.json([]);
     if (url.includes('/rpc/read_business_sales')) return Response.json({version:1,items:[{id:ids.ownSale,total:'10.00'}],hasMore:false});
     if (url.includes('/rpc/read_sales_workflow')) return Response.json({version:1,items:[{id:ids.ownSale,total:'10.00'}],hasMore:false});
@@ -151,7 +172,7 @@ test('every business route enforces the complete three-role matrix before return
     const routes: [string,string,string,number][] = [
       ['GET','/dashboard','dashboard.read',501], ['GET','/inventory','inventory.read',200],
       ['POST','/inventory','inventory.write',501], ['PATCH',`/inventory/${ids.staff}`,'inventory.write',501],
-      ['DELETE',`/inventory/${ids.staff}`,'inventory.write',501], ['GET','/reports','reports.read',501],
+      ['DELETE',`/inventory/${ids.staff}`,'inventory.write',501], ['GET','/reports','reports.read',200],
       ['POST','/checkout','checkout.create',422], ['POST',`/sales/${ids.ownSale}/void-requests`,'void.request',422],
       ['POST',`/sales/${ids.ownSale}/void`,'sale.void',422], ['POST',`/sales/${ids.ownSale}/void-decision`,'void.decide',422],
       ['POST','/daily-sales-reviews','review.confirm',422], ['GET','/sales','sales.read',200],
@@ -250,7 +271,7 @@ test('a demotion between identity lookup and permission check takes effect immed
 });
 
 test('all new business routes require authentication even when called directly', async () => {
-  for (const [method,path] of [['GET','/access'],['GET','/sales'],['GET','/void-requests'],['GET','/pos/catalogue'],['GET','/inventory'],['GET','/reports'],['GET','/dashboard'],['PATCH','/alert-settings'],['POST','/checkout'],['POST','/daily-sales-reviews'],['POST',`/sales/${ids.ownSale}/void`],['GET','/auth/accounts']]) {
+  for (const [method,path] of [['GET','/access'],['GET','/sales'],['GET','/void-requests'],['GET','/pos/catalogue'],['POST','/pos/stock'],['GET','/inventory'],['GET','/reports'],['GET','/dashboard'],['PATCH','/alert-settings'],['POST','/checkout'],['POST','/daily-sales-reviews'],['POST',`/sales/${ids.ownSale}/void`],['GET','/auth/accounts']]) {
     assert.equal((await fetch(`${baseUrl}/api${path}`,{method})).status,401,`${method} ${path}`);
   }
 });
@@ -262,7 +283,7 @@ test('checkout routes forward only caller-scoped commands and never use Auth adm
       assert.equal((await request('/pos/checkout-catalogue?limit=100')).status,200);
       assert.equal((await request('/pos/quote','POST',{lines:[]})).status,200);
       assert.equal((await request('/checkout','POST',{operationId:ids.ownSale})).status,200);
-      const calls=state.calls.filter(call=>/\/rpc\/(checkout|quote_checkout|read_checkout_catalogue)$/.test(call.path));
+      const calls=state.calls.filter(call=>/\/rpc\/(checkout|quote_checkout|read_checkout_catalogue_stock)$/.test(call.path));
       assert.ok(calls.every(call=>call.token==='Bearer session-token'));
     }
     assert.equal((await request('/pos/quote','POST',{lines:[],role:'Owner'})).status,422);

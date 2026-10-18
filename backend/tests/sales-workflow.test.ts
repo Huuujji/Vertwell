@@ -3,17 +3,33 @@ import { readFile,readdir,mkdir,mkdtemp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { PGlite } from '@electric-sql/pglite';
+import { testRealtime } from '../scripts/test-realtime.js';
 import { checkoutAs,checkoutValue } from '../scripts/checkout-checks.js';
 import { workflowFixture,workflowScenarios } from '../scripts/sales-workflow-checks.js';
 async function initialize(db:PGlite) {
   await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;
     create schema auth;create table auth.users(id uuid primary key,email text,raw_app_meta_data jsonb default '{}');
     create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;`);
+  await testRealtime(db);
   const root=new URL('../supabase/migrations/',import.meta.url);
   for(const file of (await readdir(root)).filter(f=>f.endsWith('.sql')).sort())await db.exec(await readFile(new URL(file,root),'utf8'));
 }
 const db=new PGlite();before(()=>initialize(db));after(()=>db.close());
 for(const scenario of workflowScenarios)test(scenario.name,async()=>{await db.query('begin');try{await scenario.run(db);}finally{await db.query('rollback');}});
+
+test('P7 failure verification preserves retained reviews and cash evidence in a populated database',async()=>{
+  await db.query('begin');
+  try {
+    const fixture=await workflowFixture(db),sale=await fixture.buy();
+    await fixture.execute(await fixture.review([sale.saleId],{countedCash:'24',openingCash:'10'}));
+    const before=await fixture.read();
+    const scenario=workflowScenarios.find(scenario=>scenario.name.startsWith('P7 injected final audit failure'))!;
+    await scenario.run(db);
+    await checkoutAs(db,fixture.actors.owner);
+    const after=await fixture.read();
+    assert.deepEqual(after.items.find((row:any)=>row.id===sale.saleId),before.items.find((row:any)=>row.id===sale.saleId));
+  } finally {await db.query('rollback');}
+});
 test('P7 reviews, adjustment evidence, repeated request decisions and operation replay survive disk close/reopen',async()=>{
   const parent=fileURLToPath(new URL('../../../.review/',import.meta.url));await mkdir(parent,{recursive:true});
   const path=await mkdtemp(`${parent}p7-database-`);let disk=new PGlite(path);

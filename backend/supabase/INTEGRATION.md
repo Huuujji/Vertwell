@@ -1,5 +1,20 @@
 # P2A/P5 frontend integration — October 17, 2026
 
+**Current P8A checkpoint:** shared established frontend and scoped private automatic
+updates are implemented and verified. Real-account POS also shares configuration,
+receipt and Cash/GCash fields. Protected APIs remain authoritative; drafts, cart,
+filters, revisions and operation recovery are retained. All fourteen migrations
+are immutable. See [LIVE_UPDATES.md](LIVE_UPDATES.md) and HandsOff.md for exact
+regression/hosted/preservation evidence. P9 remains pending and Backend stays local.
+
+**Previous accepted P8 checkpoint:** managers have the live Reports and financial Dashboard,
+using coherent saved sales/movements/reviews and shared screen/PDF/CSV/Print data.
+Daily Sales Values and the role/dirty-draft safeguards remain. See
+[REPORTS.md](REPORTS.md) for calculations, missing-history disclosures, access,
+verification and limits. P7 is accepted, checkout remains enabled, and only P9
+remains pending. All Backend work remains local. The phase notes below describe
+the earlier integration boundaries and do not close accepted services again.
+
 P6 extends the protected workspace with a server-quoted live POS, whole-cart
 configuration availability, Cash/GCash recording, purchased receipt reads and
 same-operation recovery through refresh. The applied database activation flag

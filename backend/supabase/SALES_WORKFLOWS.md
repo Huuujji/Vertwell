@@ -1,13 +1,18 @@
 # P7 sales review, void decisions and event history
 
-Implemented locally and applied to DualCounter `izdemgzdywtxhvgvsian` after the
-user's explicit exact-project migration/verification approval. Hosted schema and
-grant verification passes, including all eleven immutable migration hashes and
-four real anonymous/service-role PostgREST denials. Broader rollback regressions
-and authenticated caller-token/concurrent acceptance remain incomplete because
-subsequent SQL connections stall before SSL negotiation/authentication. Approval
-persists; do not ask again. P6 checkout stays disabled. No commit, push, PR,
-deployment, account reset or production cutover.
+Implemented and accepted on hosted DualCounter `izdemgzdywtxhvgvsian` after the
+user's exact-project approval. SQL connectivity recovered without changing saved
+settings or certificate verification. Hosted rollback scenarios, real Auth/API/
+PostgREST persistence and three forced-overlap races now pass. The user authorized
+Huuujji for Owner tests; existing Jest/Aquino cover Admin/Staff. No new accounts,
+password changes, mailed links or saved tokens were needed. Generated test sessions
+were signed out locally; other sessions were preserved.
+
+Checkout is now enabled for the user's use by a separate explicit request; leave
+it enabled. The eight inactive P6 test identities are retired from Users while
+retaining linked Auth/profile/history records. The retirement migration brings
+the immutable applied source count to twelve, without changing P7's applied SQL.
+No commit, push, PR, deployment or production cutover.
 
 ## Reviewable database change
 
@@ -146,12 +151,29 @@ same scenarios in rolled-back hosted transactions and compares every pre-existin
 public/private row and Auth fingerprint. This sequential command does not establish
 real caller-token behavior or simultaneous connection contention.
 
+The fourteen shared SQL scenarios pass on hosted development in rollback-only
+transactions. The additional disk close/reopen scenario is local, making fifteen
+P7 database cases altogether; earlier handoffs incorrectly called all fifteen
+hosted rollback scenarios. Real-account acceptance checks exact reconciliation,
+all positive adjustments, discrepancy explanation, new-session persistence,
+role/receipt scope, repeated request decisions and exact bulk skips. The three
+races observe both real PostgREST requests waiting on the same account lock before
+release: identical void returns one commit/one replay; review versus void and
+competing request decisions each produce one success/one stale rejection.
+
+The first real acceptance helper queried a nonexistent stock-usage batch column
+after two valid labeled checkouts. Its stock/catalogue cleanup succeeded, and its
+receipts/evidence remain. Correcting the helper to use `stock_item_id` allowed the
+full real acceptance run to pass without changing P7 runtime or frozen SQL.
+
 The six browser scenarios use real Express and disposable PostgreSQL with
 test-owned Auth/Storage transports. They cover cross-session roles, review
 protection/persistence, rejected and renewed requests, Admin approval, exact bulk
 skips, lost-response/refresh/later-failed-retry recovery and stale review drafts.
-Captures cover 1440×900, 820×400 and 320×568. Actual devices/screen readers,
-hosted Auth/PostgREST and concurrent connections need separate evidence.
+Captures cover 1440×900, 820×400 and 320×568. Actual devices, screen readers and
+hosted browser interaction are not newly claimed. The real Auth/PostgREST and
+concurrent-connection evidence described above comes from the separate HTTP
+acceptance helper, not from those test-owned browser transports.
 
 See HandsOff.md for final command results, hosted baseline, approval/application
 status, exact migration hash and the next unfinished acceptance gate.

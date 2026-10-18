@@ -16,7 +16,7 @@ async function navigate(page: Page, title: string) {
 test('cash checkout records the sale with tax and retains it after a void', async ({ page }) => {
   await enter(page); await navigate(page, 'POS');
   await page.getByRole('button', { name: 'Add Mango Matcha Latte to order', exact: true }).click();
-  await expect(page.locator('.total-row')).toContainText('75.00');
+  await expect(page.locator('.total-row')).toContainText('84.00');
   await page.getByRole('button', { name: 'Pay', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('84.00');
   await page.getByRole('button', { name: 'CASH PAYMENT', exact: true }).click();
@@ -96,7 +96,7 @@ test('CSV export contains voided transactions for traceability', async ({ page }
   await page.getByLabel('Export format').selectOption('CSV');
   await page.getByRole('button', { name: 'Export report', exact: true }).click();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export', exact: true }).click();
+  await page.getByRole('button', { name: 'Export CSV', exact: true }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toContain('2026-08-15-to-2026-08-21.csv');
   const stream = await download.createReadStream();
@@ -198,7 +198,7 @@ test('product SKUs and fixed/percentage discounts carry through checkout, dashbo
     await expect(page.locator('.product-card')).toHaveCount(1);
     await page.getByRole('button', { name: `Add Discount sample ${index} to order` }).click();
   }
-  await expect(page.locator('.total-row')).toContainText('18.00');
+  await expect(page.locator('.total-row')).toContainText('20.16');
   await page.getByRole('button', { name: 'Pay', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('20.16');
   await page.getByRole('button', { name: 'CASH PAYMENT', exact: true }).click();

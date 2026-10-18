@@ -64,6 +64,7 @@ export function observeSession(client: SupabaseClient, lookup: (token: string, s
   // INITIAL_SESSION restores the persisted session after URL exchange and refresh.
   const onFocus = () => { void reconcile(current); };
   window.addEventListener('focus', onFocus);
+  window.addEventListener('vertwell:identity', onFocus);
   const timer = window.setInterval(() => { if (current) void reconcile(current); }, 60_000);
-  return () => { disposed = true; revision++; controller?.abort(); data.subscription.unsubscribe(); window.removeEventListener('focus', onFocus); window.clearInterval(timer); };
+  return () => { disposed = true; revision++; controller?.abort(); data.subscription.unsubscribe(); window.removeEventListener('focus', onFocus); window.removeEventListener('vertwell:identity', onFocus); window.clearInterval(timer); };
 }

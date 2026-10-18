@@ -111,7 +111,7 @@ test('Owner variants require selection, merge matching SKUs, retain edits and ex
   await nav(page, 'Inventory'); await page.getByRole('searchbox', { name: 'Search inventory', exact: true }).fill('HB001'); await expect(page.locator('#stock-HB001')).toContainText('43pcs');
   await nav(page, 'Reports'); await page.getByLabel('To', { exact: true }).fill('2026-10-04'); await page.getByLabel('From', { exact: true }).fill('2026-10-04');
   await page.getByRole('combobox', { name: 'Export format', exact: true }).selectOption('CSV'); await page.getByRole('button', { name: 'Export report', exact: true }).click();
-  const download = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export', exact: true }).click(); const downloaded = await download; const data = await readFile((await downloaded.path())!, 'utf8');
+  const download = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export CSV', exact: true }).click(); const downloaded = await download; const data = await readFile((await downloaded.path())!, 'utf8');
   expect(data).toContain('Purchased variants and bundles'); expect(data).toContain('Premium · HB002'); expect(data).toContain('Standard · HB001');
 });
 

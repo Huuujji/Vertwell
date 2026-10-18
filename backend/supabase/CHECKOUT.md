@@ -1,6 +1,36 @@
 # P6 atomic checkout — October 17, 2026
 
-**P6 is accepted in hosted development.** The user explicitly approved the reviewed
+## October 18 — stock feedback in the established frontend
+
+The user-approved `20261018020000_pos_stock_feedback.sql` adds two read-only
+POS projections on DualCounter. All fifteen applied migration sources are now
+immutable. `read_checkout_catalogue_stock` retains the existing catalogue and adds
+linked retail availability; `read_checkout_stock` returns only stock referenced
+by valid, enabled POS configurations, with usable, needed and remaining quantities
+and whole-cart quantity limits. Expired/unsellable batches are excluded through
+the existing checkout rules. No costs, batch records, unrelated inventory, direct
+table grants or mutation permissions are exposed.
+
+`POST /api/pos/stock` forwards the authenticated caller's token. Owner, Admin and
+Staff share the established stock-selection rows and cart presentation. Feedback
+refreshes on private catalogue events, preserves drafts and disables increments
+at current limits. Feedback is advisory: Add/Update/Pay still obtain authoritative
+quotes, and checkout retains its original atomic validation, tax, revision and
+operation-recovery behavior. No stock is reserved or deducted by a feedback read.
+
+The new migration changes no existing function or business row. The protected
+catalogue endpoint uses its wrapper; existing catalogue/RPC callers remain valid.
+See HandsOff.md for approval, hosted/disposable verification and evidence limits.
+
+## Previous P6 checkpoint
+
+**P6 is accepted in hosted development. Checkout is now enabled for the user's
+own testing by their later explicit request.** P7 hosted acceptance also passes;
+the earlier disabled-window state below is historical. P6 test accounts are
+retired from Users with linked history retained. Leave checkout enabled unless
+the user requests otherwise.
+
+The user explicitly approved the reviewed
 migration and verification on DualCounter `izdemgzdywtxhvgvsian`, then separately
 approved temporary test activation followed by disablement. The migration is
 applied and all ten hosted migration hashes match. **Checkout is disabled again

@@ -7,11 +7,14 @@ test.describe.configure({mode:'serial'});
 let api:Awaited<ReturnType<typeof managementServer>>;
 test.beforeAll(async()=>{api=await managementServer();});
 test.afterAll(async()=>{await api?.close();});
+async function openInventory(page:Page){await page.locator('.workspace').waitFor({state:'visible'});if(await page.getByRole('heading',{name:'Inventory',exact:true}).isVisible())return;if(await page.getByRole('button',{name:'Open navigation',exact:true}).isVisible())await page.getByRole('button',{name:'Open navigation',exact:true}).click();await page.getByRole('button',{name:'Inventory',exact:true}).click();await expect(page.getByRole('heading',{name:'Inventory',exact:true})).toBeVisible();}
 async function allInventory(page:Page) {
+  await openInventory(page);
   await page.getByRole('button',{name:'All inventory',exact:true}).click();
   await page.getByLabel('Inventory category',{exact:true}).selectOption('All');
 }
 async function product(page:Page,name:string) {
+  await openInventory(page);
   await page.getByRole('button',{name:'Add Product',exact:true}).click();
   await page.getByLabel('Product Name',{exact:true}).fill(name);
   await page.getByLabel('SKU',{exact:true}).fill(`P5-${name.replaceAll(' ','-')}`);
@@ -20,7 +23,9 @@ async function product(page:Page,name:string) {
 }
 test('real Express/PostgreSQL saves survive reload/login and are visible in a separate Admin session',async({page,browser})=>{
   await api.setup(page.context());await api.login(page);
+  await expect(page.getByRole('heading',{name:'Dashboard',exact:true})).toBeVisible();await openInventory(page);
   await expect(page.getByRole('heading',{name:'Inventory',exact:true})).toBeVisible();
+  await expect(page.getByText('Development workspace · saved business data is shared with permitted accounts.',{exact:true})).toHaveCount(0);
   await product(page,'Persistent Retail');await page.getByRole('button',{name:'Save',exact:true}).click();
   await expect(page.getByText('Persistent Retail',{exact:true}).first()).toBeVisible();
   await page.reload();await allInventory(page);await expect(page.getByText('Persistent Retail',{exact:true}).first()).toBeVisible();
@@ -86,7 +91,7 @@ test('Staff cannot enter management and direct invalid/denied API writes change 
 });
 
 test('library failures retain the draft; attached copies persist independently after library edits',async({page})=>{
-  await api.setup(page.context());await api.login(page);await page.getByRole('button',{name:'Modifier groups',exact:true}).click();
+  await api.setup(page.context());await api.login(page);await openInventory(page);await page.getByRole('button',{name:'Modifier groups',exact:true}).click();
   await page.getByRole('button',{name:'Add library group',exact:true}).click();await page.getByLabel('Group name',{exact:true}).fill('Persistent Library');
   await page.getByRole('button',{name:'Add option',exact:true}).click();await page.getByLabel('Option name',{exact:true}).fill('Original option');
   await page.route('**/api/inventory/commands',route=>route.fulfill({status:503,json:{error:{message:'Library service unavailable'}}}));
@@ -118,7 +123,7 @@ test('optional raster images upload, survive reload and can be removed without r
   expect((await api.read()).tables.products.find((p:any)=>p.id===row.id).image_path).toBeNull();
 });
 test('saved management screens and retained stock drafts stay contained on desktop, short tablet and small phone',async({page})=>{
-  await api.setup(page.context());await api.restore(page);await expect(page.getByRole('heading',{name:'Inventory',exact:true})).toBeVisible();
+  await api.setup(page.context());await api.restore(page);await page.getByRole('button',{name:'Inventory',exact:true}).click();await expect(page.getByRole('heading',{name:'Inventory',exact:true})).toBeVisible();
   const captures=new URL('../../../.review/october-17-p5/',import.meta.url);await mkdir(captures,{recursive:true});
   for(const viewport of [{width:1440,height:900},{width:820,height:400},{width:320,height:568}]) {
     await page.setViewportSize(viewport);await page.evaluate(()=>{(document.activeElement as HTMLElement)?.blur();window.scrollTo(0,0);});await page.screenshot({path:fileURLToPath(new URL(`inventory-${viewport.width}.png`,captures)),fullPage:true});

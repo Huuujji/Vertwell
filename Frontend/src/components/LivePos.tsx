@@ -1,30 +1,58 @@
+import CartSummary from './CartSummary';
+import CartItem, { OrderItemCount } from './CartItem';
+import OrderReceiptDetails from './OrderReceiptDetails';
+import useCheckoutStock from './useCheckoutStock';
+import CheckoutSummary from './CheckoutSummary';
+import LiveProductOptions from './LiveProductOptions';
+import { CashPaymentFields, GCashPaymentFields, GCashQr } from './PaymentFields';
+import useDiscardChanges from './useDiscardChanges';
+import PosHeading, { CatalogueCaption } from './PosHeading';
+import type { Role } from '../data/demo';
+import { manilaTime } from '../data/demo';
+import CatalogueCard from './CatalogueCard';
+import { Art } from './ui';
 import { useCallback,useEffect,useRef,useState } from 'react';
 import { apiRequest } from '../lib/api';
 import { ApiError } from '../lib/api-client';
-import { createCheckoutData,decodeQuote,type CheckoutCommand,type CheckoutLine,type CheckoutQuote,type CheckoutReceipt,type PosProduct } from '../lib/data/checkout';
+import { combineCheckoutLines,createCheckoutData,decodeQuote,type CheckoutCommand,type CheckoutLine,type CheckoutQuote,type CheckoutReceipt,type PosProduct } from '../lib/data/checkout';
 import { displayDecimal } from '../lib/data/decimal';
-import { useResource } from '../lib/request-state';
+import { useLiveResource } from '../lib/live-updates';
 import { useViewState } from '../lib/view-state';
 import { Actions,Modal } from './ui';
 import SearchField from './SearchField';
 const php=(value:string)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(displayDecimal(value,2));
 const errorText=(cause:unknown)=>cause instanceof Error?cause.message:'Unable to complete this request.';
+function componentSummary(values:unknown[]):string {
+  return values.map(value=>{
+    if(!value||typeof value!=='object')return 'Historical component details unavailable';
+    const row=value as Record<string,unknown>,config=(row.configuration&&typeof row.configuration==='object'?row.configuration:row) as Record<string,unknown>;
+    const options=Array.isArray(config.modifiers)?config.modifiers.map(value=>value&&typeof value==='object'?String((value as Record<string,unknown>).name??''):'').filter(Boolean):[];
+    const nested=Array.isArray(config.components)?componentSummary(config.components):'';
+    return `${String(row.quantity??1)}× ${String(config.name??'Included product')}${options.length?` (${options.join(', ')})`:''}${nested?` [${nested}]`:''}`;
+  }).join('; ');
+}
 
-export default function LivePos({scope,active,onBusyChange,onUncertainChange,onSaved}:{scope:string;active:boolean;onBusyChange:(value:boolean)=>void;onUncertainChange:(value:boolean)=>void;onSaved:()=>void}) {
+export default function LivePos({scope,active,role,name,onBusyChange,onUncertainChange,onSaved,onDirtyChange}:{onDirtyChange:(value:boolean)=>void;scope:string;active:boolean;role:Role;name:string;onBusyChange:(value:boolean)=>void;onUncertainChange:(value:boolean)=>void;onSaved:()=>void}) {
   const [service]=useState(()=>createCheckoutData(apiRequest));
   const load=useCallback((signal:AbortSignal)=>service.catalogue(signal),[service]);
-  const catalogue=useResource<PosProduct[]>(scope,load);
+  const catalogue=useLiveResource<PosProduct[]>(scope,load,['catalogue']);
   const [cart,setCart]=useState<CheckoutLine[]>([]),[quote,setQuote]=useState<CheckoutQuote|null>(null);
+  const stock=useCheckoutStock(service,cart,catalogue.data,active);
   const [filter,setFilter]=useViewState('LivePos.filter','All Items'),[search,setSearch]=useViewState('LivePos.search','');
   const [editing,setEditing]=useState<PosProduct|null>(null),[variant,setVariant]=useState(''),[selected,setSelected]=useState<string[]>([]),[count,setCount]=useState('1');
   const [editingIndex,setEditingIndex]=useState<number|null>(null);
   const [stage,setStage]=useState<'order'|'Cash'|'GCash'|null>(null),[given,setGiven]=useState(''),[reference,setReference]=useState('');
   const [receipt,setReceipt]=useState<CheckoutReceipt|null>(null),[error,setError]=useState(''),[pending,setPending]=useState<CheckoutCommand|null>(null);
   const busy=useRef(false),[working,setWorking]=useState(false);
+  const [optionsDirty,setOptionsDirty]=useState(false);
+  const paymentDirty=Boolean(stage&&stage!=='order'&&(given||reference));
+  useEffect(()=>{onDirtyChange(active&&(optionsDirty||paymentDirty));return()=>onDirtyChange(false);},[active,optionsDirty,paymentDirty,onDirtyChange]);
+  useEffect(()=>{if(!active&&!busy.current){setEditing(null);setStage(null);}},[active]);
+  const paymentDiscard=useDiscardChanges(paymentDirty,()=>{setStage(null);setError('');},'payment');
   const [uncertain,setUncertain]=useState(false);
   const [showHistory,setShowHistory]=useState(false),[historyOffset,setHistoryOffset]=useState(0),[viewing,setViewing]=useState<CheckoutReceipt|null>(null);
   const loadHistory=useCallback((signal:AbortSignal)=>service.sales(historyOffset,signal),[service,historyOffset]);
-  const history=useResource(showHistory?`${scope}:receipts:${historyOffset}`:null,loadHistory);
+  const history=useLiveResource(showHistory?`${scope}:receipts:${historyOffset}`:null,loadHistory,['sales']);
   const recoveryKey=`vertwell-checkout:${scope.split(':')[0]}`;
   useEffect(()=>{
     try{
@@ -49,7 +77,10 @@ export default function LivePos({scope,active,onBusyChange,onUncertainChange,onS
   }
   async function replace(next:CheckoutLine[]) {
     if(!next.length){setCart([]);setQuote(null);return;}
-    const nextQuote=await service.quote(next);setQuote(nextQuote);setCart(next);setReceipt(null);
+    // Only deliberate cart edits combine identical selections. Restored pending
+    // commands retain their original lines and exact quote for recovery.
+    const combined=combineCheckoutLines(next);
+    const nextQuote=await service.quote(combined);setQuote(nextQuote);setCart(combined);setReceipt(null);
   }
   function open(product:PosProduct,index:number|null=null) {
     if(busy.current||pending)return;
@@ -68,7 +99,7 @@ export default function LivePos({scope,active,onBusyChange,onUncertainChange,onS
       }else await replace([...cart,{productId:product.id,variantId:null,modifierIds:[],quantity:'1'}]);
     });
   }
-  function closePayment(){if(!busy.current&&!uncertain){setStage(null);setError('');}}
+  function closePayment(){if(!busy.current&&!uncertain)paymentDiscard.requestClose();}
   async function submitPayment() {
     if(!quote)return;
     await run(async()=>{
@@ -94,68 +125,66 @@ export default function LivePos({scope,active,onBusyChange,onUncertainChange,onS
   const products=catalogue.data??[];
   const shown=products.filter(p=>(filter==='All Items'||(filter==='F&B'?p.category!=='Hobby':p.category==='Hobby'))&&
     `${p.name} ${p.sku} ${p.variants.map(v=>`${v.name} ${v.sku}`).join(' ')}`.toLowerCase().includes(search.trim().toLowerCase()));
+  const remaining=(product:PosProduct)=>product.usableQuantity==null?undefined:Math.max(0,Number(product.usableQuantity)-Number(stock.data?.stocks.find(row=>row.stockId===product.stockId)?.required??0));
   return <div className="live-pos" hidden={!active}>
-    <button className="secondary" disabled={working} aria-expanded={showHistory} onClick={()=>setShowHistory(value=>!value)}>Recorded sales</button>
     {showHistory&&<section aria-label="Recorded sales"><h2>Recorded sales</h2><p>Staff see their own sales for today. Managers see permitted business sales.</p>
       {history.status==='loading'&&<p role="status">Loading recorded sales…</p>}{history.error&&<p role="alert" className="error">{history.error.message}</p>}
-      {history.data?.items.map(sale=><p key={sale.id}><strong>{sale.orderNumber}</strong> · {sale.cashier} · {sale.status} · {php(sale.total)} <button className="secondary" disabled={working} onClick={()=>void run(async()=>setViewing(await service.receipt(sale.id)))}>View receipt</button></p>)}
+      {Boolean(history.data?.items.length)&&<div className="table-wrap" role="region" aria-label="Recorded sales; scroll to see all columns" tabIndex={0}><table className="history-table receipt-history-table"><thead><tr>{['Order ID','Cashier','Status','Total','Receipt'].map(title=><th scope="col" key={title}>{title}</th>)}</tr></thead><tbody>
+        {history.data?.items.map(sale=><tr key={sale.id}><td>{sale.orderNumber}</td><td>{sale.cashier}</td><td>{sale.status}</td><td className="numeric-cell">{php(sale.total)}</td><td><button className="secondary" disabled={working} onClick={()=>void run(async()=>setViewing(await service.receipt(sale.id)))}>View receipt</button></td></tr>)}
+      </tbody></table></div>}
       {history.data?.items.length===0&&<p>No recorded sales in this scope.</p>}
-      <Actions><button className="secondary" disabled={working||!historyOffset} onClick={()=>setHistoryOffset(value=>Math.max(0,value-20))}>Previous sales</button><button className="secondary" disabled={working||!history.data?.hasMore} onClick={()=>setHistoryOffset(value=>value+20)}>Next sales</button><button className="secondary" disabled={working} onClick={history.reload}>Refresh sales</button></Actions>
+      <Actions><button className="secondary" disabled={working||!historyOffset} onClick={()=>setHistoryOffset(value=>Math.max(0,value-20))}>Previous sales</button><button className="secondary" disabled={working||!history.data?.hasMore} onClick={()=>setHistoryOffset(value=>value+20)}>Next sales</button></Actions>
     </section>}
     {catalogue.status==='loading'&&<p role="status">Loading selling catalogue…</p>}
     {catalogue.error&&<div className="error" role="alert"><p>{catalogue.error.message}</p><button className="secondary" disabled={locked} onClick={catalogue.reload}>Retry loading POS</button></div>}
     {error&&!editing&&!stage&&<p role="alert" className="error">{error}</p>}
     {receipt&&<section className="inventory-editor-note" role="status"><strong>Order {receipt.orderNumber} recorded · {receipt.status}</strong><p>{receipt.reviewState} · stock consumed once · {php(receipt.total)}</p>
       <p>{receipt.method==='Cash'?`Cash received ${php(receipt.cashTendered!)} · Change ${php(receipt.change!)}`:`GCash reference ${receipt.reference} recorded. Provider verification is separate.`}</p></section>}
-    {catalogue.data&&<section className="pos-layout"><div className="catalog"><h1>Point of Sale</h1><p className="subtitle">Select items, review the order, then record received payment.</p>
+    {catalogue.data&&<section className="pos-layout"><div className="catalog"><PosHeading role={role} name={name} persistent action={<button className="secondary pos-history" aria-label="Recorded sales" title="Recorded sales" disabled={working} aria-expanded={showHistory} onClick={()=>setShowHistory(value=>!value)}><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></button>}/>
       <div className="catalog-toolbar"><div className="tabs">{['All Items','F&B','Hobby Items'].map(value=><button key={value} className={filter===value?'selected':''} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{value}</button>)}</div>
         <SearchField label="Search items" placeholder="Search Items" value={search} onChange={setSearch}/></div>
-      <button className="secondary" disabled={locked} onClick={catalogue.reload}>Refresh catalogue</button>
-      <div className="product-grid">{shown.map(product=><button className="product-card" key={product.id} disabled={locked||product.available===false} aria-label={`Add ${product.name} to order`} onClick={()=>open(product)}>
-        {product.imageUrl?<img className="product-photo" src={product.imageUrl} alt={product.name}/>:<div className="product-placeholder"><span>No photo</span></div>}
-        <strong>{product.name}</strong><span>{product.sku}</span><span>{product.model}</span><span>{product.priceFrom===null?'No enabled variants':product.model==='Variants'?`${php(product.priceFrom)} to ${php(product.priceTo!)}`:php(product.priceFrom)}</span>
-        {product.available===false&&<small className="availability-note">Unavailable</small>}{product.available===null&&<small>Choose options to check availability</small>}</button>)}{!shown.length&&<p className="empty-state">No items match your search.</p>}</div></div>
-      <aside className="order-panel"><h2>Current Order</h2><div className="cart-lines">{!cart.length&&<div className="cart-empty"><strong>Your order starts here</strong><p>Select an item from the catalogue.</p></div>}
-        {cart.map((line,index)=>{const price=quote?.lines[index];return <div className="cart-line" key={index}><strong>{price?.name??'Item'}</strong><small>{price?.sku}</small>
-          {price?.modifiers.map(option=><small key={option.id}>{option.name} · {php(option.price)}</small>)}
-          {(products.find(p=>p.id===line.productId)?.groups.length||products.find(p=>p.id===line.productId)?.model==='Variants'||products.find(p=>p.id===line.productId)?.model==='Bundle')&&<button className="edit-customization" disabled={locked} onClick={()=>{const p=products.find(p=>p.id===line.productId);if(p)open(p,index);}}>Edit options</button>}
-          <span>{price&&php((displayDecimal(price.unitPrice,2)*Number(line.quantity)).toFixed(2))}</span>
+      {role==='Staff'&&<CatalogueCaption count={shown.length}/>}<div className="product-grid">{shown.map(product=><CatalogueCard key={product.id} name={product.name} image={product.imageUrl} icon={product.category==='Hobby'?'hobby-solid.svg':'a638b.svg'} disabled={locked} unavailable={product.available===false?'No usable stock':remaining(product)===0?'Not enough usable stock for this order':undefined} onClick={()=>open(product)}
+        price={<><small>₱</small>{product.priceFrom===null?'No enabled variants':product.model==='Variants'?<><small>From </small>{Number(product.priceFrom).toLocaleString('en-PH')}<small> To </small>{Number(product.priceTo).toLocaleString('en-PH')}</>:Number(product.priceFrom).toLocaleString('en-PH')}</>}>
+        {product.model==='Variants'&&<small className="stock-unlinked">Choose a variant · {product.variants.length} options</small>}{product.model==='Bundle'&&<small className="stock-unlinked">Bundle · {product.components.length} products</small>}
+        {product.available===null&&<small className="stock-unlinked">Choose options to check availability</small>}
+        {product.model==='Retail Item'&&remaining(product)!==undefined&&<small className="stock-unlinked">{remaining(product)} available for this order</small>}
+      </CatalogueCard>)}{!shown.length&&<p className="empty-state">No items match your search.</p>}</div></div>
+      <aside className="order-panel"><h2>Current Order{role==='Staff'&&<OrderItemCount count={cart.reduce((sum,line)=>sum+Number(line.quantity),0)}/>}</h2><div className="cart-lines">{!cart.length&&<div className="cart-empty"><strong>Your order starts here</strong><p>Select an item from the catalogue.</p></div>}
+        {cart.map((line,index)=>{const price=quote?.lines[index];return <CartItem key={index} name={price?.name??'Item'} sku={price?.sku}
+          modifiers={price?.modifiers.map(option=>({id:option.id,name:option.name,amount:php(option.price)}))}
+          components={price?.components.length?componentSummary(price.components):undefined}
+          editAction={(products.find(p=>p.id===line.productId)?.groups.length||products.find(p=>p.id===line.productId)?.model==='Variants'||products.find(p=>p.id===line.productId)?.model==='Bundle')?<button className="edit-customization" disabled={locked} onClick={()=>{const p=products.find(p=>p.id===line.productId);if(p)open(p,index);}}>{products.find(p=>p.id===line.productId)?.model==='Bundle'?'View bundle':'Edit options'}</button>:undefined}
+          amount={price&&php((displayDecimal(price.unitPrice,2)*Number(line.quantity)).toFixed(2))}>
           <div className="quantity-control"><button aria-label={`Remove one ${price?.name}`} disabled={locked} onClick={()=>void run(()=>replace(cart.map((l,i)=>i===index?{...l,quantity:String(Number(l.quantity)-1)}:l).filter(l=>Number(l.quantity)>0)))}>−</button>
-            <output>{line.quantity}</output><button aria-label={`Add one ${price?.name}`} disabled={locked} onClick={()=>void run(()=>replace(cart.map((l,i)=>i===index?{...l,quantity:String(Number(l.quantity)+1)}:l)))}>+</button></div></div>;})}</div>
-        <div className="cart-footer">{quote&&<><p>Subtotal <strong>{php(quote.subtotal)}</strong></p><p>VAT (12%) <strong>{php(quote.tax)}</strong></p><div className="total-row"><strong>Total due</strong><strong>{php(quote.total)}</strong></div></>}
-          <p className="staff-payment-note">Payment and fulfilment are recorded at checkout. Staff/Admin sales await Owner review.</p>
-          <Actions><button className="secondary" disabled={locked||!cart.length} onClick={()=>{setCart([]);setQuote(null);setError('');}}>Clear</button>
-            <button className="primary" disabled={locked||!cart.length} onClick={()=>void run(async()=>{const q=await service.quote(cart);setQuote(q);setStage('order');})}>Pay</button></Actions>
+            <output aria-label={`${price?.name} quantity`}>{line.quantity}</output><button aria-label={`Add one ${price?.name}`} disabled={locked||!stock.data||Number(line.quantity)>=(stock.data.maximums[index]??0)} onClick={()=>void run(()=>replace(cart.map((l,i)=>i===index?{...l,quantity:String(Number(l.quantity)+1)}:l)))}>+</button></div></CartItem>;})}</div>
+        <div className="cart-footer"><CartSummary role={role} subtotal={php(quote?.subtotal??'0')} tax={php(quote?.tax??'0')} total={php(quote?.total??'0')}/>
+          {stock.error&&<p role="status" className="error">{stock.error} Payment still requires a current quote.</p>}
+          <Actions><button className="clear-button" disabled={locked||!cart.length} onClick={()=>{setCart([]);setQuote(null);setError('');}}><Art file="6006e.svg" className="card-art"/><span>Clear</span></button>
+            <button className="pay-button" disabled={locked||!cart.length} onClick={()=>void run(async()=>{const q=await service.quote(cart);setQuote(q);setStage('order');})}>Pay</button></Actions>
         </div></aside></section>}
-    {editing&&<Modal title={editing.model==='Bundle'?`Included in ${editing.name}`:editing.model==='Variants'?`Choose ${editing.name}`:`Add modifiers · ${editing.name}`} onClose={()=>{if(!busy.current)setEditing(null);}}>
-      {editing.components.map((component,index)=><p key={index}>{component.quantity}× {component.name}{component.variant?` · ${component.variant}`:''}</p>)}
-      <form onSubmit={event=>{event.preventDefault();void run(async()=>{const line={productId:editing.id,variantId:variant||null,modifierIds:selected,quantity:count};await replace(editingIndex===null?[...cart,line]:cart.map((l,i)=>i===editingIndex?line:l));setEditing(null);});}}>
-        {editing.model==='Variants'&&<label>Variant<select aria-label="Variant" required value={variant} disabled={working} onChange={event=>{setVariant(event.target.value);setSelected([]);}}><option value="">Choose a variant</option>{editing.variants.map(v=><option key={v.id} value={v.id}>{v.name} · {v.sku} · {php(v.price)}</option>)}</select></label>}
-        {editing.groups.map(group=><fieldset key={group.id} disabled={working}><legend>{group.name} · choose {group.min}–{group.max}</legend>{group.options.map(option=><label key={option.id} className="live-pos-option"><input type="checkbox" checked={selected.includes(option.id)} disabled={!selected.includes(option.id)&&selected.filter(id=>group.options.some(o=>o.id===id)).length>=group.max}
-          onChange={event=>setSelected(current=>event.target.checked?[...current,option.id]:current.filter(id=>id!==option.id))}/>{option.name} · +{php(option.price)}</label>)}</fieldset>)}
-        <label>Quantity<input type="number" min="1" max="10000" step="1" required value={count} disabled={working} onChange={event=>setCount(event.target.value)}/></label>
-        <p>Availability and prices are checked for the whole order when you add.</p>{error&&<p role="alert" className="error">{error}</p>}
-        <Actions><button type="button" className="secondary" disabled={working} onClick={()=>setEditing(null)}>Cancel</button><button className="primary" disabled={working}>{working?'Checking…':'Add'}</button></Actions>
-      </form></Modal>}
-    {stage&&quote&&<Modal title={stage==='order'?'ORDER CONFIRMATION':stage==='Cash'?'CASH PAYMENT':'GCASH PAYMENT'} plain focusOnTitleChange className="payment-modal" onClose={closePayment}>
-      {stage==='order'?<><div className="receipt">{quote.lines.map((line,index)=><p key={index}><strong>{line.quantity}× {line.name}</strong><span>{php((displayDecimal(line.unitPrice,2)*line.quantity).toFixed(2))}</span></p>)}<p>Subtotal <strong>{php(quote.subtotal)}</strong></p><p>VAT (12%) <strong>{php(quote.tax)}</strong></p><p>Total due <strong>{php(quote.total)}</strong></p></div>
-        <div className="payment-methods"><button data-initial-focus className="primary" onClick={()=>setStage('Cash')}>Cash payment</button><button className="primary" onClick={()=>setStage('GCash')}>GCash payment</button></div></>:
-        <form onSubmit={event=>{event.preventDefault();void submitPayment();}}><p className="payment-total">Total due <strong>{php(quote.total)}</strong></p>
-          {stage==='Cash'?<><label>Amount Given<input data-initial-focus type="number" min={quote.total} step="0.01" required value={given} disabled={locked} onChange={event=>setGiven(event.target.value)}/></label><p>Change due: {new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(Math.max(0,Number(given)-Number(quote.total)))}</p></>:
-          <><p>Record a payment already received in your GCash account. A reference does not verify a provider payment.</p><label>GCash reference number<input data-initial-focus inputMode="numeric" pattern="[0-9]{13}" maxLength={13} required value={reference} disabled={locked} onChange={event=>setReference(event.target.value)}/></label></>}
+    {editing&&<LiveProductOptions product={editing} initial={{productId:editing.id,variantId:variant||null,modifierIds:selected,quantity:count}}
+      otherLines={editingIndex===null?cart:cart.filter((_,index)=>index!==editingIndex)} service={service} editing={editingIndex!==null}
+      stockVersion={catalogue.data} working={working} error={error} onDirtyChange={setOptionsDirty} onClose={()=>{setEditing(null);setError('');}}
+      onSave={line=>void run(async()=>{await replace(editingIndex===null?[...cart,line]:cart.map((current,index)=>index===editingIndex?line:current));setEditing(null);})}/>}
+    {stage&&quote&&<Modal title={stage==='order'?'ORDER CONFIRMATION':stage==='Cash'?'CASH PAYMENT':'GCASH PAYMENT'} plain focusOnTitleChange className={`payment-modal ${stage==='order'?'confirmation-modal':''}`} onClose={closePayment}>
+      {stage==='order'?<CheckoutSummary subtotal={php(quote.subtotal)} tax={php(quote.tax)} total={php(quote.total)} onCash={()=>setStage('Cash')} onGCash={()=>setStage('GCash')}
+        lines={quote.lines.map((line,index)=>({key:index,name:line.name,quantity:line.quantity,amount:php((displayDecimal(line.unitPrice,2)*line.quantity).toFixed(2)),details:<><small className="receipt-modifier">SKU: {line.sku}</small>{line.components.length>0&&<small className="receipt-modifier">Includes: {componentSummary(line.components)}</small>}{line.modifiers.map(option=><small className="receipt-modifier" key={option.id}>{option.name} · +{php(option.price)}</small>)}</>}))}/>:
+        <form className={stage==='GCash'?'qr-payment':undefined} onSubmit={event=>{event.preventDefault();void submitPayment();}}>
+          {stage==='Cash'?<CashPaymentFields total={displayDecimal(quote.total,2)} given={given} disabled={locked} onChange={setGiven}/>:
+          <><GCashQr /><p className="payment-total"><strong>Total Due:</strong><strong>{php(quote.total)}</strong></p><p>Check the received GCash payment, then enter its reference number.</p><GCashPaymentFields reference={reference} disabled={locked} onChange={setReference}/></>}
           {error&&<p role="alert" className="error">{error}</p>}{uncertain&&<p role="status">The result is uncertain. Retry this same checkout to retrieve its receipt before starting another order.</p>}
           <Actions><button className="secondary" type="button" disabled={locked} onClick={()=>{setStage('order');setError('');}}>Back</button>
             <button className="primary" disabled={working}>{working?'Recording…':uncertain?'Retry same checkout':'Confirm payment received'}</button></Actions>
-          {!uncertain&&error&&<button className="secondary" type="button" disabled={working} onClick={()=>void run(async()=>{const q=await service.quote(cart);setQuote(q);setStage('order');})}>Refresh quote and review</button>}
+          {!uncertain&&error&&<button className="secondary" type="button" disabled={working} onClick={()=>void run(async()=>{const q=await service.quote(cart);setQuote(q);setStage('order');})}>Review current quote</button>}
         </form>}
     </Modal>}
-    {viewing&&<Modal title="Recorded receipt" onClose={()=>setViewing(null)}><p>{viewing.orderNumber} · {new Date(viewing.occurredAt).toLocaleString('en-PH',{timeZone:'Asia/Manila'})}</p>
-      <p>{viewing.cashierName} ({viewing.cashierRole}) · {viewing.status} · {viewing.reviewState}</p>
-      {viewing.lines.map((line,index)=><div key={index}><strong>{line.quantity}× {line.name} · {line.sku} · {php(line.unitPrice)} each</strong>
-        {line.modifiers.map(option=><p key={option.id}>{option.name} · +{php(option.price)}</p>)}<ComponentList values={line.components}/></div>)}
-      <p>Subtotal {php(viewing.subtotal)} · VAT {php(viewing.tax)} · Total {php(viewing.total)}</p><p>Stock consumed at checkout. Review never deducts it again.</p>
+    {paymentDiscard.confirmation}
+    {viewing&&<Modal title="Recorded receipt" className="payment-modal recorded-receipt-modal" onClose={()=>setViewing(null)} footer={<Actions><button className="primary" onClick={()=>setViewing(null)}>Close receipt</button></Actions>}>
+      <OrderReceiptDetails id={viewing.orderNumber} cashier={viewing.cashierName} role={viewing.cashierRole} method={viewing.method} time={manilaTime(viewing.occurredAt)} status={viewing.status} total={php(viewing.total)} review={viewing.reviewState}
+        lines={viewing.lines.map((line,index)=>({key:index,name:line.name,quantity:line.quantity,amount:php((displayDecimal(line.unitPrice,2)*line.quantity).toFixed(2)),details:<><small className="receipt-modifier">SKU: {line.sku} · {php(line.unitPrice)} each</small>{line.modifiers.map(option=><small className="receipt-modifier" key={option.id}>{option.name} · +{php(option.price)}</small>)}<ComponentList values={line.components}/></>}))}/>
+      <p className="detail-line"><span>Subtotal</span><strong>{php(viewing.subtotal)}</strong></p><p className="detail-line"><span>VAT</span><strong>{php(viewing.tax)}</strong></p><p>Stock consumed at checkout. Review never deducts it again.</p>
       <p>{viewing.method==='Cash'?`Cash received ${php(viewing.cashTendered!)} · Change ${php(viewing.change!)}`:`GCash reference ${viewing.reference} · Provider verification is separate.`}</p>
-      <Actions><button className="primary" onClick={()=>setViewing(null)}>Close receipt</button></Actions></Modal>}
+    </Modal>}
   </div>;
 }
 
@@ -163,8 +192,8 @@ function ComponentList({values}:{values:unknown[]}) {
   return <>{values.map((value,index)=>{
     if(!value||typeof value!=='object')return null;
     const row=value as Record<string,unknown>,configuration=row.configuration as Record<string,unknown>|undefined;
-    return <div key={index} className="live-pos-component"><p>{String(row.quantity)}× {String(configuration?.name??row.name)} · {String(configuration?.sku??row.sku??'')}</p>
-      {Array.isArray(configuration?.modifiers)&&configuration.modifiers.map((value,index)=>{const m=value as Record<string,unknown>;return <p key={index}>{String(m.name)}</p>;})}
-      {Array.isArray(configuration?.components)&&<ComponentList values={configuration.components}/>}</div>;
+    return <span key={index} className="live-pos-component"><small>{String(row.quantity)}× {String(configuration?.name??row.name)} · {String(configuration?.sku??row.sku??'')}</small>
+      {Array.isArray(configuration?.modifiers)&&configuration.modifiers.map((value,index)=>{const m=value as Record<string,unknown>;return <small key={index}>{String(m.name)}</small>;})}
+      {Array.isArray(configuration?.components)&&<ComponentList values={configuration.components}/>}</span>;
   })}</>;
 }

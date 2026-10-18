@@ -1,7 +1,7 @@
 import type { InventoryChange } from '../lib/data/management';
 import { useViewState } from '../lib/view-state';
 import { useMutation } from '../lib/request-state';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Actions, Art, Modal, Status, asset } from '../components/ui';
 import SearchField from '../components/SearchField';
@@ -23,8 +23,8 @@ import { stockCondition } from '../data/reporting';
 export interface InventoryContext { id: string; batchId?: string; token: number }
 const stockModels = { All: 'All stock models', Stocked: 'Retail Item', 'Made to order': 'Recipe', Variants: 'Variants', Bundle: 'Bundle' } as const;
 type StockModelFilter = keyof typeof stockModels;
-interface Props { persistent?: boolean; templates: ModifierTemplate[]; onSaveTemplate: (template: ModifierTemplate) => void | Promise<void>; onRemoveTemplate: (id: string) => void | Promise<void>; items: StockItem[]; products: Product[]; context?: InventoryContext; actor: string; onDirtyChange: (dirty: boolean) => void; onLeave: (action: () => void) => void; onUpdate: (item: StockItem, change?: InventoryChange) => void | Promise<void>; onSaveProduct: (product: Product, stock?: StockItem, change?: InventoryChange) => void | Promise<void>; onAddIngredient: (item: StockItem, change?: InventoryChange) => void | Promise<void>; onRemoveProduct: (id: string, reason?: string) => void | Promise<void>; onRemoveStock: (id: string, reason?: string) => void | Promise<void>; notify: (message: string) => void }
-export default function Inventory({ persistent = false, templates, onSaveTemplate, onRemoveTemplate, items, products, context, actor, onDirtyChange, onLeave, onUpdate, onSaveProduct, onAddIngredient, onRemoveProduct, onRemoveStock, notify }: Props) {
+interface Props { persistent?: boolean; onDraftOpenChange?: (open:boolean)=>void; templates: ModifierTemplate[]; onSaveTemplate: (template: ModifierTemplate) => void | Promise<void>; onRemoveTemplate: (id: string) => void | Promise<void>; items: StockItem[]; products: Product[]; context?: InventoryContext; actor: string; onDirtyChange: (dirty: boolean) => void; onLeave: (action: () => void) => void; onUpdate: (item: StockItem, change?: InventoryChange) => void | Promise<void>; onSaveProduct: (product: Product, stock?: StockItem, change?: InventoryChange) => void | Promise<void>; onAddIngredient: (item: StockItem, change?: InventoryChange) => void | Promise<void>; onRemoveProduct: (id: string, reason?: string) => void | Promise<void>; onRemoveStock: (id: string, reason?: string) => void | Promise<void>; notify: (message: string) => void }
+export default function Inventory({ persistent = false, onDraftOpenChange, templates, onSaveTemplate, onRemoveTemplate, items, products, context, actor, onDirtyChange, onLeave, onUpdate, onSaveProduct, onAddIngredient, onRemoveProduct, onRemoveStock, notify }: Props) {
   const [view, setView] = useViewState('Inventory.view', 'Ingredients'); const [category, setCategory] = useViewState<Category | 'All'>('Inventory.category', 'Beverage'); const [search, setSearch] = useViewState('Inventory.search', '');
   const [stockModel, setStockModel] = useViewState<StockModelFilter>('Inventory.stockModel', 'All');
   const [expanded, setExpanded] = useViewState<string[]>('Inventory.expanded', ['PT002', 'FD001']); const [highlight, setHighlight] = useState('');
@@ -38,6 +38,7 @@ export default function Inventory({ persistent = false, templates, onSaveTemplat
   const [restockDirty, setRestockDirty] = useState(false);
   const restockGuard = useDiscardChanges(Boolean(restock && restockDirty), () => { setRestock(null); setRestockDirty(false); }, 'receipt batch');
   useEffect(() => { if (restock) onDirtyChange(restockDirty || receiving.saving); return () => { if (restock) onDirtyChange(false); }; }, [restock,restockDirty,receiving.saving,onDirtyChange]);
+  useLayoutEffect(()=>{onDraftOpenChange?.(Boolean(editor||restock||removing||libraryEditing));return()=>onDraftOpenChange?.(false);},[editor,restock,removing,libraryEditing,onDraftOpenChange]);
   const [detailsProduct, setDetailsProduct] = useState<Product | null>(null);
   const [appliedToken, setAppliedToken] = useViewState('Inventory.tsx.token', 0);
   useEffect(() => {

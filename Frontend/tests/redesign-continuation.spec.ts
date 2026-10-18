@@ -262,7 +262,7 @@ test('Browser PDF viewer and export share identical bytes across all scopes and 
     const stream = await exportDownload.createReadStream(), chunks: Buffer[] = []; for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
     expect(Buffer.concat(chunks)).toEqual(Buffer.from(bytes)); expect(Buffer.from(bytes).subarray(0, 5).toString()).toBe('%PDF-');
     await page.getByLabel('Export format').selectOption('CSV'); await page.getByRole('button', { name: 'Export report', exact: true }).click();
-    const pendingCsv = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export', exact: true }).click(); const csvDownload = await pendingCsv;
+    const pendingCsv = page.waitForEvent('download'); await page.getByRole('button', { name: 'Export CSV', exact: true }).click(); const csvDownload = await pendingCsv;
     await csvDownload.saveAs(path.replace('.pdf', '.csv')); const csv = await readFile(path.replace('.pdf', '.csv'), 'utf8');
     if (scope !== 'Inventory usage') {
       const sales = await page.evaluate(async () => (await import('/src/data/demo.ts')).createDemoData().sales);

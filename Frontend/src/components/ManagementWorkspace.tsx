@@ -3,7 +3,7 @@ import type { IdentityResponse } from '../lib/auth-session';
 import { apiRequest } from '../lib/api';
 import { ApiError } from '../lib/api-client';
 import { createManagementData, type AccountsData, type InventoryData } from '../lib/data/management';
-import { useResource } from '../lib/request-state';
+import { useLiveResource, LiveConnectionStatus } from '../lib/live-updates';
 import { ViewState } from '../lib/view-state';
 import { signOut } from '../lib/auth';
 import Navigation, { type Page } from './Navigation';
@@ -12,26 +12,35 @@ import Users from '../pages/Users';
 import { Actions, Modal } from './ui';
 import LivePos from './LivePos';
 import LiveSales from './LiveSales';
+import LiveReports from './LiveReports';
+import LiveDashboard from './LiveDashboard';
+import type { ReportFilters } from '../data/durable-reporting';
+import type { InventoryContext } from '../pages/Inventory';
+import type { AuditContext } from '../pages/SalesHistory';
 
 export default function ManagementWorkspace({identity}:{identity:IdentityResponse}) {
   const [service]=useState(()=>createManagementData(apiRequest));
   const role=identity.profile.role, manager=role==='Owner'||role==='Admin';
   const scope=`${identity.profile.id}:${role}`;
-  const [page,setPage]=useState<Page>(manager?'Inventory':'POS');
+  const [page,setPage]=useState<Page>(manager?'Dashboard':'POS');
+  const [inventoryContext,setInventoryContext]=useState<InventoryContext>();
+  const [auditContext,setAuditContext]=useState<AuditContext>();
+  const [reportContext,setReportContext]=useState<ReportFilters>();
   const views=useRef(new Map<string,unknown>());
   const dirty=useRef(false), busy=useRef(false);
   const checkoutBusy=useRef(false),checkoutUncertain=useRef(false);
   const workflowBusy=useRef(false),workflowUncertain=useRef(false);
   const [salesVersion,setSalesVersion]=useState(0);
+  const [draftOpen,setDraftOpen]=useState(false);
   const [isDirty,setDirty]=useState(false), [isBusy,setBusy]=useState(false);
   const [pending,setPending]=useState<(()=>void)|null>(null);
   const [toast,setToast]=useState('');
   const loadInventory=useCallback((signal:AbortSignal)=>service.inventory(signal),[service]);
   const loadAccounts=useCallback((signal:AbortSignal)=>service.accounts(signal),[service]);
-  const inventory=useResource<InventoryData>(manager?`${scope}:inventory`:null,loadInventory);
-  const accounts=useResource<AccountsData>(manager?`${scope}:accounts`:null,loadAccounts);
-  const loadAccess=useCallback((signal:AbortSignal)=>apiRequest<{services:{checkout:boolean;salesReview:boolean}}>('/api/access',{signal}),[]);
-  const access=useResource(`${scope}:access`,loadAccess);
+  const inventory=useLiveResource<InventoryData>(manager?`${scope}:inventory`:null,loadInventory,['inventory'],draftOpen||isDirty||isBusy);
+  const accounts=useLiveResource<AccountsData>(manager?`${scope}:accounts`:null,loadAccounts,['accounts'],draftOpen||isDirty||isBusy);
+  const loadAccess=useCallback((signal:AbortSignal)=>apiRequest<{services:{checkout:boolean;salesReview:boolean;reports:boolean}}>('/api/access',{signal}),[]);
+  const access=useLiveResource(`${scope}:access`,loadAccess,['access']);
   const [hasRecovery]=useState(()=>{try{return Boolean(sessionStorage.getItem(`vertwell-checkout:${identity.profile.id}`));}catch{return false;}});
   const [hasWorkflowRecovery]=useState(()=>{try{return Boolean(sessionStorage.getItem(`vertwell-sales-workflow:${identity.profile.id}`));}catch{return false;}});
   const onCheckoutBusy=useCallback((value:boolean)=>{checkoutBusy.current=value;},[]);
@@ -57,18 +66,18 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
   async function logout() {try {await signOut();}catch(cause){setToast(cause instanceof Error?cause.message:'Unable to sign out.');}}
   useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(''),6000);return ()=>clearTimeout(timer);},[toast]);
   const salesReady=access.data?.services?.salesReview===true||hasWorkflowRecovery;
-  const effectivePage=manager && !['Inventory','Users','POS',...(salesReady?['Dashboard','Audit Trail']:[])].includes(page)?'Inventory':page;
+  const reportsReady=manager&&access.data?.services?.reports===true;
+  const effectivePage=manager && access.status==='ready' && !['Inventory','Users','POS',...(salesReady?['Dashboard','Audit Trail']:[]),...(reportsReady?['Reports']:[])].includes(page)?'Inventory':page;
   const managementPage=['Inventory','Users'].includes(effectivePage);
   const resource=effectivePage==='Users'?accounts:inventory;
   return <ViewState.Provider value={views.current}><div className={`workspace ${manager?'admin-workspace':'staff-workspace'}`}>
-    <Navigation persistent identity={{name:identity.profile.full_name,role}} destinations={manager?(salesReady?['Dashboard','Inventory','POS','Audit Trail','Users']:['Inventory','POS','Users']):(salesReady?['POS','Audit Trail']:['POS'])}
+    <Navigation persistent identity={{name:identity.profile.full_name,role}} destinations={manager?[...(salesReady?['Dashboard' as const]:[]),'Inventory','POS',...(reportsReady?['Reports' as const]:[]),...(salesReady?['Audit Trail' as const]:[]),'Users']:(salesReady?['POS','Audit Trail']:['POS'])}
       activePage={effectivePage} onNavigate={next=>leave(()=>setPage(next))} onLogout={()=>leave(()=>{void logout();})} />
     <main className="workspace-main">
-      <div className="page-heading"><div><h1>Welcome, {identity.profile.full_name}</h1><p>Signed in as <strong>{role}</strong> · @{identity.profile.username}</p></div>
-        {manager && managementPage && <button className="secondary" disabled={isDirty||isBusy||resource.status==='loading'} onClick={()=>{inventory.reload();accounts.reload();}}>Refresh data</button>}</div>
+      <LiveConnectionStatus/>
       {manager && managementPage && resource.status==='loading' && <p role="status">Loading {effectivePage==='Users'?'accounts':'inventory'}…</p>}
       {manager && managementPage && resource.error && <div role="alert" className="error"><p>{resource.error.message}</p><button className="secondary" disabled={isBusy||isDirty} onClick={resource.reload}>Retry loading</button></div>}
-      {manager && effectivePage==='Inventory' && inventory.data && <Inventory persistent
+      {manager && effectivePage==='Inventory' && inventory.data && <Inventory persistent onDraftOpenChange={setDraftOpen} context={inventoryContext}
         templates={inventory.data.modifierTemplates} items={inventory.data.stock} products={inventory.data.products}
         actor={`${identity.profile.full_name} (${role})`} onDirtyChange={onDirty} onLeave={leave}
         onSaveProduct={(product,item,change)=>saveInventory(()=>service.saveProduct(stockSource(),product,item,change))}
@@ -78,7 +87,7 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
         onRemoveTemplate={id=>saveInventory(()=>service.archive(stockSource(),'library',id,'Modifier library archived'))}
         onRemoveProduct={(id,reason)=>saveInventory(()=>service.archive(stockSource(),'product',id,reason??'Product archived'))}
         onRemoveStock={(id,reason)=>saveInventory(()=>service.archive(stockSource(),'stock',id,reason??'Stock archived'))} notify={setToast} />}
-      {manager && effectivePage==='Users' && accounts.data && <Users persistent accounts={accounts.data.accounts} role={role} actorId={identity.profile.id}
+      {manager && effectivePage==='Users' && accounts.data && <Users persistent onDraftOpenChange={setDraftOpen} accounts={accounts.data.accounts} role={role} actorId={identity.profile.id}
         onDirtyChange={onDirty} onSave={(account,credentials)=>mutate(async()=>{
           if(!accountSource.current) throw new ApiError('Load accounts first.','unavailable');
           const saved=await service.saveAccount(accountSource.current,account,credentials?.password,credentials?.operationId);
@@ -89,10 +98,15 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
           const account=current.accounts.find(row=>row.id===id);if(!account)throw new ApiError('Account changed. Reload and review.','conflict');
           const saved=await service.saveAccount(current,{...account,active:false});accountSource.current=saved;accounts.replace(saved);
         })} notify={setToast} />}
-      {(access.data?.services?.checkout===true||hasRecovery)&&<LivePos scope={scope} active={effectivePage==='POS'} onBusyChange={onCheckoutBusy} onUncertainChange={onCheckoutUncertain} onSaved={()=>{inventory.reload();setSalesVersion(value=>value+1);}}/>}
+      {(access.data?.services?.checkout===true||hasRecovery)&&<LivePos onDirtyChange={onDirty} role={role} name={identity.profile.full_name} scope={scope} active={effectivePage==='POS'} onBusyChange={onCheckoutBusy} onUncertainChange={onCheckoutUncertain} onSaved={()=>{inventory.reload();setSalesVersion(value=>value+1);}}/>}
       {salesReady&&<LiveSales scope={`${scope}:sales:${salesVersion}`} role={role} actor={identity.profile.full_name}
         active={effectivePage==='Audit Trail'||effectivePage==='Dashboard'} dashboard={effectivePage==='Dashboard'} onAudit={()=>leave(()=>setPage('Audit Trail'))}
-        onBusyChange={onWorkflowBusy} onUncertainChange={onWorkflowUncertain} onDirtyChange={onDirty}/>}
+        context={auditContext} onBusyChange={onWorkflowBusy} onUncertainChange={onWorkflowUncertain} onDirtyChange={onDirty}
+        dashboardContent={onReview=><LiveDashboard scope={scope} stock={inventory.data?.stock??[]} role={role} owner={identity.profile.full_name} onDailyReview={onReview} onDirtyChange={onDirty}
+          onAudit={context=>leave(()=>{setAuditContext({...context,token:Date.now()});setPage('Audit Trail');})}
+          onInventory={context=>leave(()=>{setInventoryContext({...context,token:Date.now()});setPage('Inventory');})}
+          onReports={filters=>leave(()=>{views.current.delete('LiveReports.drilldown');setReportContext(filters);setPage('Reports');})}/>}/>} 
+      {reportsReady&&effectivePage==='Reports'&&<LiveReports scope={scope} context={reportContext} onInventory={context=>leave(()=>{setInventoryContext({...context,token:Date.now()});inventory.reload();setPage('Inventory');})}/>}
       {effectivePage==='POS'&&access.status==='loading'&&<p role="status">Checking POS availability…</p>}
       {effectivePage==='POS'&&access.error&&<div role="alert" className="error"><p>{access.error.message}</p><button onClick={access.reload}>Retry POS connection</button></div>}
       {effectivePage==='POS'&&access.data?.services?.checkout!==true&&access.status!=='loading'&&!access.error&&<section><h2>POS connection</h2><p>Your account is verified. Live checkout is not available yet.</p><button className="secondary" onClick={access.reload}>Check POS availability</button></section>}

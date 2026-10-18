@@ -1,5 +1,5 @@
 export interface ReportSection { title: string; headings: string[]; rows: string[][] }
-export interface ReportDocument { title: string; range: string; generated: string; notes: string[]; sections: ReportSection[] }
+export interface ReportDocument { title: string; range: string; generated: string; notes: string[]; sections: ReportSection[]; source?: string }
 export function saveBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob), link = document.createElement('a'); link.href = url; link.download = filename; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -23,7 +23,7 @@ export async function createPdf(report: ReportDocument) {
   const [{ jsPDF }, font] = await Promise.all([import('jspdf'), reportFont()]);
   const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
   doc.addFileToVFS('report.ttf', font); doc.addFont('report.ttf', 'Report', 'normal'); doc.setFont('Report');
-  doc.setProperties({ title: report.title, subject: report.range, author: 'Happy Hentie · Vertwell preview' });
+  doc.setProperties({ title: report.title, subject: report.range, author: report.source ? 'Happy Hentie · Vertwell' : 'Happy Hentie · Vertwell preview' });
   let y = 0;
   const text = (value: string, size = 9, color = '#34302a') => {
     doc.setFontSize(size); doc.setTextColor(color); const lines = doc.splitTextToSize(value, 178) as string[];
@@ -67,7 +67,7 @@ export async function createPdf(report: ReportDocument) {
     }); y += 8;
   }
   const pages = doc.getNumberOfPages();
-  for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor('#71675a'); doc.text(`Sample data · Page ${i} of ${pages}`, 16, 288); }
+  for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor('#71675a'); doc.text(`${report.source ?? 'Sample data'} · Page ${i} of ${pages}`, 16, 288); }
   return doc.output('blob');
 }
 export async function downloadPdf(report: ReportDocument, filename: string) { saveBlob(await createPdf(report), filename); }

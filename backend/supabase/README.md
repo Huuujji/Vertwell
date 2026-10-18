@@ -1,10 +1,41 @@
 # Database workspace — Backend phase
 
-P7 is implemented/verified locally and its explicitly approved migration
-`20261017150033_durable_sales_workflows.sql` is applied and schema/grant-verified
-on DualCounter. All eleven applied sources are immutable. Broader hosted
-acceptance is incomplete because later SQL connections stall during SSL
-negotiation. The existing approval persists; checkout remains disabled.
+P9's chosen **in-app-only** notification scope is implemented. Its sixteenth
+migration and seventeenth stable-alert-identity follow-up are applied/verified on
+DualCounter. [NOTIFICATIONS.md](NOTIFICATIONS.md)
+documents saved alert evidence/history, per-account read state, protected delivery
+and recovery. Existing business rows, Auth IDs, settings and checkout state match
+fresh before/after fingerprints. All **17** applied SQL sources are immutable.
+Root checks pass **160/160**; 31 affected browser cases pass across the broad/final
+focused runs. See HandsOff.md for the exact evidence and limits. Source/docs remain
+local; no GitHub save or application deployment was requested or performed.
+
+The earlier phase checkpoints below describe their historical acceptance.
+
+P8A is implemented and verified. [LIVE_UPDATES.md](LIVE_UPDATES.md) documents the
+shared real/preview frontend, private receive-only invalidations, protected reloads,
+draft/conflict/recovery handling and hosted/local verification boundaries. All
+**fourteen** applied migration hashes and existing grants verify unchanged. Root
+checks pass **147/147**; 264 full browser cases plus final affected coverage pass.
+Existing business rows/Auth IDs/settings are preserved and checkout stays enabled.
+P9 remains pending; all Backend work stays local. Earlier checkpoints below are
+historical.
+
+P8 durable reports are accepted. [REPORTS.md](REPORTS.md) documents the protected
+coherent snapshot, saved financial Dashboard/Reports, historical stock movement
+reconciliation, original payment/review/void evidence and shared screen/export
+scopes. All thirteen applied sources are immutable. Root tests pass 142/142;
+hosted report checks pass 4/4 and real existing-account acceptance passes without
+business writes. Checkout remains enabled. P9 remains pending and Backend stays
+local. The older phase checkpoints below are historical.
+
+P7 hosted acceptance passes on DualCounter: fourteen rollback scenarios, real
+caller-token persistence and three forced-overlap decision races. The connection
+problem recovered without changing TLS or saved settings. The user requested
+checkout activation for use; checkout is enabled and should remain enabled.
+The eight P6 fixture accounts are retired from Users while preserving referenced
+Auth/profiles and history. `20261017195000_retired_accounts.sql` is the twelfth
+applied migration; all twelve applied sources are immutable.
 [SALES_WORKFLOWS.md](SALES_WORKFLOWS.md) describes exact receipt reviews, recorded
 cash adjustments, all void request/decision history, durable bulk results,
 caller-scoped reads and uncertain-response recovery. It does not enable checkout.
@@ -16,8 +47,8 @@ checkout, server quotes/configuration availability, purchased receipt retrieval
 and scoped POS image reads. All ten applied hashes match and sources are frozen.
 Real caller-token persistence, three forced-overlap races and final hosted
 regressions pass. The separately approved temporary test activation ended
-**disabled**; a future request is needed to leave checkout enabled for use.
-See [CHECKOUT.md](CHECKOUT.md). P7 hosted acceptance is next. All Backend work
+**disabled** at that historical checkpoint; the later user request now supersedes
+it. See [CHECKOUT.md](CHECKOUT.md). P8/P9 remain pending. All Backend work
 remains local and off GitHub.
 
 The October 17 database priority now has a verified hosted development foundation.
@@ -44,7 +75,7 @@ keeps the explicitly labeled sample preview separate.
   `izdemgzdywtxhvgvsian`, region Singapore (`ap-southeast-1`).
 - [Project dashboard](https://supabase.com/dashboard/project/izdemgzdywtxhvgvsian)
   and API URL `https://izdemgzdywtxhvgvsian.supabase.co`.
-- PostgreSQL **17.11**; ten applied migrations match local content hashes.
+- PostgreSQL **17.11**; thirteen applied migrations match local content hashes.
 - All 25 business tables have RLS and authenticated SELECT-only policies. Exactly
   six tables have authenticated SELECT grants; no table write grants exist.
   Management/profile/ledger table grants remain closed. Twelve restricted public

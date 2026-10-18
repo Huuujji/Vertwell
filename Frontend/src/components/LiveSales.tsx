@@ -1,18 +1,25 @@
-import { useCallback,useEffect,useRef,useState } from 'react';
+import SelectionSummary from './SelectionSummary';
+import OrderReceiptDetails from './OrderReceiptDetails';
+import SalesHistoryHeader from './SalesHistoryHeader';
+import TransactionTable from './TransactionTable';
+import { useCallback,useEffect,useId,useRef,useState } from 'react';
 import { apiRequest } from '../lib/api';
 import { ApiError } from '../lib/api-client';
 import { createSalesWorkflowData,restoreWorkflowCommand,workflowTarget,type WorkflowCommand,type WorkflowResult,type WorkflowSale } from '../lib/data/sales-workflow';
 import { displayDecimal } from '../lib/data/decimal';
-import { useResource } from '../lib/request-state';
+import { useLiveResource } from '../lib/live-updates';
 import { useViewState } from '../lib/view-state';
 import type { DailyReview,Role,Sale } from '../data/demo';
 import { businessDate,manilaTime } from '../data/demo';
 import DailySalesReview from './DailySalesReview';
 import { Actions,Modal } from './ui';
-import SearchField from './SearchField';
-import DateField from './DateField';
+
+
 import Pagination,{usePagination} from './Pagination';
 import useDiscardChanges from './useDiscardChanges';
+import type { ReactNode } from 'react';
+import DailyReviewQueue from './DailyReviewQueue';
+import type { AuditContext } from '../pages/SalesHistory';
 
 const php=(value:string)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(displayDecimal(value,2));
 const sum=(sales:WorkflowSale[])=>sales.reduce((n,s)=>n+displayDecimal(s.total,2),0).toFixed(2);
@@ -32,12 +39,16 @@ type VoidAction={kind:'void.request'|'void.decide'|'sale.void';sales:WorkflowSal
 function VoidDialog({action,role,actor,onClose,onSave,onDirtyChange}:{action:VoidAction;role:Role;actor:string;onClose:()=>void;onSave:(command:WorkflowCommand)=>Promise<WorkflowResult>;onDirtyChange:(value:boolean)=>void}) {
   const [reason,setReason]=useState(action.kind==='void.request'?'':pendingRequest(action.sales[0])?.reason??'Duplicate transaction');
   const [final,setFinal]=useState(false),[error,setError]=useState(''),[saving,setSaving]=useState(false);const busy=useRef(false);
+  const ReceiptContext=action.sales.length===1&&!final?'details':'div';
   const isVoid=action.kind==='sale.void'||action.approved===true;
+  const formId=useId();
   const dirty=Boolean(reason.trim());const discard=useDiscardChanges(dirty,onClose,'void decision');
   useEffect(()=>{onDirtyChange(dirty);return()=>onDirtyChange(false);},[dirty,onDirtyChange]);
-  return <><Modal title={final?'Void selected orders permanently?':action.kind==='void.request'?'Request Void':action.approved===false?'Reject void request':action.sales.length>1?'Review Bulk Void':'VOID ORDER'}
-    className="bulk-modal" onClose={()=>{if(!busy.current)discard.requestClose();}}>
-    <form inert={saving} onSubmit={async event=>{
+  const actions=<Actions><button className="secondary" type="button" disabled={saving} data-initial-focus onClick={()=>final?setFinal(false):discard.requestClose()}>{final?'Go back':'Cancel'}</button>
+    <button form={formId} type="submit" className={isVoid&&final?'danger-button':'primary'} disabled={saving||!reason.trim()}>{saving?'Saving…':isVoid?(final?`Void ${action.sales.length===1?'order':`${action.sales.length} orders`}`:'Review void'):action.kind==='void.request'?'Send void request':'Reject request'}</button></Actions>;
+  return <><Modal title={final?(action.sales.length===1?'Void this order permanently?':'Void selected orders permanently?'):action.kind==='void.request'?'Request Void':action.approved===false?'Reject void request':action.sales.length>1?'Review Bulk Void':'VOID ORDER'}
+    focusOnTitleChange plain={!final&&action.sales.length===1} className={`workflow-modal ${final?'bulk-final-modal':action.sales.length>1?'bulk-modal':'confirmation-modal'}`} onClose={()=>{if(!busy.current)discard.requestClose();}} footer={actions}>
+    <form id={formId} inert={saving} onSubmit={async event=>{
       event.preventDefault();if(busy.current||!reason.trim())return;
       if(isVoid&&!final){setFinal(true);return;}
       const base={operationId:crypto.randomUUID(),targets:action.sales.map(workflowTarget),reason:reason.trim()};
@@ -46,31 +57,33 @@ function VoidDialog({action,role,actor,onClose,onSave,onDirtyChange}:{action:Voi
       try{await onSave(command);onClose();}catch(cause){setError(cause instanceof Error?cause.message:'Unable to save. Your reason has been kept.');}
       finally{busy.current=false;setSaving(false);}
     }}>
-      <p>{action.sales.length} selected orders · {php(sum(action.sales))} · {actor} ({role})</p>
+      {(action.sales.length>1||final)&&<p>{action.sales.length} selected orders · {php(sum(action.sales))} · {actor} ({role})</p>}
       {final&&<p><strong>This action cannot be undone.</strong> The original transactions and all requests remain in Audit Trail. No payment refund or stock return is performed.</p>}
       {action.kind==='void.request'&&<p>The sale stays unchanged until an Owner or Admin decides your request.</p>}
       {action.sales.length>1&&<p>Only these exact receipts are submitted. Changed or already voided receipts are skipped and reported individually. An unexpected save failure rolls back the whole action.</p>}
-      <div className="bulk-order-list">{action.sales.map(s=><article key={s.id}><strong>{s.orderNumber}</strong><p>{s.cashierName} · {s.status} · {php(s.total)}</p><small>Receipt ID: {s.id}</small>
+      {!final&&action.sales.length===1&&<><p className="order-id">Order ID: {action.sales[0].orderNumber}</p><div className="receipt">{action.sales[0].receipt?.lines.map((line,i)=><p key={i}><strong>•{line.quantity}× {line.name}</strong><strong>{php((displayDecimal(line.unitPrice,2)*line.quantity).toFixed(2))}</strong></p>)}<p className="receipt-total"><strong>Total Due:</strong><strong>{php(action.sales[0].total)}</strong></p></div></>}
+      <ReceiptContext className={action.sales.length>1?'bulk-order-list':'void-order-context'}>{action.sales.length===1&&!final&&<><summary>Recorded receipt details</summary><p>Decision recorded as {actor} ({role}).</p></>}{action.sales.map(s=><article key={s.id}><strong>{s.orderNumber}</strong><p>{s.cashierName} · {s.status} · {php(s.total)}</p><small>Receipt ID: {s.id}</small>
         {pendingRequest(s)&&<p>Original request: {pendingRequest(s)!.reason} · {pendingRequest(s)!.requested_name} ({pendingRequest(s)!.requested_role})</p>}
-        <p>{s.stockCommitted===true?'Recorded stock consumption is retained.':'Historical stock handling is not assumed.'} No automatic refund or stock return.</p></article>)}</div>
+        <p>{s.stockCommitted===true?'Recorded stock consumption is retained.':'Historical stock handling is not assumed.'} No automatic refund or stock return.</p></article>)}</ReceiptContext>
       {final?<p>Decision reason: {reason}</p>:<label>{action.kind==='void.request'?'Reason for request':'Decision reason'}<textarea required maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)}/></label>}
       {error&&<p className="error" role="alert">{error}</p>}
-      <Actions><button className="secondary" type="button" data-initial-focus onClick={()=>final?setFinal(false):discard.requestClose()}>{final?'Go back':'Cancel'}</button>
-        <button className={isVoid&&final?'danger-button':'primary'} disabled={saving||!reason.trim()}>{saving?'Saving…':isVoid?(final?`Void ${action.sales.length===1?'order':`${action.sales.length} orders`}`:'Review void'):action.kind==='void.request'?'Send void request':'Reject request'}</button></Actions>
     </form>
   </Modal>{discard.confirmation}</>;
 }
 
-export default function LiveSales({scope,role,actor,active,dashboard,onAudit,onBusyChange,onUncertainChange,onDirtyChange}:{scope:string;role:Role;actor:string;active:boolean;dashboard:boolean;onAudit:()=>void;onBusyChange:(value:boolean)=>void;onUncertainChange:(value:boolean)=>void;onDirtyChange:(value:boolean)=>void}) {
+export default function LiveSales({scope,role,actor,active,dashboard,onBusyChange,onUncertainChange,onDirtyChange,dashboardContent,context}:{context?:AuditContext;dashboardContent?:(onReview:(date:string)=>void)=>ReactNode;scope:string;role:Role;actor:string;active:boolean;dashboard:boolean;onAudit:()=>void;onBusyChange:(value:boolean)=>void;onUncertainChange:(value:boolean)=>void;onDirtyChange:(value:boolean)=>void}) {
   const [service]=useState(()=>createSalesWorkflowData(apiRequest));
   const load=useCallback((signal:AbortSignal)=>service.read(signal),[service]);
-  const resource=useResource(scope,load),manager=role!=='Staff';
+  const resource=useLiveResource(scope,load,['sales']),manager=role!=='Staff';
   const [search,setSearch]=useViewState('LiveSales.search',''),[day,setDay]=useViewState('LiveSales.day','');
   const [status,setStatus]=useViewState('LiveSales.status','All statuses'),[method,setMethod]=useViewState('LiveSales.method','All payments');
   const [requestsOnly,setRequestsOnly]=useViewState('LiveSales.requestsOnly',false),[allRequests,setAllRequests]=useViewState('LiveSales.allRequests',false);
   const [selected,setSelected]=useViewState<string|null>('LiveSales.selected',null);
   const [checked,setChecked]=useState<Record<string,WorkflowSale>>({});
   const [review,setReview]=useState<{day:string;sales:WorkflowSale[]}|null>(null),[action,setAction]=useState<VoidAction|null>(null);
+  const [linkedIds,setLinkedIds]=useViewState<string[]|null>('LiveSales.linkedIds',null);
+  const [appliedContext,setAppliedContext]=useState<number>();
+  useEffect(()=>{if(!context)return;setSelected(context.selected??null);setDay(context.date??'');setSearch(context.search??'');setAllRequests(context.allReviews===true);setRequestsOnly(context.requestsOnly===true);setLinkedIds(context.linkedOnly?context.orderIds??[]:null);setStatus('All statuses');setMethod('All payments');setChecked({});setAppliedContext(context.token);},[context]);
   const recoveryKey=`vertwell-sales-workflow:${scope.split(':')[0]}`;
   const [pending,setPending]=useState<WorkflowCommand|null>(null),[recovery,setRecovery]=useState(false),[recoveryError,setRecoveryError]=useState('');
   const [results,setResults]=useState<WorkflowResult|null>(null),[error,setError]=useState(''),[working,setWorking]=useState(false);
@@ -113,11 +126,18 @@ export default function LiveSales({scope,role,actor,active,dashboard,onAudit,onB
     }finally{busy.current=false;setWorking(false);onBusyChange(false);}
   }
   const data=(resource.data?.items??[]).filter(s=>manager||s.businessDate===businessDate()),chosen=Object.values(checked);
-  const filtered=data.filter(s=>(!day||s.businessDate===day)&&(status==='All statuses'||s.status===status)&&(method==='All payments'||s.method===method)&&
+  const filtered=data.filter(s=>(!day||s.businessDate===day)&&(!linkedIds||linkedIds.includes(s.id))&&(status==='All statuses'||s.status===status)&&(method==='All payments'||s.method===method)&&
     (!requestsOnly||pendingRequest(s))&&(!allRequests||pendingRequest(s)||awaiting(s))&&`${s.id} ${s.orderNumber} ${s.cashierName} ${s.reference??''} ${s.receipt?.lines.map(l=>`${l.name} ${l.sku}`).join(' ')??''}`.toLowerCase().includes(search.trim().toLowerCase()));
-  const paging=usePagination(filtered,JSON.stringify([day,status,method,search,requestsOnly,allRequests]));
+  const paging=usePagination(filtered,JSON.stringify([day,status,method,search,requestsOnly,allRequests,linkedIds]));
+  const selectedPage=useRef<number|undefined>(undefined);
+  const selectAll=useRef<HTMLInputElement>(null);
+  useEffect(()=>{
+    if(!context?.selected||appliedContext!==context.token||!resource.data||selectedPage.current===context.token)return;
+    const index=filtered.findIndex(s=>s.id===context.selected);if(index>=0){paging.setPage(Math.floor(index/paging.pageSize)+1);selectedPage.current=context.token;}
+  },[context,appliedContext,resource.data,filtered,paging]);
   const eligible=paging.records.filter(s=>s.status!=='Voided'),hidden=chosen.filter(s=>!paging.records.some(p=>p.id===s.id));
-  const sale=data.find(s=>s.id===selected),dates=[...new Set(data.filter(s=>awaiting(s)&&(!day||s.businessDate===day)).map(s=>s.businessDate))].sort().reverse();
+  useEffect(()=>{if(selectAll.current)selectAll.current.indeterminate=eligible.some(s=>Boolean(checked[s.id]))&&!eligible.every(s=>Boolean(checked[s.id]));});
+  const sale=chosen.length>=2?undefined:chosen.length===1?chosen[0]:data.find(s=>s.id===selected);
   async function confirmReview(input:DailyReview) {
     if(!review)throw new Error('Reopen the receipt set before confirming.');
     await save({operationId:input.id,kind:'review.confirm',targets:review.sales.map(workflowTarget),review:{date:input.date,
@@ -125,45 +145,36 @@ export default function LiveSales({scope,role,actor,active,dashboard,onAudit,onB
     return true;
   }
   return <div className="live-sales" hidden={!active}>
-    <div className="page-heading"><div><h1>{dashboard?'Daily Sales Review':manager?'Audit Trail':'Today’s Sales History'}</h1><p className="subtitle">{manager?'Recorded sales, receipt reviews and every void request/decision.':'Your own recorded sales and requests for today.'}</p></div>
-      <button className="secondary" disabled={working||Boolean(review||action)||recovery} onClick={resource.reload}>Refresh sales history</button></div>
     {resource.status==='loading'&&<p role="status">Loading saved sales history…</p>}
-    {resource.error&&<p className="error" role="alert">{resource.error.message} Your existing view is retained; refresh before making a new decision.</p>}
+    {resource.error&&<div className="error" role="alert"><p>{resource.error.message} Your existing view is retained.</p><button className="secondary" onClick={resource.reload}>Retry loading sales</button></div>}
     {error&&<p className="error" role="alert">{error}</p>}
     {results&&<section className="inventory-editor-note" aria-label="Sales action result" role="status"><h2>Saved action result{results.replayed?' · reconciled retry':''}</h2>
       <p>{results.results.filter(r=>!['stale','ineligible'].includes(r.outcome)).length} saved · {results.results.filter(r=>['stale','ineligible'].includes(r.outcome)).length} skipped</p>
       <ul>{results.results.map(r=><li key={r.saleId}>{data.find(s=>s.id===r.saleId)?.orderNumber??r.saleId}: {r.outcome}{['stale','ineligible'].includes(r.outcome)?' — refresh, review and reselect before another action.':''}</li>)}</ul></section>}
-    {manager&&<section className="audit-daily-reviews" aria-label="Daily Sales Review queue"><h2>Daily Sales Review</h2><p>Stock was consumed at checkout. Owner confirmation never deducts it again.</p>
-      {dates.map(date=>{const orders=data.filter(s=>awaiting(s)&&s.businessDate===date);return <article className="daily-review-card attention-required" key={date}><div><strong>{date}</strong><p>{orders.length} awaiting Owner review · {php(sum(orders))}</p></div>
-        <button className="secondary" disabled={working||recovery||resource.status!=='ready'} onClick={()=>setReview({day:date,sales:orders.slice(0,500)})}>{orders.length>500?'Review first 500 receipts':'Review daily sales'}</button></article>;})}
-      {resource.data&&!dates.length&&<p className="empty-state">No sales awaiting Owner review{day?` for ${day}`:''}.</p>}
-      {dashboard&&<><p>{data.filter(s=>pendingRequest(s)).length} pending void requests</p><button className="primary" onClick={()=>{setAllRequests(true);setRequestsOnly(false);onAudit();}}>View all requests</button></>}
-    </section>}
-    {!dashboard&&active&&<section className="history-layout"><div className="history-main"><div className="audit-filters">
-      <SearchField label="Search transactions" value={search} onChange={setSearch} placeholder="Search receipt, cashier, item or reference"/>
-      {manager&&<DateField label="Business date" value={day} onChange={setDay} max={businessDate()}/>}
-      <label>Status<select value={status} onChange={e=>setStatus(e.target.value)}>{['All statuses','Pending','Completed','Voided'].map(v=><option key={v}>{v}</option>)}</select></label>
-      <label>Payment<select value={method} onChange={e=>setMethod(e.target.value)}>{['All payments','Cash','GCash'].map(v=><option key={v}>{v}</option>)}</select></label>
-      <button className="secondary" aria-pressed={requestsOnly} onClick={()=>{setRequestsOnly(!requestsOnly);setAllRequests(false);}}>Void requests ({data.filter(s=>pendingRequest(s)).length})</button>
+    {dashboard&&dashboardContent?.(date=>{const orders=data.filter(s=>awaiting(s)&&s.businessDate===date);if(!working&&!recovery&&resource.status==='ready'&&orders.length)setReview({day:date,sales:orders.slice(0,500)});})}
+
+    {!dashboard&&active&&<section className="history-layout"><div className="history-main"><SalesHistoryHeader role={role} orders={data.length} pending={data.filter(s=>s.status==='Pending').length} requests={data.filter(s=>Boolean(pendingRequest(s))).length} search={search} date={day} onSearch={setSearch} onDate={setDay} maxDate={businessDate()}/><div className="audit-filters">
+      <label>Order status<select aria-label="Order status" value={status} onChange={e=>setStatus(e.target.value)}>{['All statuses','Pending','Completed','Voided'].map(v=><option key={v}>{v}</option>)}</select></label>
+      <label>Payment method<select aria-label="Payment method" value={method} onChange={e=>setMethod(e.target.value)}>{['All payments','Cash','GCash'].map(v=><option key={v}>{v}</option>)}</select></label>
+      {manager&&<button className={`request-filter secondary ${data.some(s=>pendingRequest(s))?'attention-required':''}`} aria-pressed={requestsOnly} onClick={()=>{setRequestsOnly(!requestsOnly);setAllRequests(false);}}>{requestsOnly?'Show all sales':`Void requests (${data.filter(s=>pendingRequest(s)).length})`}</button>}
       {manager&&<button className="secondary" aria-pressed={allRequests} onClick={()=>{setAllRequests(!allRequests);setRequestsOnly(false);}}>All review requests</button>}
-    </div><p className="filter-summary" role="status">{filtered.length} matching orders · {day||(manager?'All dates':'Current day')}
-      <button className="secondary" onClick={()=>{setSearch('');setDay('');setStatus('All statuses');setMethod('All payments');setRequestsOnly(false);setAllRequests(false);}}>Clear filters</button></p>
-    {manager&&<div className="bulk-toolbar"><label><input type="checkbox" aria-label="Select all eligible orders on this page" disabled={!eligible.length} checked={eligible.length>0&&eligible.every(s=>Boolean(checked[s.id]))} onChange={e=>setChecked(current=>{
+    </div><div className="filter-summary" role="status">{filtered.length} matching orders · {day||(manager?'All dates':'Current day')} · {allRequests?'Daily sales and void requests':requestsOnly?'Pending void requests':status} · {method}{search.trim()?` · Search: “${search.trim()}”`:''}{linkedIds?` · ${linkedIds.length} linked orders`:''}
+      {(day||search||linkedIds||requestsOnly||allRequests||status!=='All statuses'||method!=='All payments')&&<button className="secondary" onClick={()=>{setSearch('');setDay('');setLinkedIds(null);setStatus('All statuses');setMethod('All payments');setRequestsOnly(false);setAllRequests(false);}}>Clear filters</button>}</div>
+    {manager&&<DailyReviewQueue sales={data.map(s=>({id:s.id,time:s.occurredAt,total:displayDecimal(s.total,2),status:s.status,reviewState:s.reviewState,paymentState:'Received',fulfilmentState:'Fulfilled'} as Sale))} date={day} disabled={working||recovery||resource.status!=='ready'} onReview={date=>setReview({day:date,sales:data.filter(s=>awaiting(s)&&s.businessDate===date).slice(0,500)})}/>}
+    {manager&&<div className="bulk-toolbar"><label><input ref={selectAll} type="checkbox" aria-label="Select all eligible orders on this page" disabled={!eligible.length} checked={eligible.length>0&&eligible.every(s=>Boolean(checked[s.id]))} onChange={e=>setChecked(current=>{
       const next={...current};for(const s of eligible){if(e.target.checked)next[s.id]=s;else delete next[s.id];}return next;
     })}/>Select all eligible orders on this page</label><p>{chosen.length} selected · {php(sum(chosen))}</p>
       {hidden.length>0&&<p className="selection-notice">{hidden.length} selected orders are outside the current page or filters. IDs: {hidden.map(s=>s.orderNumber).join(', ')}. <button className="secondary" onClick={()=>setChecked(Object.fromEntries(chosen.filter(s=>paging.records.some(p=>p.id===s.id)).map(s=>[s.id,s])))}>Keep visible selection only</button></p>}
       <button className="secondary" disabled={!chosen.length} onClick={()=>setChecked({})}>Clear selection</button><button className="primary" disabled={!chosen.length||chosen.length>500||working||recovery||resource.status!=='ready'} onClick={()=>setAction({kind:'sale.void',sales:chosen})}>Bulk Void</button>{chosen.length>500&&<p>Choose at most 500 receipts per action.</p>}</div>}
-    <div className="table-wrap" role="region" aria-label={manager?'Audit transactions; scroll to see all columns':'Today’s transactions; scroll to see all columns'} tabIndex={0}><table className="history-table"><thead><tr>{manager&&<th scope="col">Select</th>}{['Date & Time','Order ID','Items','Status','Cashier'].map(t=><th scope="col" key={t}>{t}</th>)}</tr></thead><tbody>
-      {paging.records.map(s=><tr key={s.id} className={selected===s.id||checked[s.id]?'active-row':''}>
-        {manager&&<td><input type="checkbox" aria-label={`Select order ${s.orderNumber}`} disabled={s.status==='Voided'} checked={Boolean(checked[s.id])} onChange={e=>setChecked(current=>{const next={...current};if(e.target.checked)next[s.id]=s;else delete next[s.id];return next;})}/></td>}
-        <td>{manilaTime(s.occurredAt)}</td><td><button className="order-link" onClick={()=>setSelected(selected===s.id?null:s.id)} aria-label={`View order ${s.orderNumber}`}>{s.orderNumber}</button></td>
-        <td>{s.receipt?.lines.map((l,i)=><span className="sale-item" key={i}>{l.quantity}× {l.name}</span>)??'Historical receipt'}</td>
-        <td><span className={`audit-sale-status ${s.status.toLowerCase()}`}>{s.status}</span>{pendingRequest(s)&&<small className="request-status">Void requested</small>}</td><td>{s.cashierName}<small className="audit-cashier-role">{s.cashierRole}</small></td></tr>)}
-    </tbody></table>{resource.data&&!filtered.length&&<p className="empty-state">No transactions match this view.</p>}</div><Pagination label="Transactions" {...paging}/></div>
-    <aside className="order-panel details-panel"><h2>Order Details</h2><div className="sale-details" role="region" aria-label="Order items, payment and review timeline" tabIndex={sale?0:undefined}>
-      {!sale?<p className="empty-state">Select a transaction to see the recorded receipt and full event history.</p>:<><p className="detail-id"><strong>{sale.orderNumber}</strong></p><p>{sale.cashierName} ({sale.cashierRole}) · {manilaTime(sale.occurredAt)}</p><p>{sale.status} · {sale.reviewState}</p>
-        {sale.receipt?.lines.map((line,i)=><div className="detail-line" key={i}><span>{line.quantity}× {line.name}<small>{line.sku}</small>{line.modifiers.map(m=><small key={m.id}>{m.name} · {php(m.price)}</small>)}{line.components.length>0&&<details><summary>Included products</summary><BundleContents items={line.components}/></details>}</span><strong>{php((displayDecimal(line.unitPrice,2)*line.quantity).toFixed(2))}</strong></div>)}
-        {!sale.receipt&&<p>Purchased configuration details are unavailable for this historical receipt.</p>}<p>Total: <strong>{php(sale.total)}</strong> · {sale.method}</p>
+    <TransactionTable manager={manager} selected={selected} checked={Object.keys(checked)} onSelect={id=>{setChecked({});setSelected(!chosen.length&&selected===id?null:id);}} onCheck={(id,value)=>setChecked(current=>{const next={...current};if(value){const sale=data.find(s=>s.id===id);if(sale)next[id]=sale;}else delete next[id];return next;})}
+      rows={paging.records.map(s=>({id:s.id,label:s.orderNumber,time:s.occurredAt,cashier:s.cashierName,cashierRole:s.cashierRole,status:s.status,request:Boolean(pendingRequest(s)),items:s.receipt?.lines.map((line,i)=><span className="sale-item" key={i}>•{line.quantity}× {line.name}</span>)??'Historical receipt'}))}
+      empty={resource.data&&<p className="empty-state">No transactions match this view.</p>}/><Pagination label="Transactions" {...paging}/></div>
+    <aside className="order-panel details-panel"><h2>{chosen.length>=2?'Selection summary':'Order Details'}</h2><div className="sale-details" role="region" aria-label="Order items, payment and review timeline" tabIndex={sale?0:undefined}>
+      {chosen.length>=2&&<SelectionSummary count={chosen.length} total={php(sum(chosen))} cash={php(sum(chosen.filter(s=>s.method==='Cash')))} gcash={php(sum(chosen.filter(s=>s.method==='GCash')))} pending={chosen.filter(s=>s.status==='Pending').length} completed={chosen.filter(s=>s.status==='Completed').length} hidden={hidden.map(s=>s.orderNumber)}/>}
+      {sale&&!filtered.some(s=>s.id===sale.id)&&<p className="selected-order-notice" role="status">This order is outside the current filters. Its details remain open for reference.</p>}
+      {!sale?chosen.length<2&&<div className="cart-empty"><strong>Select a transaction</strong><p>Open an order to review its items, payment, and audit details.</p></div>:<><OrderReceiptDetails id={sale.orderNumber} cashier={sale.cashierName} role={sale.cashierRole} method={sale.method} time={manilaTime(sale.occurredAt)} status={sale.status} total={php(sale.total)} review={sale.reviewState}
+        missing={!sale.receipt?'Purchased configuration details are unavailable for this historical receipt.':undefined}
+        lines={sale.receipt?.lines.map((line,i)=>({key:i,name:line.name,quantity:line.quantity,amount:php((displayDecimal(line.unitPrice,2)*line.quantity).toFixed(2)),details:<><small className="receipt-modifier">SKU: {line.sku}</small>{line.modifiers.map(m=><small className="receipt-modifier" key={m.id}>{m.name} · +{php(m.price)}</small>)}{line.components.length>0&&<small className="receipt-modifier">Includes: <BundleContents items={line.components}/></small>}</>}))}/>
         {sale.reference&&<p>GCash reference: {sale.reference}. Recorded evidence; provider verification is separate.</p>}
         <p>{sale.stockCommitted===true?'Recorded stock consumption is retained.':sale.stockCommitted===false?'No stock deduction was recorded.':'Historical stock handling was not recorded.'} Review and void actions do not deduct or return stock. Voids do not refund payments.</p>
         {sale.review&&<section aria-label="Recorded Daily Sales Review"><h3>Daily Sales Review</h3><p>{sale.review.owner} ({sale.review.role}) · {manilaTime(sale.review.time)} · {sale.review.outcome}</p>
@@ -177,9 +188,10 @@ export default function LiveSales({scope,role,actor,active,dashboard,onAudit,onB
         <section className="audit-timeline" aria-label="Order review timeline"><h3>Order review timeline</h3><ol>{sale.events.map(e=><li key={e.id}><strong>{e.event_type}</strong><p>{e.actor_name} ({e.actor_role}) · {manilaTime(e.occurred_at)}</p><p>{e.reason}</p><small>Operation: {e.operation_id}</small></li>)}</ol></section>
       </>}
     </div><div className="details-footer">
-      {sale&&sale.status!=='Voided'&&<><button className="primary" disabled={working||recovery||resource.status!=='ready'||(!manager&&Boolean(pendingRequest(sale)))} onClick={()=>setAction({kind:manager?(pendingRequest(sale)?'void.decide':'sale.void'):'void.request',sales:[sale],approved:manager?true:undefined})}>
-        {manager?(pendingRequest(sale)?'Approve Void':'VOID'):(pendingRequest(sale)?'Request Pending':'Request Void')}</button>
-        {manager&&pendingRequest(sale)&&<button className="secondary" disabled={working||recovery||resource.status!=='ready'} onClick={()=>setAction({kind:'void.decide',sales:[sale],approved:false})}>Reject Request</button>}</>}
+      {role==='Staff'&&<p className="staff-payment-note">Void requests need Owner or Admin approval. The original sale stays in your history.</p>}
+      <button className="primary" disabled={!sale||sale.status==='Voided'||working||recovery||resource.status!=='ready'||(!manager&&Boolean(sale&&pendingRequest(sale)))} onClick={()=>{if(sale)setAction({kind:manager?(pendingRequest(sale)?'void.decide':'sale.void'):'void.request',sales:[sale],approved:manager?true:undefined});}}>
+        {manager?(sale&&pendingRequest(sale)?'Approve Void':'VOID'):(sale&&pendingRequest(sale)?'Request Pending':'Request Void')}</button>
+      {manager&&sale&&pendingRequest(sale)&&<button className="secondary reject-void" disabled={working||recovery||resource.status!=='ready'} onClick={()=>setAction({kind:'void.decide',sales:[sale],approved:false})}>Reject Request</button>}
     </div></aside></section>}
     {review&&<DailySalesReview persistent date={review.day} role={role} owner={actor} onDirtyChange={reportDirty} onClose={()=>setReview(null)} onConfirm={confirmReview}
       sales={review.sales.map(s=>({id:s.id,time:s.occurredAt,cashier:s.cashierName,cashierRole:s.cashierRole as Role,total:displayDecimal(s.total,2),status:s.status,reviewState:s.reviewState,method:s.method,reference:s.reference??undefined,lines:[]} as Sale))}/>}

@@ -161,11 +161,15 @@ export const workflowScenarios:{name:string;run(db:DB):Promise<void>}[]=[
   }},
   {name:'P7 injected final audit failure rolls back all review/cash/link/status/operation writes',async run(db){
     const f=await workflowFixture(db),sale=await f.buy(),command=await f.review([sale.saleId],{countedCash:'24',openingCash:'10'}),before=await f.read();
-    await db.query('reset role');await db.query(`create function private.p7_fail() returns trigger language plpgsql as $$begin if new.event_type='Daily review recorded' then raise exception 'P7 injected failure';end if;return new;end$$`);
+    await db.query('reset role');
+    const tables=['daily_sales_reviews','daily_sales_review_items','cash_movements','private.sales_workflow_operations'];
+    const counts=new Map<string,number>();
+    for(const table of tables)counts.set(table,await checkoutValue(db,`select count(*)::int as value from ${table}`));
+    await db.query(`create function private.p7_fail() returns trigger language plpgsql as $$begin if new.event_type='Daily review recorded' then raise exception 'P7 injected failure';end if;return new;end$$`);
     await db.query('create trigger p7_fail before insert on public.audit_events for each row execute function private.p7_fail()');
     await checkoutAs(db,f.actors.owner);await workflowRejects(db,()=>f.execute(command));assert.deepEqual(await f.read(),before);
-    await db.query('reset role');for(const table of ['daily_sales_reviews','daily_sales_review_items','cash_movements','private.sales_workflow_operations'])
-      assert.equal(await checkoutValue(db,`select count(*)::int as value from ${table}`),0);
+    await db.query('reset role');for(const table of tables)
+      assert.equal(await checkoutValue(db,`select count(*)::int as value from ${table}`),counts.get(table),`${table}: preserve existing history`);
   }},
   {name:'P7 unexpected bulk failure rolls back every void, pending-request decision, audit and operation receipt',async run(db){
     const f=await workflowFixture(db),a=await f.buy(),b=await f.buy();await f.execute(await f.request(a.saleId));

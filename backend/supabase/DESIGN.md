@@ -42,7 +42,7 @@ denies reads/writes, including authenticated users; role policies come at P4.
 | Daily Sales Review | Review header plus explicit included-sale/receipt-verification rows. Expected/verified values, cash reconciliation, explanation and Owner snapshot survive later changes. Review never consumes stock again. |
 | Voids | Every request has a row; a partial unique index permits only one pending request per sale. Decision and audit events retain attribution. Voids neither restore stock nor imply a refund. |
 | Reports | Canonical stock ledger and purchased usage establish coverage. No opening movement means unknown earlier balance; never manufacture historical openings from current stock. Sale time is an instant; period stock balances cover full Manila days. |
-| Alerts | Owner-only settings persist threshold/window. Detection is derived, human-reviewed evidence; no automatic void or account sanction. Read markers/notification delivery are later scope. |
+| Alerts | Owner-only settings persist threshold/window. P9 stores in-app evidence/versions and per-account read markers in private tables for Owner/Admin. Detection requires human review; no automatic void or account sanction. See NOTIFICATIONS.md. |
 | Edited by / edited at | Protected P5 catalogue commands write audit actor snapshots against entity_type/entity_id in the same transaction; editors obtain the latest relevant actor and updated_at rather than accepting a caller's attribution. |
 
 The preview's legacy `code`, inferred stock kinds, demo IDs, blob image URLs and
@@ -183,8 +183,9 @@ The integer/numeric column types alone do not validate incoming JSON syntax.
   Authoritative pricing/rounding is finalized and verified at P6.
 - Historical importing requires documented coverage and actor/stock provenance;
   do not translate preview sample actors or illustrative receipts into real sales.
-- Read-marker lifetime and alert-delivery preferences need P9 scope. Settings
-  storage exists; notification delivery and automatic detection jobs do not.
+- P9 scope is in-app delivery for Owner/Admin. Read markers persist per account;
+  database events save detection evidence without a scheduled job. Email/browser
+  push remain outside this scope. See NOTIFICATIONS.md and HandsOff.md for acceptance.
 - Recipe/group/variant/bundle minimum completeness, modifier default constraints,
   fixed-option selection bounds and duplicate full bundle configurations must be
   enforced by P5 aggregate commands before any role can edit catalogue data.
