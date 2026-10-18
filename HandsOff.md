@@ -1,5 +1,93 @@
 # Vertwell handoff
 
+## Newest priority — frontend fixes for a separate new chat (October 19, 2026)
+
+**Status: recorded only; implementation, investigation and verification are pending for the new task.** The user explicitly requested preserving the full message without summarizing so their intent passes to the next chat. This update adds documentation only. It does not start these fixes, navigate any website, change application code or delete database transactions. Read the entire original message below before starting the new task.
+
+This is a new frontend-priority request, separate from FP1–FP6 below. Those Final Priorities remain waiting for the Project Manager's decision. The previous accepted application checkpoints remain historical evidence for their recorded source snapshots; they do not establish that the newly reported issues are fixed.
+
+### Website navigation and token-use rule — user's full wording
+
+Apply this rule to future work in this project. When a website needs manual navigation or details entered, give the user clear, easy-to-follow instructions to carry out those website steps. The user's full rule is preserved here and in the complete original message below:
+
+```text
+if the ai want to navigate in a specific website or want to input a details in a website DONT DO IT. instead you can give me instruction to do that instead so that you can only use all your Tokens for coding, because navigating a specific website the ai will use a lot of token just from moving the mouse so instead of the ai doing the navigation of mouse I can do it instead just give me instructions on what to do make sure it is easy to understand for me. Anything that may cause the AI to consume a lot of Token something like 20% consumption from one thing it do like navigating for example.
+```
+
+### Original frontend-priority request — verbatim, not summarized
+
+The original wording, links, formatting escapes and unfinished receipt points are retained. Do not silently complete or reinterpret the two unfinished receipt sentences; clarify those details with the user when that part of the new task is reached. Keep this full message intact when recording later progress.
+
+```text
+okay\
+I want you to add this in the Handsoff file a priority fixes for the Frontend, also when putting this in the handsoff file dont summarize it I want the intent to be in the message it is important that what I had in mind is passed on.
+this will be another Task and by putting this in the handsoff I will start the task in a new chat
+
+First of all add another rule&#x20;
+if the ai want to navigate in a specific website or want to input a details in a website DONT DO IT. instead you can give me instruction to do that instead so that you can only use all your Tokens for coding, because navigating a specific website the ai will use a lot of token just from moving the mouse so instead of the ai doing the navigation of mouse I can do it instead just give me instructions on what to do make sure it is easy to understand for me. Anything that may cause the AI to consume a lot of Token something like 20% consumption from one thing it do like navigating for example.
+
+okay here are the tasks
+
+\- more space for reading info: when there is an info message something like an information to explain certain part like explaining the calculation in Daily sales Review or the calculations in the Reports used ingredients table. Find an svg Icon that can be use like Info Icon for the user to click instead of a full text we can use Icon instead and it will show the details. also the details need spacing specially in the Daily sales review the info there need to be reconstruct into simpler words and easy for the user to understand.\
+\- hash the password: the password needs to be hidden it can be seen by just enabling the inspect in browser.\
+Don't put full name: after the real account logged in we can just use the Username of the Account to show in the - Navbar instead of Fullname the same with other data \
+\- Remove uid: the UID of the users can be seen when you enable the inspect browser\
+\- Pagination option should stay hidden if there is atleast no 2 or more page like if it is only page 1 its an industry standard that the pagination is hidden.\
+\- Fix Button alignments: this is located in the Inventory the action button of all table is not aligned we can all aligned it to the Right this includes the other tables so Products table's action column and Ingredient Table's action column is aligned. my take here is just align all the Remove button to the right and let the other buttons follow that alignment so even if there are other button with different sizes the Remove button is commonly used this one will be considered as aligned if all the remove button is aligned all through the other tables.\
+\- No zero quantity for the info: this is for adding Ingredient and Product it should not be able for the user to input 0 in quantity just add a validation that it should be more than the more than 1 also the quantity alert should be more than 1 as well\
+\- Need Validation for vat\
+\- Remove generate sku on frontend: instead of letting the user input the SKU let the system auto generate this so that the user wont be able to make 2 same Item but different SKU. so when the user input the same ingredient name or Product name with existing the user will be prompt saying there is already the same name of an item/stock existing the stock that you will be adding will be considered second batch for the existing one. Confirm or Cancel button for it.\
+\- Need attention notif should be on top: this is located on the Report Tab the need attention Table should be at top since this is needed for attention. \
+\- Receipt is for a day only: this is for the \
+\- Remove unknown phrase on receipt: there is\
+\- Arrange the latest to older on the table: in all table the order list of showing the items should be ascending sorted by the latest Stock that is added for example I add a new Item it will be placed on the top of the Row in a table since it is latest.
+\- so the [http://localhost:5173/](http://localhost:5173/) there should be a [http://localhost:5173/](http://localhost:5173/)Login right? I think it is called Webhook like when you are entering new page it will show in the URL a /{page} example /Login or /Dashboard something like that because it is not showing also since we run it on local now it only shows Localhost right? is there any way to rename it so that it wont be localhost into [https://HappyHentai-Vertwell/](https://HappyHentai-Vertwell/) something like that if we cant do that its fine we can keep the Localhost thingy.
+\- in the login part lets now remove the explore preview along with all the mock data inside it we no longer need the preview because we can use the database now and it is fully integrated we now gonna be free from mock data's and use the data from database
+\- in the Login our panelist asked to remove the "Two Shops one System" sentence so I think lets just change it or revert it back to what it was once only that sentence.
+\- can we remove all the sales made from database we gonna start new sales remove all the transaction made but dont remove the Account and the Stocks in the inventory.
+\- also in Daily sales Review when doing Daily Sales Review I should still be able to confirm review sales even if I check 1 or more than 2 transaction and the Expected cash receipts will be automatically calculate the expected cash base on what I check or selected transaction to review. also the "Expected Cash receipts: **₱414.40** · Verified net receipts: **₱0.00** · Difference: **-₱414.40**
+Expected GCash: **₱168.00** · Verified digital receipts: **₱0.00** · Difference: **-₱168.00"&#x20;**&#x74;his texts I want to reconstruct it so that the user may be able to easily understand what are these and also give spacing the texts look cramped.&#x20;
+\- in the audit trail hide the Daily Sales Review Panel if there is no Daily Sales Review only show it if there is any that requires Review.
+```
+
+### Additional tasks — follow-up message, verbatim (October 19, 2026)
+
+These two items extend the newest frontend-priority list above and remain recorded only, pending implementation in the new chat. Preserve the user's wording:
+
+```text
+add this in the list of task as well
+- in daily sales review the Review Notes on the buttom of the modal make it Optional,
+- as the Product and Ingredient there is Reason for stock change remove this Input box, but you can keep the Reason for stock change in Editing Ingredient or Product.
+```
+
+### Continuation for the new frontend-fixes chat
+
+```text
+Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo when the user opens the
+separate task and asks to begin these frontend fixes. Read this entire October 19
+request, including the full navigation/token-use rule, every original task line
+and the additional two-task follow-up message above. Do not replace the original
+requirements with a shortened summary.
+The new fixes are recorded only. No application, account, stock or sales data
+has been changed by this handoff update, and no new acceptance has been run.
+Use the existing database-integrated application and accepted checkpoints as
+context; do not fall back to the superseded October 4/5 preview-only baseline.
+The two unfinished receipt items require the user's missing detail when reached.
+The requested database sales/transaction reset is future work, not an action
+performed or triggered by documenting/reading this file. Preserve the explicit
+requirement to keep accounts and inventory stock when planning that work.
+Give the user easy website instructions instead of automating website navigation
+or detail entry, following the full rule above. Keep the public README unchanged
+unless the user explicitly requests its edit. Preserve existing local work,
+original handoff messages and immutable applied migrations.
+FP1–FP6 still require their own Project Manager decisions; this new frontend list
+does not start release work, Git operations, deployment or those Final Priorities.
+Record actual changes, clarification, checks and remaining work here as the new
+task progresses. Existing test counts are not verification of these new fixes.
+```
+
+## Previous accepted state and Final Priorities — preserved
+
 Updated October 19, 2026. This is the single handoff file. **FP means Final Priority. FP1–FP6 are recorded below and every one is WAITING FOR THE PROJECT MANAGER'S DECISION before any work starts. The Project Manager will decide whether each is done now or later; this documentation request authorizes none of them to begin.** **P1–P9 implementation remains complete within the agreed scope. P9A final current-system acceptance now passes one clean 276/276 browser run plus 160/160 root checks, typechecks, both builds and schema verification. P9B scoped hosted notification verification passes with the exact original read marker restored and all business/notification fingerprints unchanged. P10 technical-guide consistency and P12 disposable performance profiling are complete; P11 actual shop QR/payment trial is deferred at the user's choice and is carried forward as FP4.** These results do not establish unrestricted production readiness, native-PostgreSQL high-volume throughput or a new committed hosted business-event acceptance. All seventeen migrations are applied/verified on DualCounter `izdemgzdywtxhvgvsian` and remain immutable. Preserve the established frontend, manual GCash/sample QR, enabled checkout, retired accounts/history, accounts/credentials/roles/settings, local work and every original message. The public README is unchanged. The accepted follow-up work began at the user's clean commit `5328679` (`Completed P1-P9 Priorities`); that checkpoint performed no new commit, push, PR, GitHub save or deployment. This October 19 request changes only HandsOff.md. Older pending/payment-API/next-priority statements are historical wherever they disagree with the current checkpoint, chosen in-app-only scope and Project Manager decision gate.
 
 ## README presentation rule — October 18, 2026
