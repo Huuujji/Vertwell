@@ -10,7 +10,7 @@ import { testRealtime } from './test-realtime.js';
 // Deliberately no dotenv, developmentClient or hosted Auth/API imports.
 // Use a new LOCAL cluster/database, never the shop's Supabase database.
 if (process.argv.includes('--help')) {
-  console.log('Set VERTWELL_FP5_DATABASE_URL to a fresh localhost PostgreSQL database named vertwell_fp5_<name>. Run with --confirm-disposable. See supabase/RELEASE_READINESS.md.');
+  console.log('Set VERTWELL_FP5_DATABASE_URL to a fresh localhost PostgreSQL database named vertwell_fp5_<name>. Run with --confirm-disposable. See memory/backend/supabase/RELEASE_READINESS.md outside the source repository.');
   process.exit(0);
 }
 const raw = process.env.VERTWELL_FP5_DATABASE_URL;

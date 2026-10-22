@@ -33,10 +33,10 @@ try {
     output.ownerProbe = ready.ok && result.status === 'ok' && valid && checks.authentication === 'passed' && checks.database === 'passed' && checks.storage === 'passed' ? 'passed' : 'failed';
     if (ready.status === 401) output.action = 'Refresh the private Owner session token; do not treat an expired probe credential as a database outage.';
     else if (ready.status === 403) output.action = 'Use a current active Owner; do not widen account permissions.';
-    else if (!ready.ok) output.action = 'Follow OPERATIONS.md using the request ID and time; do not automatically retry a business command.';
+    else if (!ready.ok) output.action = 'Follow memory/backend/supabase/OPERATIONS.md outside the source repository using the request ID and time; do not automatically retry a business command.';
     if (output.liveness !== 'passed' || output.ownerProbe !== 'passed') process.exitCode = 1;
   }
 } catch {
-  output.probe = 'unavailable'; output.action = 'Check API/network availability and follow OPERATIONS.md. No business command was sent.'; process.exitCode = 1;
+  output.probe = 'unavailable'; output.action = 'Check API/network availability and follow memory/backend/supabase/OPERATIONS.md outside the source repository. No business command was sent.'; process.exitCode = 1;
 }
 console.log(JSON.stringify(output, null, 2));

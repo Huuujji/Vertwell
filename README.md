@@ -73,7 +73,7 @@ This project is organized as a **monorepo managed with npm workspaces**, contain
 ├── api/                   # Vercel API entry point
 ├── package.json           # Shared npm workspace commands
 ├── vercel.json            # Unified frontend/API hosting configuration
-└── HandsOff.md            # Development context and task history
+└── README.md              # Public project introduction
 ```
 
 Use the exact `Frontend` capitalization on case-sensitive systems and in hosting configuration.
@@ -110,7 +110,7 @@ Use the exact `Frontend` capitalization on case-sensitive systems and in hosting
    Copy-Item Frontend/.env.example Frontend/.env
    ```
 
-   Configure the Supabase connection values using the [database setup guide](backend/supabase/README.md) and [authentication guide](backend/supabase/AUTHENTICATION.md). Initialize the required database schema and account access before signing in. Secret keys belong only on the backend; frontend environment variables must contain publishable values only.
+   Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `Frontend/.env`, and `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and the server-only `SUPABASE_SECRET_KEY` in `backend/.env`. Coordinate database initialization and authorized account access with the project maintainer before signing in. Keep secret keys on the backend; frontend variables must contain publishable values only.
 
 4. Start the frontend and backend development servers:
 
@@ -148,12 +148,4 @@ Use the exact `Frontend` capitalization on case-sensitive systems and in hosting
 
 3. Review the diff, keep environment secrets and generated artifacts out of commits, and open a Pull Request against the team-agreed target branch for code review.
 
-4. Record implementation progress and verification results in [HandsOff.md](HandsOff.md). Keep this README focused on the public project introduction; edit it only when the Project Manager explicitly requests a README change.
-
-## Technical Documentation
-
-- [Database Setup & Design](backend/supabase/README.md) · [Schema Design](backend/supabase/DESIGN.md)
-- [Authentication](backend/supabase/AUTHENTICATION.md) · [Role Permissions](backend/supabase/AUTHORIZATION.md)
-- [Inventory & Accounts](backend/supabase/CRUD.md) · [Checkout](backend/supabase/CHECKOUT.md)
-- [Sales Workflows](backend/supabase/SALES_WORKFLOWS.md) · [Reports](backend/supabase/REPORTS.md)
-- [Live Updates](backend/supabase/LIVE_UPDATES.md) · [In-App Notifications](backend/supabase/NOTIFICATIONS.md)
+4. Keep internal project notes and verification evidence in the team's separate `memory` folder outside this repository. Keep this README focused on the public project introduction; edit it only when the Project Manager explicitly requests a README change.
