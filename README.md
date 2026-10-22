@@ -1,152 +1,159 @@
-<p align="center">
-  <img src="Frontend/public/assets/be809.png" alt="Happy Hentie Hobbies logo" width="150">
-</p>
+# DualCounter: Inventory & Sales Management System
 
-<h1 align="center">Vertwell</h1>
+DualCounter is a web application developed by **Vertwell** for **Happy Hentie Café & Hobby Shop**. The platform brings café operations and hobby retail into one workspace, connecting inventory, point of sale, daily sales review, and business reporting.
 
-<p align="center">
-  <strong>DualCounter: Inventory &amp; Sales Management System</strong><br>
-  Two shops, one system.
-</p>
-
-<p align="center">System Fundamentals Project · BSCS 3A</p>
-
----
-
-## About the Project
-
-DualCounter is a web application developed by the Vertwell team for **Happy Hentie Café & Hobby Shop**. It brings café operations and hobby retail into one workspace, connecting product inventory, point of sale, daily sales review, and business reports.
-
-The system supports Food, Beverage, and Hobby products, with separate tools for Owners, Admins, and Staff. From preparing a drink with ingredient-based recipes to selling retail items and bundles, each sale stays connected to the stock it uses.
-
-## Features
-
-| Workspace | What it offers |
-| :--- | :--- |
-| **Dashboard** | Sales overview, stock attention, Daily Sales Review, and saved in-app alerts for pending void requests and potentially repeated sales. |
-| **Inventory** | Products, ingredients, receipt batches, expiry tracking, stock receiving, and stock adjustments. Supports recipes, stocked products, variants, bundles, and reusable modifier groups. |
-| **Point of Sale** | Product customization, discounts, stock availability checks, Cash and manual GCash payment recording, and itemized receipts. |
-| **Audit Trail** | Recorded sales, review history, void requests and decisions, and actor attribution. |
-| **Reports** | Sales and inventory usage reports, stock balances, date filters, CSV/PDF downloads, and printing from the same PDF layout. |
-| **Users** | Managed accounts with Owner, Admin, and Staff access, account activation controls, and password recovery. |
-
-The interface adapts to desktop, tablet, and phone screens. Saved workspaces receive private automatic updates while retaining active drafts, cart contents, and filters.
-
-### Roles and Access
-
-| Role | Main responsibilities |
-| :--- | :--- |
-| **Owner** | Manage the business workspace and all account roles, confirm Daily Sales Reviews, and configure alert settings. |
-| **Admin** | Manage inventory, checkout, reports, void requests and decisions, and Staff accounts. Daily Sales Review confirmation remains Owner-only. |
-| **Staff** | Process checkout, view their own current-day sales, and submit eligible void requests. |
-
-### Payments and Stock
-
-Checkout records purchased items and deducts usable stock together. Recipes use ingredients, stocked products and variants use their linked SKU, and bundles use their component stock. Expired or unsellable stock is excluded from checkout availability.
-
-GCash uses a **manual QR and reference-number workflow**: the cashier checks the payment and records its reference. The included QR is a sample to be replaced with the shop’s actual QR before use. Payment-provider integration is not part of this workflow.
-
-## Team Members
-
-| Name | Role / Focus Area |
-| :--- | :--- |
-| **Aquino** | Project Manager / Research Developer / Quality Assurance |
-| **Alba** | Lead Backend Developer / Frontend Developer |
-| **Santiago** | Lead Frontend Developer / UI/UX Designer |
-| **Mejia** | Backend Developer / Research Developer / Database Manager |
-| **Yoingco** | Frontend Developer / UI/UX Designer |
+**System Fundamentals Project · BSCS 3A**
 
 ## Tech Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | React, Vite, TypeScript, CSS |
-| **Backend** | Node.js, Express.js, TypeScript |
-| **Database** | PostgreSQL through Supabase |
-| **Authentication & Storage** | Supabase Auth and private Supabase Storage |
-| **Automatic Updates** | Supabase Realtime private WebSocket channels |
-| **PDF Reports** | jsPDF |
-| **Testing** | Playwright, Node.js test runner, PGlite |
-| **Deployment Configuration** | Vercel, with separate frontend and backend projects |
+### Core
+![TypeScript](https://img.shields.io/badge/TYPESCRIPT-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/NODE.JS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 
-## Getting Started
+### Web App
+![React](https://img.shields.io/badge/REACT-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/VITE-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS-663399?style=for-the-badge&logo=css&logoColor=white)
 
-### Requirements
+### Backend & Real-Time
+![Express.js](https://img.shields.io/badge/EXPRESS.JS-000000?style=for-the-badge&logo=express&logoColor=white)
+![Supabase Realtime](https://img.shields.io/badge/SUPABASE_REALTIME-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-- Node.js **24.x** and npm.
-- A configured Supabase project for saved accounts and business data. The sample preview can run without Supabase credentials.
+### Database, Authentication & Storage
+![PostgreSQL](https://img.shields.io/badge/POSTGRESQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Supabase Auth](https://img.shields.io/badge/SUPABASE_AUTH-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Supabase Storage](https://img.shields.io/badge/SUPABASE_STORAGE-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-### Run Locally
+### Reporting & Testing
+![jsPDF](https://img.shields.io/badge/JSPDF-EF4444?style=for-the-badge)
+![Playwright](https://img.shields.io/badge/PLAYWRIGHT-2EAD33?style=for-the-badge)
+![PGlite](https://img.shields.io/badge/PGLITE-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 
-From the repository root, install the dependencies:
+### Tooling
+![Git](https://img.shields.io/badge/GIT-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GITHUB-181717?style=for-the-badge&logo=github&logoColor=white)
+![Figma](https://img.shields.io/badge/FIGMA-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
+![npm Workspaces](https://img.shields.io/badge/NPM_WORKSPACES-CB3837?style=for-the-badge&logo=npm&logoColor=white)
 
-```powershell
-npm install
-```
+### Hosting Target
+![Vercel](https://img.shields.io/badge/VERCEL-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-For a new checkout, create the local environment files from the provided examples. Keep existing environment files if you already configured the project.
+The repository includes a single-project Vercel configuration for the frontend and API under one origin.
 
-```powershell
-Copy-Item backend/.env.example backend/.env
-Copy-Item Frontend/.env.example Frontend/.env
-```
+## System Features
 
-To use real accounts and saved data, configure the environment values and follow the [database setup guide](backend/supabase/README.md) and [authentication guide](backend/supabase/AUTHENTICATION.md). Keep secret keys on the backend; only publishable keys belong in frontend variables.
+- **Unified Dashboard:** Sales overview, stock attention, Daily Sales Review, and actionable alerts for Owners and Admins.
+- **Inventory Management:** Product and ingredient records, stock receiving, receipt batches, expiry tracking, stock adjustments, and archival.
+- **Flexible Stock Models:** Ingredient-based recipes, stocked products, SKU variants, bundles, and reusable modifier groups for Food, Beverage, and Hobby products.
+- **Stock-Aware Point of Sale:** Product customization, discounts, usable-stock checks, atomic checkout, and recorded stock consumption linked to each sale.
+- **Manual GCash & Cash Payments:** Cashier-verified payment recording, GCash QR/reference entry, and itemized receipts. The bundled GCash QR is a sample to be replaced with the shop-approved QR before use.
+- **Sales Review & Audit Trail:** Owner confirmation of Daily Sales Reviews, void requests and decisions, recorded actor attribution, and preserved transaction history.
+- **Reports & Exports:** Date-filtered sales and inventory usage reports, stock balances, CSV downloads, and matching PDF download/print layouts.
+- **Role-Based Access Control:** Owner, Admin, and Staff permissions with protected account management and password recovery. Staff access is limited to checkout and their own current-day sales workflows.
+- **Saved In-App Notifications:** Persistent alerts and per-account read status for Owners and Admins, delivered through private automatic updates.
+- **Responsive Interface:** Desktop, tablet, and phone layouts with shared navigation, accessible controls, and protection for unsaved drafts.
 
-Start both applications:
+## Monorepo Architecture
 
-```powershell
-npm run dev
-```
-
-| Application | Local address |
-| :--- | :--- |
-| Frontend | [localhost:5173](http://localhost:5173) |
-| Backend | [localhost:3001](http://localhost:3001) |
-
-For a frontend-only demonstration, run `npm run dev:frontend`, select a **Preview role** and **Preview person** on the login screen, then choose **Open preview**. No password is needed. Preview data is separate from saved business records and resets when the page is refreshed.
-
-### Development Commands
-
-| Command | Purpose |
-| :--- | :--- |
-| `npm run dev` | Run the frontend and backend together. |
-| `npm run dev:frontend` | Run the frontend only. |
-| `npm run dev:backend` | Run the backend only. |
-| `npm run typecheck` | Check frontend and backend TypeScript. |
-| `npm test` | Run backend, database, and frontend unit tests. |
-| `npm run build` | Build both applications. |
-| `npm run test:e2e --workspace Frontend` | Run frontend browser tests. |
-
-## Repository Structure
+This project is organized as a **monorepo managed with npm workspaces**, containing a React frontend and an Express backend:
 
 ```text
-Vertwell/
-├── Frontend/              # React application
+.
+├── Frontend/
+│   ├── public/assets/     # Artwork, fonts, and license notices
 │   ├── src/               # Pages, shared components, data access, and styles
-│   ├── public/assets/     # App artwork, fonts, and license notices
 │   ├── tests/             # Browser and unit tests
-│   └── design-reference/  # Preserved design assets and relocation manifest
-├── backend/               # Express API
-│   ├── src/               # Routes, authentication, and service helpers
-│   ├── supabase/          # Database migrations and technical guides
+│   └── design-reference/  # Preserved design assets
+├── backend/
+│   ├── src/               # Express routes, authentication, and service helpers
+│   ├── supabase/
+│   │   └── migrations/    # Database schema and business operations
 │   ├── scripts/           # Database and integration tooling
 │   └── tests/             # API and database tests
+├── api/                   # Vercel API entry point
 ├── package.json           # Shared npm workspace commands
-├── README.md              # Project introduction
+├── vercel.json            # Unified frontend/API hosting configuration
 └── HandsOff.md            # Development context and task history
 ```
 
-Use the exact `Frontend` capitalization when working on Linux or configuring hosting.
+Use the exact `Frontend` capitalization on case-sensitive systems and in hosting configuration.
+
+## Team & Domain Responsibilities
+
+- **Aquino:** Project Manager / Research Developer / Quality Assurance.
+- **Alba:** Lead Backend Developer / Frontend Developer.
+- **Santiago:** Lead Frontend Developer / UI/UX Designer.
+- **Mejia:** Backend Developer / Research Developer / Database Manager.
+- **Yoingco:** Frontend Developer / UI/UX Designer.
+
+## Setup Instructions
+
+**Requirements:** Node.js **24.x**, npm, and a configured Supabase project. Application access requires an authorized account.
+
+1. Clone the repository:
+
+   ```powershell
+   git clone https://github.com/Huuujji/Vertwell.git
+   cd Vertwell
+   ```
+
+2. Install dependencies across both workspaces:
+
+   ```powershell
+   npm install
+   ```
+
+3. Create the local environment files from the provided examples. Keep existing environment files if the project is already configured:
+
+   ```powershell
+   Copy-Item backend/.env.example backend/.env
+   Copy-Item Frontend/.env.example Frontend/.env
+   ```
+
+   Configure the Supabase connection values using the [database setup guide](backend/supabase/README.md) and [authentication guide](backend/supabase/AUTHENTICATION.md). Initialize the required database schema and account access before signing in. Secret keys belong only on the backend; frontend environment variables must contain publishable values only.
+
+4. Start the frontend and backend development servers:
+
+   ```powershell
+   npm run dev
+   ```
+
+   Open [localhost:5173](http://localhost:5173) for the application. The backend runs at [localhost:3001](http://localhost:3001), with local `/api` requests forwarded by Vite.
+
+   To run the applications separately, use `npm run dev:frontend` and `npm run dev:backend` in separate terminals.
+
+## Development Workflow
+
+1. Coordinate the base branch with the Project Manager, update it, and create a feature branch for the assigned work:
+
+   ```powershell
+   git switch -c feat/your-feature
+   ```
+
+2. Validate changes with the shared project checks:
+
+   ```powershell
+   npm run typecheck
+   npm test
+   npm run build
+   ```
+
+   For interface changes, run the frontend browser checks as well:
+
+   ```powershell
+   npm run test:e2e --workspace Frontend
+   ```
+
+   Browser tests use Microsoft Edge on Windows. On other systems, install Playwright Chromium from `Frontend` with `npx playwright install chromium`.
+
+3. Review the diff, keep environment secrets and generated artifacts out of commits, and open a Pull Request against the team-agreed target branch for code review.
+
+4. Record implementation progress and verification results in [HandsOff.md](HandsOff.md). Keep this README focused on the public project introduction; edit it only when the Project Manager explicitly requests a README change.
 
 ## Technical Documentation
 
-| Guide | Contents |
-| :--- | :--- |
-| [Database Setup](backend/supabase/README.md) | Database workspace and setup commands. |
-| [Database Design](backend/supabase/DESIGN.md) | Schema, stock models, and data relationships. |
-| [Authentication](backend/supabase/AUTHENTICATION.md) · [Authorization](backend/supabase/AUTHORIZATION.md) | Account access, recovery, and role permissions. |
-| [Inventory & Accounts](backend/supabase/CRUD.md) · [Checkout](backend/supabase/CHECKOUT.md) | Saved management operations and stock-aware checkout. |
-| [Sales Workflows](backend/supabase/SALES_WORKFLOWS.md) · [Reports](backend/supabase/REPORTS.md) | Daily review, void handling, reporting, and reconciliation. |
-| [Live Updates](backend/supabase/LIVE_UPDATES.md) · [Notifications](backend/supabase/NOTIFICATIONS.md) | Private updates and saved in-app alerts. |
-| [Development Handoff](HandsOff.md) | Original requirements, task progress, verification evidence, and continuation notes. |
+- [Database Setup & Design](backend/supabase/README.md) · [Schema Design](backend/supabase/DESIGN.md)
+- [Authentication](backend/supabase/AUTHENTICATION.md) · [Role Permissions](backend/supabase/AUTHORIZATION.md)
+- [Inventory & Accounts](backend/supabase/CRUD.md) · [Checkout](backend/supabase/CHECKOUT.md)
+- [Sales Workflows](backend/supabase/SALES_WORKFLOWS.md) · [Reports](backend/supabase/REPORTS.md)
+- [Live Updates](backend/supabase/LIVE_UPDATES.md) · [In-App Notifications](backend/supabase/NOTIFICATIONS.md)
