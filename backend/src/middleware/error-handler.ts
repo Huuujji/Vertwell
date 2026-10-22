@@ -18,6 +18,6 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, _ne
   }
 
   // Provider errors can contain request/credential details. Do not log raw objects.
-  console.error('Unhandled API error.');
+  // observeRequests emits a correlated bounded record, without this error object.
   res.status(500).json({ error: { message: 'An unexpected server error occurred.' } });
 };

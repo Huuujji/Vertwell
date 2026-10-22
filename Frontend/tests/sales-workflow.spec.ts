@@ -34,16 +34,16 @@ async function fillReview(page:Page,cash='14',digital='0'){
   await page.getByRole('button',{name:'Review daily sales',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Daily Sales Review',exact:true});
   for(const box of await dialog.getByRole('checkbox').all())await box.check();
-  await dialog.getByLabel('Counted cash for included receipts').fill(cash);await dialog.getByLabel('Verified GCash receipts amount').fill(digital);
+  await dialog.getByLabel('Cash counted for selected receipts').fill(cash);await dialog.getByLabel('GCash verified for selected receipts').fill(digital);
   return dialog;
 }
 
 test('Owner exact receipt review protects the draft and persists adjustment evidence after refresh without stock changes',async({page})=>{
   const cash=await buy(),gcash=await buy('Admin',true),before=await api.read();await open(page);
   const dialog=await fillReview(page,'24','14');await dialog.getByText('Opening change, cash movements and refunds',{exact:true}).click();await dialog.getByLabel('Opening change',{exact:true}).fill('10');
-  await dialog.getByLabel('Review notes / discrepancy decision').fill('Verified both original receipts');await dialog.getByRole('button',{name:'Close dialog',exact:true}).click();
+  await dialog.getByLabel('Review notes (optional)').fill('Verified both original receipts');await dialog.getByRole('button',{name:'Close dialog',exact:true}).click();
   await expect(page.getByRole('dialog',{name:'Discard unsaved changes?'})).toBeVisible();await page.getByRole('button',{name:'Keep editing',exact:true}).click();
-  await expect(dialog.getByLabel('Counted cash for included receipts')).toHaveValue('24');await dialog.getByRole('button',{name:'Confirm reviewed sales',exact:true}).click();
+  await expect(dialog.getByLabel('Cash counted for selected receipts')).toHaveValue('24');await dialog.getByRole('button',{name:'Confirm reviewed sales',exact:true}).click();
   await expect(page.getByRole('status',{name:'Sales action result'})).toContainText('2 saved');
   expect((await state()).items.every((s:any)=>s.status==='Completed')).toBe(true);expect(await api.read()).toEqual(before);
   await page.reload();await page.getByRole('button',{name:'Audit Trail',exact:true}).click();await details(page,cash);
@@ -67,7 +67,7 @@ test('Staff request, Admin rejection, renewed request and Admin approval retain 
   await expect(page.getByRole('region',{name:'Order items, payment and review timeline'})).toContainText('New evidence found');
   await api.flushUpdates();await admin.getByRole('button',{name:'Approve Void',exact:true}).click();await admin.getByLabel('Decision reason').fill('Approved after evidence check');await admin.getByRole('button',{name:'Review void',exact:true}).click();
   await expect(admin.getByRole('dialog')).toContainText('This action cannot be undone');await admin.getByRole('button',{name:'Void order',exact:true}).click();
-  await expect(admin.getByRole('region',{name:'Order items, payment and review timeline'})).toContainText('Voided by Test Admin (Admin)');
+  await expect(admin.getByRole('region',{name:'Order items, payment and review timeline'})).toContainText('Voided by admin (Admin)');
   const saved=(await state()).items[0];expect(saved.requests.map((r:any)=>r.status)).toEqual(['Rejected','Approved']);expect(saved.events.filter((e:any)=>e.event_type==='Void requested')).toHaveLength(2);
   await context.close();
 });
@@ -96,9 +96,9 @@ test('lost committed response restores the exact saved request through refresh a
 });
 
 test('a stale daily review retains counts, verified receipts and notes after another session voids one included sale',async({page})=>{
-  const sale=await buy();await open(page);const dialog=await fillReview(page);await dialog.getByLabel('Review notes / discrepancy decision').fill('Keep this review draft');
+  const sale=await buy();await open(page);const dialog=await fillReview(page);await dialog.getByLabel('Review notes (optional)').fill('Keep this review draft');
   await command(sale.saleId);await dialog.getByRole('button',{name:'Confirm reviewed sales'}).click();await expect(dialog.getByRole('alert')).toContainText('changed');
-  await expect(dialog.getByLabel('Counted cash for included receipts')).toHaveValue('14');await expect(dialog.getByLabel('Review notes / discrepancy decision')).toHaveValue('Keep this review draft');await expect(dialog.getByRole('checkbox')).toBeChecked();
+  await expect(dialog.getByLabel('Cash counted for selected receipts')).toHaveValue('14');await expect(dialog.getByLabel('Review notes (optional)')).toHaveValue('Keep this review draft');await expect(dialog.getByRole('checkbox')).toBeChecked();
   expect((await state()).items[0].review).toBeNull();
 });
 

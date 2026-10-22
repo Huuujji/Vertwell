@@ -16,6 +16,7 @@ import './admin.css';
 import './staff.css';
 import './redesign.css';
 import './sales-workflow.css';
+import './priority-fixes.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode><App /></StrictMode>,

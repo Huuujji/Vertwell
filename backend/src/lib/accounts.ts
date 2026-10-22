@@ -9,7 +9,7 @@ export function databaseError(error: { code?: string } | null): never {
   throw new HttpError(503, 'Account service is unavailable.');
 }
 export async function currentProfile(client: SupabaseClient): Promise<Profile> {
-  const { data, error } = await client.rpc('current_profile');
+  const { data, error } = await client.rpc('current_profile').abortSignal(AbortSignal.timeout(5000));
   if (error) databaseError(error);
   if (!data?.id || !data.active || !['Owner','Admin','Staff'].includes(data.role)) throw new HttpError(403, 'Account is inactive or has no application profile.');
   return data as Profile;

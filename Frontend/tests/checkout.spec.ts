@@ -16,10 +16,10 @@ async function pos(page:import('@playwright/test').Page,role:'Owner'|'Admin'|'St
   await api.setup(page.context(),role);await api.restore(page,role);
   if(role!=='Staff')await page.getByRole('button',{name:'POS',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Point of Sale',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Add P6 retail to order'})).toBeEnabled();
+  await expect(page.getByRole('button',{name:`Add ${fixture.product.name} to order`})).toBeEnabled();
 }
 test('Owner checkout uses server VAT/tender/change, persists receipts and preserves cart across manager navigation',async({page})=>{
-  await pos(page);await page.getByRole('button',{name:'Add P6 retail to order'}).click();
+  await pos(page);await page.getByRole('button',{name:`Add ${fixture.product.name} to order`}).click();
   await expect(page.locator('.order-panel')).toContainText('₱14.00');
   await page.getByRole('button',{name:'Inventory',exact:true}).click();await page.getByRole('button',{name:'POS',exact:true}).click();
   await expect(page.locator('.cart-line')).toHaveCount(1);
@@ -33,7 +33,7 @@ test('Owner checkout uses server VAT/tender/change, persists receipts and preser
 });
 test('Staff GCash records Pending review, exposes only own-day sales and denies management',async({page})=>{
   await pos(page,'Staff');await expect(page.getByRole('button',{name:'Inventory',exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();
+  await page.getByRole('button',{name:`Add ${fixture.product.name} to order`}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();
   await page.getByRole('button',{name:'GCash payment',exact:true}).click();await expect(page.getByLabel('GCash reference number')).toBeFocused();
   await page.getByLabel('GCash reference number').fill('7771234567890');await page.getByRole('button',{name:'Confirm payment received'}).click();
   await expect(page.getByRole('status').filter({hasText:'Order'})).toContainText('Pending');
@@ -41,22 +41,26 @@ test('Staff GCash records Pending review, exposes only own-day sales and denies 
   await page.getByRole('button',{name:'View receipt',exact:true}).click();await expect(page.getByRole('dialog')).toContainText('Provider verification is separate');
 });
 test('lost committed response survives refresh and exact retry returns one receipt without another deduction',async({page})=>{
-  await pos(page,'Admin');await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('50');
+  const observations:string[]=[];
+  page.on('request',request=>{if(request.url().endsWith('/api/operations/client-events'))observations.push(request.postDataJSON().event);});
+  await pos(page,'Admin');await page.getByRole('button',{name:`Add ${fixture.product.name} to order`}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('50');
   const before=await api.read();let dropped=false;
   await page.route('**/api/checkout',async route=>{
     if(dropped){await route.fallback();return;}dropped=true;
     const req=route.request(),response=await api.request(`${api.base}/api/checkout`,{method:'POST',headers:req.headers(),body:req.postData()});expect(response.status).toBe(200);await route.abort('failed');
   });
   await page.getByRole('button',{name:'Confirm payment received'}).click();await expect(page.getByRole('button',{name:'Retry same checkout'})).toBeVisible();
+  await expect.poll(()=>observations).toContain('checkout.unconfirmed');
   await page.getByRole('button',{name:'Close dialog',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();
   await page.reload();
   await expect(page.getByRole('button',{name:'Retry same checkout'})).toBeVisible();await expect(page.getByLabel('Amount Given:',{exact:true})).toHaveValue('50');
   await page.getByRole('button',{name:'Retry same checkout'}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect.poll(()=>observations).toContain('checkout.reconciled');
   const after=await api.read();expect(BigInt(after.revision)).toBe(BigInt(before.revision)+1n);
   expect(await page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.startsWith('vertwell-checkout:')))).toHaveLength(0);
 });
 test('stale checkout retains cart/payment and requires a fresh quote review; invalid whole-cart addition changes nothing',async({page})=>{
-  await pos(page);await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('20');
+  await pos(page);await page.getByRole('button',{name:`Add ${fixture.product.name} to order`}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('20');
   await api.db.query('update private.inventory_state set revision=revision+1 where singleton');
   await page.getByRole('button',{name:'Confirm payment received'}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Amount Given:',{exact:true})).toHaveValue('20');
   await page.getByRole('button',{name:'Review current quote'}).click();await expect(page.getByRole('dialog',{name:'ORDER CONFIRMATION'})).toBeVisible();
@@ -92,7 +96,7 @@ test('live POS and payment remain contained and readable at desktop, short table
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
     await page.screenshot({path:`${root}pos-${width}.png`,fullPage:true});
   }
-  await page.getByRole('button',{name:'Add P6 retail to order'}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();
+  await page.getByRole('button',{name:`Add ${fixture.product.name} to order`}).click();await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();
   await expect(page.getByRole('heading',{name:'CASH PAYMENT',exact:true})).toBeInViewport();await expect(page.getByRole('button',{name:'Close dialog',exact:true})).toBeInViewport();
   await page.screenshot({path:`${root}payment-320.png`});
 });

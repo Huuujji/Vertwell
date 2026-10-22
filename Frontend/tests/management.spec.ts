@@ -17,9 +17,9 @@ async function product(page:Page,name:string) {
   await openInventory(page);
   await page.getByRole('button',{name:'Add Product',exact:true}).click();
   await page.getByLabel('Product Name',{exact:true}).fill(name);
-  await page.getByLabel('SKU',{exact:true}).fill(`P5-${name.replaceAll(' ','-')}`);
+  await expect(page.getByLabel('SKU',{exact:true})).toHaveCount(0);
   await page.getByLabel('Quantity',{exact:true}).fill('10');await page.getByLabel('Quantity Alert',{exact:true}).fill('2');
-  await page.getByLabel('Price',{exact:true}).fill('12.50');await page.getByLabel('Reason for stock change',{exact:true}).fill('Counted new delivery');
+  await page.getByLabel('Price',{exact:true}).fill('12.50');await expect(page.getByLabel('Reason for stock change',{exact:true})).toHaveCount(0);
 }
 test('real Express/PostgreSQL saves survive reload/login and are visible in a separate Admin session',async({page,browser})=>{
   await api.setup(page.context());await api.login(page);
@@ -39,7 +39,7 @@ test('real Express/PostgreSQL saves survive reload/login and are visible in a se
 test('lost receipt response keeps its draft and explicit retry records exactly one receipt',async({page})=>{
   await api.setup(page.context());await api.login(page);await allInventory(page);
   await page.getByRole('button',{name:'Add stock to Persistent Retail',exact:true}).click();
-  await page.getByLabel('Quantity Added').fill('3');await page.getByLabel('Reason for receipt').fill('Second delivery');
+  await page.getByLabel('Quantity Added').fill('3');await expect(page.getByLabel('Reason for receipt')).toHaveCount(0);
   const before=await api.read();let lost=false;
   await page.route('**/api/inventory/commands',async route=>{
     if(lost){await route.fallback();return;}lost=true;
@@ -59,7 +59,7 @@ test('rejected product writes retain fields, session focus preserves drafts, and
   const before=await api.read();await page.route('**/api/inventory/commands',route=>route.fulfill({status:409,json:{error:{message:'Inventory changed. Reload and review.'}}}));
   await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Inventory changed');
   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(page.getByLabel('Product Name',{exact:true})).toHaveValue('Retained Draft');
-  await expect(page.getByLabel('Reason for stock change')).toHaveValue('Counted new delivery');
+  await expect(page.getByLabel('Reason for stock change')).toHaveCount(0);
   await page.getByRole('button',{name:'Users',exact:true}).click();await expect(page.getByRole('dialog',{name:'Discard unsaved changes?'})).toBeVisible();
   await page.getByRole('button',{name:'Keep editing',exact:true}).click();await expect(page.getByLabel('Product Name',{exact:true})).toHaveValue('Retained Draft');
   expect(await api.read()).toEqual(before);
@@ -70,13 +70,13 @@ test('Users creates Auth/profile accounts, persists edits and deactivates with r
   await page.getByLabel('Username',{exact:true}).fill('persistent-staff');await page.getByRole('button',{name:'Next',exact:true}).click();
   await expect(page.getByLabel('Code',{exact:true})).toHaveCount(0);await page.getByLabel('Email Address',{exact:true}).fill('persistent-staff@example.invalid');
   await page.getByRole('button',{name:'Confirm',exact:true}).click();await page.getByLabel('Password',{exact:true}).fill('Test-password-456');await page.getByLabel('Confirm Password',{exact:true}).fill('Test-password-456');
-  await page.getByRole('button',{name:'Add Account',exact:true}).click();await expect(page.getByRole('group',{name:'Persistent Staff account'})).toBeVisible();
-  await page.getByRole('group',{name:'Persistent Staff account'}).getByRole('button',{name:'Manage',exact:true}).click();await page.getByLabel('Name',{exact:true}).fill('Updated Staff');
+  await page.getByRole('button',{name:'Add Account',exact:true}).click();await expect(page.getByRole('group',{name:'persistent-staff account',exact:true})).toBeVisible();
+  await page.getByRole('group',{name:'persistent-staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click();await page.getByLabel('Name',{exact:true}).fill('Updated Staff');
   await page.getByRole('button',{name:'Save',exact:true}).click();await page.reload();await page.getByRole('button',{name:'Users',exact:true}).click();
-  const row=page.getByRole('group',{name:'Updated Staff account'});await expect(row).toBeVisible();await row.getByRole('button',{name:'Manage',exact:true}).click();
+  const row=page.getByRole('group',{name:'persistent-staff account',exact:true});await expect(row).toBeVisible();await row.getByRole('button',{name:'Manage',exact:true}).click();await expect(page.getByLabel('Name',{exact:true})).toHaveValue('Updated Staff');
   await page.getByRole('button',{name:'Deactivate Account',exact:true}).click();await page.getByRole('button',{name:'Confirm deactivation',exact:true}).click();await expect(row).toContainText('Inactive');
   const context=await browser.newContext();await api.setup(context,'Admin');const other=await context.newPage();await api.login(other,'Admin');await other.getByRole('button',{name:'Users',exact:true}).click();
-  await expect(other.getByRole('group',{name:'Updated Staff account'})).toContainText('Inactive');
+  await expect(other.getByRole('group',{name:'persistent-staff account',exact:true})).toContainText('Inactive');
   await context.close();
 });
 test('Staff cannot enter management and direct invalid/denied API writes change no inventory data',async({page})=>{

@@ -52,7 +52,7 @@ export function createManagementData(request: Request) {
   }
   async function stock(row: StockItem, source: InventorySnapshot, change?: InventoryChange) {
     const existing=source.tables.stock_items.find(item=>item.id===row.id);
-    return {id:row.id,sku:change?.automaticSku?null:row.sku,name:row.name,kind:row.kind,category:row.category,unit:row.unit,
+    return {id:row.id,sku:existing?row.sku:null,name:row.name,kind:row.kind,category:row.category,unit:row.unit,
       threshold:decimal(row.threshold??0,6,factors[row.unit]),unsellable:row.status==='Unsellable',
       imagePath:await image(existing?.image_path??null,change),batches:(row.batches??[{id:crypto.randomUUID(),quantity:row.quantity,
         manufactured:row.manufactured,expires:row.expires,status:row.status}]).map(batch=>({id:batch.id,quantityBase:decimal(batch.quantity,6,factors[row.unit]),
@@ -87,7 +87,7 @@ export function createManagementData(request: Request) {
       return command(source,'stock.save',await stock(row,source,change),change?.reason??'Inventory correction',{stockAction:change?.stockAction??'correct'});
     },
     async saveProduct(source:InventorySnapshot,row:Product,item?:StockItem,change?:InventoryChange) {
-      const record={id:row.id,sku:change?.automaticSku?null:row.sku,name:row.name,category:row.category,
+      const record={id:row.id,sku:source.tables.products.some(p=>p.id===row.id)?row.sku:null,name:row.name,category:row.category,
         model:row.mode==='Stocked'?'Retail Item':row.mode==='Made to order'?'Recipe':row.mode,price:decimal(row.price,2),
         discountType:row.discountType??'None',discountValue:decimal(row.discountValue??0,2),enabled:row.available!==false,
         imagePath:await image(source.tables.products.find(p=>p.id===row.id)?.image_path??null,change),

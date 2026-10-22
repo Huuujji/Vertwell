@@ -25,7 +25,7 @@ export async function checkoutFixture(db:DB) {
   await checkoutAs(db,actors.owner);
   const save=async(kind:string,record:any,extra:any={})=>checkoutValue(db,'select public.inventory_command($1::jsonb) as value',
     [JSON.stringify({kind,record,...extra,revision:(await checkoutValue(db,'select public.read_inventory() as value')).revision,operationId:randomUUID(),reason:'P6 verification'})]);
-  const stock=stockRecord({name:'P6 finished'}), product=productRecord(stock,{name:'P6 retail'});
+  const stock=stockRecord({name:`P6 finished ${actors.owner}`}), product=productRecord(stock,{name:`P6 retail ${actors.owner}`});
   await save('product.save',product,{stock});
   const line=(p=product,overrides:any={})=>({productId:p.id,variantId:null,modifierIds:[],quantity:'1',...overrides});
   const quote=(lines=[line()])=>checkoutValue(db,'select public.quote_checkout($1::jsonb) as value',[JSON.stringify(lines)]);
@@ -139,7 +139,7 @@ export const checkoutScenarios:{name:string;run(db:DB):Promise<void>}[]=[
     await rejects(db,()=>f.checkout({...request,payment:{...request.payment,cashTendered:'20000.00'}}),'PT409');
     await checkoutAs(db,f.actors.other);await rejects(db,()=>f.checkout(request),'PT409');
     await checkoutAs(db,f.actors.owner);f.product.name='Renamed';f.product.price='99';await f.save('product.save',f.product);
-    const replay=await f.checkout(request);assert.equal(replay.lines[0].name,'P6 retail');assert.equal(replay.total,r.total);assert.equal(replay.saleId,r.saleId);
+    const replay=await f.checkout(request);assert.equal(replay.lines[0].name,`P6 retail ${f.actors.owner}`);assert.equal(replay.total,r.total);assert.equal(replay.saleId,r.saleId);
     await db.query('reset role');assert.equal(Number(await f.balance()),9);
   }},
   {name:'P6 receipt reads enforce Staff ownership/day and active profiles without exposing operation storage',async run(db){

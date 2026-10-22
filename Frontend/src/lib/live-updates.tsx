@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { supabase } from './supabase';
 import type { AuthProfile } from './auth-session';
 import { useResource } from './request-state';
+import { reportOperationalEvent } from './operations';
 
 export type DataScope = 'inventory' | 'accounts' | 'catalogue' | 'sales' | 'reports' | 'access' | 'notifications';
 type Listener = (scopes: readonly DataScope[]) => void;
@@ -35,6 +36,7 @@ export function LiveUpdates({ profile, children }: { profile: AuthProfile; child
     const topics = [`vertwell:user:${profile.id}`, 'vertwell:catalogue',
       ...(profile.role === 'Staff' ? [] : ['vertwell:managers'])];
     const connected = new Set<string>();
+    let connection: 'connecting' | 'connected' | 'offline' = 'connecting';
     const channels = topics.map(topic => client.channel(topic, { config: { private: true } })
       .on('broadcast', { event: 'invalidate' }, ({ payload }: { payload: unknown }) => {
         if (disposed || !payload || typeof payload !== 'object') return;
@@ -50,7 +52,11 @@ export function LiveUpdates({ profile, children }: { profile: AuthProfile; child
         invalidate(all);
         window.dispatchEvent(new Event('vertwell:identity'));
       } else connected.delete(topics[index]);
-      setState(connected.size === topics.length ? 'connected' : status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED' ? 'offline' : 'connecting');
+      const next = connected.size === topics.length ? 'connected' : status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED' ? 'offline' : 'connecting';
+      if (next === 'offline' && connection !== 'offline') reportOperationalEvent('updates.offline');
+      if (next === 'connected' && connection === 'offline') reportOperationalEvent('updates.recovered');
+      if (next !== 'connecting') connection = next;
+      setState(next);
     }));
     const resume = () => {
       if (document.visibilityState === 'hidden') return;

@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { mkdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { createDemoData, type Product } from '../src/data/demo';
+import { createDemoData, type Product } from './fixtures/demo';
 import { consumeStock, usageFor } from '../src/data/inventory';
 import { generateItemCode } from '../src/data/item-codes';
 import { configurationError } from '../src/data/catalogue';

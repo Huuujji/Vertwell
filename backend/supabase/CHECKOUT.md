@@ -1,6 +1,12 @@
 # P6 atomic checkout — October 17, 2026
 
-**Current development scope:** P1–P9 are implemented within their agreed scopes on DualCounter, with seventeen immutable applied migrations and checkout enabled. GCash uses a replaceable sample QR plus manual reference recording; Owner/Admin notifications are in-app only. See [current database status](README.md#current-development-status) and [HandsOff.md](../../HandsOff.md) for the current P9A/P9B/P10–P12 follow-ups and exact verification limits. Phase-specific test counts and migration totals below describe their historical acceptance; they are not current unfinished tasks. Release preparation, GitHub saving and deployment remain for later.
+**October 22 Task 3:** bounded client observations report uncertain checkout and
+receipt reconciliation without command/payment contents or account IDs. They do
+not retry or authorize a business command; the original exact-operation recovery
+and once-only deduction remain unchanged. See [OPERATIONS.md](OPERATIONS.md) for
+operator response and the distinction between an HTTP failure and rollback.
+
+**Current development scope (October 21, 2026):** P1–P9 and the newest frontend-priority implementation are complete within their recorded scopes on DualCounter, with eighteen immutable applied migrations and checkout enabled. The application now requires an account; old preview references and phase-specific counts below are historical. The Project Manager selected the seven final recommendations; see [release readiness and current acceptance](RELEASE_READINESS.md), [frontend-priority contract](FRONTEND_PRIORITY.md) and [HandsOff.md](../../HandsOff.md) for current evidence, browser permission and remaining dependencies. Keep the sample QR; actual shop QR/payment trial remains deferred. GitHub release/public deployment is not yet complete.
 
 ## October 18 stock-feedback acceptance — historical checkpoint
 

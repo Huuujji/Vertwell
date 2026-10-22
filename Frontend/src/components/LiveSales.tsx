@@ -140,7 +140,7 @@ export default function LiveSales({scope,role,actor,active,dashboard,onBusyChang
   const sale=chosen.length>=2?undefined:chosen.length===1?chosen[0]:data.find(s=>s.id===selected);
   async function confirmReview(input:DailyReview) {
     if(!review)throw new Error('Reopen the receipt set before confirming.');
-    await save({operationId:input.id,kind:'review.confirm',targets:review.sales.map(workflowTarget),review:{date:input.date,
+    await save({operationId:input.id,kind:'review.confirm',targets:review.sales.filter(s=>input.orderIds.includes(s.id)).map(workflowTarget),review:{date:input.date,
       countedCash:input.countedCash.toFixed(2),verifiedGCash:input.actualGCash.toFixed(2),openingCash:input.openingCash.toFixed(2),additions:input.additions.toFixed(2),removals:input.removals.toFixed(2),refunds:input.refunds.toFixed(2),explanation:input.explanation,verifiedIds:input.orderIds}});
     return true;
   }
@@ -180,7 +180,7 @@ export default function LiveSales({scope,role,actor,active,dashboard,onBusyChang
         {sale.review&&<section aria-label="Recorded Daily Sales Review"><h3>Daily Sales Review</h3><p>{sale.review.owner} ({sale.review.role}) · {manilaTime(sale.review.time)} · {sale.review.outcome}</p>
           {sale.review.details&&<><p>Expected Cash / GCash: {php(sale.review.details.expected_cash)} / {php(sale.review.details.expected_gcash)}</p><p>Verified Cash / GCash: {php(sale.review.details.verified_cash)} / {php(sale.review.details.verified_gcash)}</p>
             <p>Counted cash: {php(sale.review.details.counted_cash)}. Opening: {php(sale.review.details.opening_cash)} · Additions: {php(sale.review.details.additions)} · Removals: {php(sale.review.details.removals)} · Refund adjustments: {php(sale.review.details.refunds)}</p>
-            <p>{sale.review.details.explanation||'Receipts matched expected amounts.'}</p><p>Included receipt IDs: {sale.review.details.orderIds.join(', ')}</p><p>{sale.review.details.cashMovements.length} saved reconciliation adjustments. Entered at review time; no provider refund was issued.</p></>}
+            <p>{sale.review.details.explanation||(sale.review.outcome==='Matched'?'Receipts matched expected amounts.':'The Owner accepted the difference without a review note.')}</p><p>Included receipt IDs: {sale.review.details.orderIds.join(', ')}</p><p>{sale.review.details.cashMovements.length} saved reconciliation adjustments. Entered at review time; no provider refund was issued.</p></>}
         </section>}
         {sale.requests.map(r=><section className="void-request" key={r.id}><h3>Void request · {r.status}</h3><p>{r.reason}</p><p>{r.requested_name} ({r.requested_role}) · {manilaTime(r.requested_at)}</p>{r.reviewed_at&&<p>{r.reviewed_name} ({r.reviewed_role}) · {manilaTime(r.reviewed_at)} · {r.decision_reason}</p>}</section>)}
         {sale.voidedAt&&<p>Voided by {sale.voidedName} ({sale.voidedRole}) · {manilaTime(sale.voidedAt)} · {sale.voidReason}{sale.bulkActionId&&<> · Batch action: {sale.bulkActionId}</>}</p>}

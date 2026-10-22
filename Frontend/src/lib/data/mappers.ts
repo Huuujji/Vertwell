@@ -25,10 +25,10 @@ export function mapAccounts(value: unknown): (Account & { active: boolean })[] {
     const profile = decodeRow('profiles', value), email = record(value).email;
     if (typeof email !== 'string') invalidResponse('missing authorized account email');
     return { id: profile.id, name: profile.full_name, username: profile.username, email,
-      role: choice(profile.role, roles), active: profile.active };
+      role: choice(profile.role, roles), active: profile.active, createdAt: profile.created_at };
   });
   index(accounts, account => account.id);
-  return accounts;
+  return accounts.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)||b.id.localeCompare(a.id));
 }
 
 // Only the prepared contract is accepted, never raw unpaginated PostgREST results.
@@ -74,7 +74,7 @@ export function mapInventory(value: unknown) {
     required(options, row.option_id);
   }
   const mappedGroups = t.modifier_groups.filter(active).map(row => ({
-    id: row.id, name: row.name, min: row.min_choices, max: row.max_choices, sourceGroupId: row.source_group_id ?? undefined, ...edited(row.id,'modifier_group'),
+    id: row.id, name: row.name, createdAt: row.created_at, min: row.min_choices, max: row.max_choices, sourceGroupId: row.source_group_id ?? undefined, ...edited(row.id,'modifier_group'),
     options: t.modifier_options.filter(option => option.group_id === row.id && active(option)).map(option => ({
       id: option.id, name: option.name, price: displayDecimal(option.price, 2), defaultSelected: option.default_selected,
       inputs: t.modifier_stock_inputs.filter(input => input.option_id === option.id).map(input),
@@ -95,14 +95,14 @@ export function mapInventory(value: unknown) {
     const threshold = displayDecimal(row.threshold_base, 6, units[unit]);
     const usable = batches.filter(batch => batch.status !== 'Unsellable' && (!batch.expires || batch.expires >= snapshot.businessDate))
       .reduce((sum, batch) => sum + batch.quantity, 0);
-    return { id: row.id, sku: skuFor(row.sku_id), name: row.name, kind: choice(row.kind, ['Ingredient', 'Finished'] as const),
+    return { id: row.id, createdAt: row.created_at, addedAt: stockBatches.at(-1)?.received_at ?? row.created_at, sku: skuFor(row.sku_id), name: row.name, kind: choice(row.kind, ['Ingredient', 'Finished'] as const),
       category: choice(row.category, categories), unit, quantity, threshold, batches, manufactured: '', expires: '', ...edited(row.id,'stock_item'),
       status: row.unsellable ? 'Unsellable' : quantity === 0 ? 'Out of Stock' : usable === 0 ? 'Expired / unusable' : usable <= threshold ? 'Low Stock' : 'In Stock' };
   });
   const products: Product[] = t.products.filter(active).map(row => {
     const model = choice(row.stock_model, Object.keys(models) as (keyof typeof models)[]);
     if (row.stock_item_id) required(stocks, row.stock_item_id);
-    return { id: row.id, sku: skuFor(row.sku_id), name: row.name, category: choice(row.category, categories),
+    return { id: row.id, createdAt: row.created_at, sku: skuFor(row.sku_id), name: row.name, category: choice(row.category, categories),
       mode: models[model], price: displayDecimal(row.base_price, 2), discountType: choice(row.discount_type, ['None', 'Fixed', 'Percentage'] as const),
       discountValue: displayDecimal(row.discount_value, 2), available: row.enabled, image: '', ...edited(row.id,'product'),
       icon: row.category === 'Hobby' ? 'hobby-solid.svg' : row.category === 'Beverage' ? 'b6984.svg' : 'a638b.svg',
@@ -131,6 +131,8 @@ export function mapInventory(value: unknown) {
   for (const component of t.bundle_components) required(productRows, component.bundle_product_id);
   // Retain source revisions, image paths and provenance beside the display models.
   // P5 commands must select writable fields, never serialize a display object as SQL.
+  const latest = (a:{createdAt?:string;addedAt?:string;id:string},b:{createdAt?:string;addedAt?:string;id:string}) => (b.addedAt??b.createdAt??'').localeCompare(a.addedAt??a.createdAt??'')||b.id.localeCompare(a.id);
+  stock.sort(latest);products.sort(latest);mappedGroups.sort(latest);
   return { source: snapshot, businessDate: snapshot.businessDate, stock, products,
     modifierTemplates: mappedGroups.filter(group => required(groups, group.id).product_id === null) };
 }

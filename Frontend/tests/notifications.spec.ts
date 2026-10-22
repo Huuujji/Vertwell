@@ -27,13 +27,13 @@ async function request(){
 test('saved alerts update through private WebSockets, sync across own sessions and keep other accounts unread after logout',async({page,browser})=>{
   await enter(page);const ownContext=await browser.newContext(),own=await ownContext.newPage();await enter(own);
   const adminContext=await browser.newContext(),admin=await adminContext.newPage();await enter(admin,'Admin');
-  await request();for(const p of [page,own,admin])await expect(p.locator('.alert-list')).toContainText('P6 staff');
+  await request();for(const p of [page,own,admin])await expect(p.locator('.alert-list')).toContainText(`p6-${f.actors.staff}`);
   await page.getByRole('button',{name:'Mark read',exact:true}).click();await expect(own.getByRole('button',{name:'Mark unread',exact:true})).toBeVisible();
   await expect(admin.getByRole('button',{name:'Mark read',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Log out',exact:true}).click();await expect(page.getByRole('button',{name:'Log in',exact:true})).toBeVisible();await signIn(page);
   await expect(page.getByRole('button',{name:'Mark unread',exact:true})).toBeVisible();
   await expect(admin.getByRole('button',{name:'Alert settings',exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:'Review orders',exact:true}).click();await expect(page.locator('.sale-details')).toContainText('P6 staff');await expect(page.locator('tbody tr')).toHaveCount(1);
+  await page.getByRole('button',{name:'Review orders',exact:true}).click();await expect(page.locator('.sale-details')).toContainText(`p6-${f.actors.staff}`);await expect(page.locator('tbody tr')).toHaveCount(1);
   await ownContext.close();await adminContext.close();
 });
 test('duplicate evidence becomes unread, stale marks recover explicitly and reconnect receives missed alerts',async({page})=>{
@@ -82,7 +82,7 @@ test('Owner/Admin notification cards retain the established responsive layout an
     for(const [width,height] of [[1440,900],[820,1180],[390,844],[320,568],[820,400]]){
       await view.setViewportSize({width,height});await expect(view.locator('.alert-list article')).toHaveCount(2);
       const mark=view.getByRole('button',{name:'Mark read',exact:true}).first();await mark.focus();await expect(mark).toBeFocused();await view.keyboard.press('Enter');
-      await expect(view.getByRole('button',{name:'Mark unread',exact:true})).toHaveCount(1);await view.getByRole('button',{name:'Mark unread',exact:true}).click();
+      const unread=view.getByRole('button',{name:'Mark unread',exact:true});await expect(unread).toHaveCount(1);await expect(unread).toBeEnabled();await unread.focus();await unread.press('Enter');
       await expect(view.getByRole('button',{name:'Mark read',exact:true})).toHaveCount(2);
       expect(await view.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
       await view.evaluate(()=>window.scrollTo(0,0));await expect.poll(()=>view.evaluate(()=>scrollY)).toBe(0);

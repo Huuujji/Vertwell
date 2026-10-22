@@ -79,7 +79,8 @@ export async function managementServer() {
     throw new Error(`Unexpected test transport ${target.pathname}`);
   };
   process.env.CORS_ORIGINS='http://127.0.0.1:5180';process.env.SUPABASE_URL='https://management.test';process.env.SUPABASE_PUBLISHABLE_KEY='test-publishable';process.env.SUPABASE_SECRET_KEY='test-management-secret';
-  const {default:app}=await import('../../../backend/src/app');
+  const {createApp}=await import('../../../backend/src/app');
+  const app=createApp();
   const server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));
   const address=server.address();if(!address||typeof address==='string')throw new Error('Test server missing');
   const base=`http://127.0.0.1:${address.port}`;
@@ -124,10 +125,10 @@ export async function managementServer() {
   async function read() {
     return db.transaction(async tx=>{await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[ids.Owner]);return (await tx.query<{value:any}>('select public.read_inventory() as value')).rows[0]!.value;});
   }
-  async function restore(page:Page,role:keyof typeof ids='Owner') {
+  async function restore(page:Page,role:keyof typeof ids='Owner',pathname='/') {
     const active=session(ids[role]);actorsByToken.set(active.access_token,ids[role]);
     await page.addInitScript(value=>localStorage.setItem('sb-management-auth-token',JSON.stringify(value)),active);
-    await page.goto('/');
+    await page.goto(pathname);
   }
   return {db,ids,setup,login,restore,read,base,request:originalFetch,flushUpdates,invalidate,subscriptionCount:()=>[...sockets.values()].reduce((sum,topics)=>sum+topics.size,0),disconnect(){for(const socket of sockets.keys())socket.close({code:1012,reason:'Test connection interrupted'});sockets.clear();},token:()=>{const active=session(ids.Owner);actorsByToken.set(active.access_token,ids.Owner);return active.access_token;},
     async close(){await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));globalThis.fetch=originalFetch;await db.close();}};

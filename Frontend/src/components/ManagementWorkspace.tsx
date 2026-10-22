@@ -6,6 +6,7 @@ import { createManagementData, type AccountsData, type InventoryData } from '../
 import { useLiveResource, LiveConnectionStatus } from '../lib/live-updates';
 import { ViewState } from '../lib/view-state';
 import { signOut } from '../lib/auth';
+import { pageFromPath, pagePaths } from '../lib/page-paths';
 import Navigation, { type Page } from './Navigation';
 import Inventory from '../pages/Inventory';
 import Users from '../pages/Users';
@@ -22,7 +23,11 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
   const [service]=useState(()=>createManagementData(apiRequest));
   const role=identity.profile.role, manager=role==='Owner'||role==='Admin';
   const scope=`${identity.profile.id}:${role}`;
-  const [page,setPage]=useState<Page>(manager?'Dashboard':'POS');
+  const [page,updatePage]=useState<Page>(()=>pageFromPath(window.location.pathname,manager));
+  function setPage(next:Page, replace=false) {
+    updatePage(next);
+    if(window.location.pathname!==pagePaths[next]) window.history[replace?'replaceState':'pushState'](null,'',pagePaths[next]);
+  }
   const [inventoryContext,setInventoryContext]=useState<InventoryContext>();
   const [auditContext,setAuditContext]=useState<AuditContext>();
   const [reportContext,setReportContext]=useState<ReportFilters>();
@@ -54,6 +59,11 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
     if(checkoutUncertain.current){setToast('Retry the uncertain checkout to retrieve its receipt before leaving.');return;}
     if(workflowUncertain.current){setToast('Reconcile the saved sales action before leaving.');return;}
     if(dirty.current) setPending(()=>action);else action();}
+  const leaveRef=useRef(leave);leaveRef.current=leave;
+  useEffect(()=>{
+    const pop=()=>{const next=pageFromPath(window.location.pathname,manager);let accepted=false;leaveRef.current(()=>{accepted=true;setPage(next,true);});if(!accepted)window.history.pushState(null,'',pagePaths[page]);};
+    window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);
+  },[manager,page]);
   async function mutate<T>(save:()=>Promise<T>):Promise<T> {
     if(busy.current) throw new ApiError('A save is already in progress.','conflict');
     busy.current=true;setBusy(true);
@@ -68,10 +78,11 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
   const salesReady=access.data?.services?.salesReview===true||hasWorkflowRecovery;
   const reportsReady=manager&&access.data?.services?.reports===true;
   const effectivePage=manager && access.status==='ready' && !['Inventory','Users','POS',...(salesReady?['Dashboard','Audit Trail']:[]),...(reportsReady?['Reports']:[])].includes(page)?'Inventory':page;
+  useEffect(()=>{setPage(effectivePage,true);},[effectivePage]);
   const managementPage=['Inventory','Users'].includes(effectivePage);
   const resource=effectivePage==='Users'?accounts:inventory;
   return <ViewState.Provider value={views.current}><div className={`workspace ${manager?'admin-workspace':'staff-workspace'}`}>
-    <Navigation persistent identity={{name:identity.profile.full_name,role}} destinations={manager?[...(salesReady?['Dashboard' as const]:[]),'Inventory','POS',...(reportsReady?['Reports' as const]:[]),...(salesReady?['Audit Trail' as const]:[]),'Users']:(salesReady?['POS','Audit Trail']:['POS'])}
+    <Navigation persistent identity={{name:identity.profile.username,role}} destinations={manager?[...(salesReady?['Dashboard' as const]:[]),'Inventory','POS',...(reportsReady?['Reports' as const]:[]),...(salesReady?['Audit Trail' as const]:[]),'Users']:(salesReady?['POS','Audit Trail']:['POS'])}
       activePage={effectivePage} onNavigate={next=>leave(()=>setPage(next))} onLogout={()=>leave(()=>{void logout();})} />
     <main className="workspace-main">
       <LiveConnectionStatus/>
@@ -79,7 +90,7 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
       {manager && managementPage && resource.error && <div role="alert" className="error"><p>{resource.error.message}</p><button className="secondary" disabled={isBusy||isDirty} onClick={resource.reload}>Retry loading</button></div>}
       {manager && effectivePage==='Inventory' && inventory.data && <Inventory persistent onDraftOpenChange={setDraftOpen} context={inventoryContext}
         templates={inventory.data.modifierTemplates} items={inventory.data.stock} products={inventory.data.products}
-        actor={`${identity.profile.full_name} (${role})`} onDirtyChange={onDirty} onLeave={leave}
+        actor={`${identity.profile.username} (${role})`} onDirtyChange={onDirty} onLeave={leave}
         onSaveProduct={(product,item,change)=>saveInventory(()=>service.saveProduct(stockSource(),product,item,change))}
         onUpdate={(item,change)=>saveInventory(()=>service.saveStock(stockSource(),item,change))}
         onAddIngredient={(item,change)=>saveInventory(()=>service.saveStock(stockSource(),item,change))}
@@ -98,11 +109,11 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
           const account=current.accounts.find(row=>row.id===id);if(!account)throw new ApiError('Account changed. Reload and review.','conflict');
           const saved=await service.saveAccount(current,{...account,active:false});accountSource.current=saved;accounts.replace(saved);
         })} notify={setToast} />}
-      {(access.data?.services?.checkout===true||hasRecovery)&&<LivePos onDirtyChange={onDirty} role={role} name={identity.profile.full_name} scope={scope} active={effectivePage==='POS'} onBusyChange={onCheckoutBusy} onUncertainChange={onCheckoutUncertain} onSaved={()=>{inventory.reload();setSalesVersion(value=>value+1);}}/>}
-      {salesReady&&<LiveSales scope={`${scope}:sales:${salesVersion}`} role={role} actor={identity.profile.full_name}
+      {(access.data?.services?.checkout===true||hasRecovery)&&<LivePos onDirtyChange={onDirty} role={role} name={identity.profile.username} scope={scope} active={effectivePage==='POS'} onBusyChange={onCheckoutBusy} onUncertainChange={onCheckoutUncertain} onSaved={()=>{inventory.reload();setSalesVersion(value=>value+1);}}/>}
+      {salesReady&&<LiveSales scope={`${scope}:sales:${salesVersion}`} role={role} actor={identity.profile.username}
         active={effectivePage==='Audit Trail'||effectivePage==='Dashboard'} dashboard={effectivePage==='Dashboard'} onAudit={()=>leave(()=>setPage('Audit Trail'))}
         context={auditContext} onBusyChange={onWorkflowBusy} onUncertainChange={onWorkflowUncertain} onDirtyChange={onDirty}
-        dashboardContent={onReview=><LiveDashboard scope={scope} stock={inventory.data?.stock??[]} role={role} owner={identity.profile.full_name} onDailyReview={onReview} onDirtyChange={onDirty}
+        dashboardContent={onReview=><LiveDashboard scope={scope} stock={inventory.data?.stock??[]} role={role} owner={identity.profile.username} onDailyReview={onReview} onDirtyChange={onDirty}
           onAudit={context=>leave(()=>{setAuditContext({...context,token:Date.now()});setPage('Audit Trail');})}
           onInventory={context=>leave(()=>{setInventoryContext({...context,token:Date.now()});setPage('Inventory');})}
           onReports={filters=>leave(()=>{views.current.delete('LiveReports.drilldown');setReportContext(filters);setPage('Reports');})}/>}/>} 

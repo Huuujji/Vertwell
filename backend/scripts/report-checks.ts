@@ -10,7 +10,7 @@ export const reportScenarios:{name:string;run(db:PermissionDatabase):Promise<voi
     await f.execute(await f.review([cash.saleId,gcash.saleId],{openingCash:'10',countedCash:'24'}));
     const before=await f.physical();await checkoutAs(db,f.actors.owner);const owner=await read(db);
     assert.equal(owner.version,1);assert.ok(Number.isFinite(Date.parse(owner.generatedAt)));
-    const sale=owner.tables.sales.find((s:any)=>s.id===cash.saleId);assert.equal(sale.total,'14.00');assert.equal(sale.cashier_name,'P6 staff');
+    const sale=owner.tables.sales.find((s:any)=>s.id===cash.saleId);assert.equal(sale.total,'14.00');assert.equal(sale.cashier_name,`p6-${f.actors.staff}`);
     assert.equal(typeof owner.tables.stock_movements[0].quantity_base,'string');
     const review=owner.tables.daily_sales_review_items.find((i:any)=>i.sale_id===cash.saleId);
     assert.deepEqual(owner.tables.daily_sales_review_items.filter((i:any)=>i.review_id===review.review_id).map((i:any)=>i.sale_id).sort(),[cash.saleId,gcash.saleId].sort());
@@ -35,7 +35,7 @@ export const reportScenarios:{name:string;run(db:PermissionDatabase):Promise<voi
     f.product.name='Renamed current catalogue';f.product.price='80';await f.save('product.save',f.product,{stock:{...f.stock,batches:f.stock.batches.map((b:any)=>({...b,quantityBase:'9'}))}});
     const before=await f.physical();await checkoutAs(db,f.actors.owner);const a=await read(db),b=await read(db);
     assert.deepEqual(a.tables,b.tables);const l=a.tables.sale_items.find((l:any)=>l.sale_id===sale.saleId);
-    assert.equal(l.name,'P6 retail');assert.equal(l.unit_price,'12.50');
+    assert.equal(l.name,`P6 retail ${f.actors.owner}`);assert.equal(l.unit_price,'12.50');
     assert.equal(a.tables.sales.find((s:any)=>s.id===sale.saleId).status,'Voided');
     assert.equal(a.tables.payments.find((p:any)=>p.sale_id===sale.saleId).amount,'14.00');
     assert.ok(a.tables.stock_movements.some((m:any)=>m.sale_item_id===l.id&&m.kind==='Consumption'));

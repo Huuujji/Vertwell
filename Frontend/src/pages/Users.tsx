@@ -77,7 +77,8 @@ export default function Users({ persistent = false, onDraftOpenChange, onDirtyCh
       if (submitted.current) return;
       if (values.get('password') !== values.get('confirm')) { setError('Passwords must match.'); return; }
       submitted.current = true;
-      const password=String(values.get('password')); const signature=JSON.stringify({...draft,password});
+      const password=String(values.get('password'));
+      const signature=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({...draft,password})))),byte=>byte.toString(16).padStart(2,'0')).join('');
       if(operation.current?.signature!==signature) operation.current={signature,id:crypto.randomUUID()};
       const result = await saving.run({ account: { ...draft, id: crypto.randomUUID() }, ...(persistent ? {credentials:{password,operationId:operation.current.id}} : {}) });
       if (!result.ok) { submitted.current = false; setError(result.error.message); return; }
@@ -90,8 +91,8 @@ export default function Users({ persistent = false, onDraftOpenChange, onDirtyCh
     <p className="role-policy">Owner manages roles and business access. Admin manages Staff and operations. Staff uses POS and their current Manila-day history. Only Owner can assign Owner or Admin access.</p>
     <div className="users-toolbar"><SearchField label="Search users" value={search} onChange={setSearch} placeholder="Search name, username, or email" /><label>Account role<select value={filter} onChange={event => setFilter(event.target.value as Role | 'All')}><option value="All">All roles</option>{roles.map(role => <option key={role}>{role}</option>)}</select></label></div>
     <div className="filter-summary"><p role="status">{shown.length} of {accounts.length} accounts · {filter === 'All' ? 'All roles' : filter}{query && ` · Matching “${search.trim()}”`}</p>{(search || filter !== 'All') && <button className="secondary" onClick={() => { setSearch(''); setFilter('All'); }}>Clear filters</button>}</div>
-    <div className="user-list">{shown.map(account => <div className="user-row" key={account.id} role="group" aria-label={`${account.name} account`}>
-      <div className="user-identity"><span className="user-avatar" aria-hidden="true">{account.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('')}</span><div><strong>{account.name}</strong>{persistent && account.active===false && <span className="current-account">Inactive</span>}{account.id === actorId && <span className="current-account">You</span>}<small>@{account.username} · {account.email}</small>{signedRole !== 'Owner' && account.role !== 'Staff' && <small>Owner manages this account.</small>}</div></div>
+    <div className="user-list">{shown.map(account => <div className="user-row" key={account.id} role="group" aria-label={`${account.username} account`}>
+      <div className="user-identity"><span className="user-avatar" aria-hidden="true">{account.username.slice(0,2).toUpperCase()}</span><div><strong>{account.username}</strong>{persistent && account.active===false && <span className="current-account">Inactive</span>}{account.id === actorId && <span className="current-account">You</span>}<small>@{account.username} · {account.email}</small>{signedRole !== 'Owner' && account.role !== 'Staff' && <small>Owner manages this account.</small>}</div></div>
       <strong className="account-role">{account.role}</strong><button className="primary" disabled={signedRole !== 'Owner' && account.role !== 'Staff'} onClick={() => { submitted.current = false; setManageDirty(false); setEditActive(account.active!==false); setManaging(account); setEditName(account.name); setEditRole(account.role); setError(''); setConfirmDelete(false); }}>Manage</button>
     </div>)}</div>
     {!shown.length && <div className="users-empty"><h2>No matching accounts</h2><p>Try another name, username, email, or role.</p><button className="secondary" onClick={() => { setSearch(''); setFilter('All'); }}>Show all accounts</button></div>}

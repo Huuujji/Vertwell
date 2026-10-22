@@ -9,6 +9,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   if (!token) throw new HttpError(401, 'A Bearer access token is required.');
 
   const { data, error } = await getSupabaseAuthClient().auth.getUser(token);
+  if (error && (!error.status || [408, 429].includes(error.status) || error.status >= 500)) throw new HttpError(503, 'Authentication service is unavailable. Try again shortly.');
   if (error || !data.user) throw new HttpError(401, 'Invalid or expired access token.');
 
   res.locals.user = data.user;

@@ -8,13 +8,7 @@ import { requirePermission } from '../lib/permissions.js';
 
 export const authRouter = Router();
 
-const attempts = new Map<string, { count: number; until: number }>();
 authRouter.post('/login', async (req, res) => {
-  const ip = req.ip ?? 'unknown', now = Date.now();
-  for (const [key, value] of attempts) if (value.until < now) attempts.delete(key);
-  const attempt = attempts.get(ip) ?? { count: 0, until: now + 60_000 };
-  if (attempts.size >= 10_000 || ++attempt.count > 10) throw new HttpError(429, 'Too many login attempts. Try again in a minute.');
-  attempts.set(ip, attempt);
   const { identifier, password } = req.body ?? {};
   if (typeof identifier !== 'string' || !identifier.trim() || identifier.length > 254 || typeof password !== 'string' || password.length > 128) throw new HttpError(401, 'Invalid login credentials.');
   let email = identifier.trim();
@@ -25,6 +19,7 @@ authRouter.post('/login', async (req, res) => {
   }
   const client = createUserDatabaseClient('');
   const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error && (!error.status || [408, 429].includes(error.status) || error.status >= 500)) throw new HttpError(503, 'Authentication service is unavailable. Try again shortly.');
   if (error || !data.session) throw new HttpError(401, 'Invalid login credentials.');
   // Do not return a usable app session for an inactive/unprovisioned identity.
   try { await currentProfile(createUserDatabaseClient(data.session.access_token)); }
@@ -33,7 +28,9 @@ authRouter.post('/login', async (req, res) => {
     if (error instanceof HttpError) throw error;
     throw new HttpError(503, 'Account verification is unavailable.');
   }
-  res.json({ session: data.session });
+  // The browser needs tokens only; omit the provider's duplicate user/metadata
+  // payload. Authentication still requires the token's subject identifier.
+  res.json({ session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token } });
 });
 
 authRouter.get('/me', requireAuth, (_req, res) => {

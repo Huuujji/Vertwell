@@ -31,7 +31,7 @@ export function decodeWorkflowSale(value:unknown):WorkflowSale {
   const s=record(value);let review:WorkflowReview|null=null;
   const bulk=s.bulkAction===null?null:record(s.bulkAction);
   if(s.review!==null){const r=record(s.review);const d=r.details===null?null:record(r.details);
-    review={id:id(r.id),owner:text(r.owner),role:choice(text(r.role),['Owner']),time:instant(r.time),outcome:choice(text(r.outcome),['Matched','Reviewed with explained discrepancy']),
+    review={id:id(r.id),owner:text(r.owner),role:choice(text(r.role),['Owner']),time:instant(r.time),outcome:choice(text(r.outcome),['Matched','Reviewed with discrepancy','Reviewed with explained discrepancy']),
       details:d===null?null:{...decodeRow('daily_sales_reviews',d),orderIds:array(d.orderIds).map(id),cashMovements:array(d.cashMovements).map(c=>decodeRow('cash_movements',c))}};
   }
   return {id:id(s.id),orderNumber:text(s.orderNumber),token:token(s.token),businessDate:date(s.businessDate),occurredAt:instant(s.occurredAt),

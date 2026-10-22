@@ -3,7 +3,7 @@ import { saveRecord } from './fixtures/save-record';
 import { test, expect, type Page } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { createDemoData } from '../src/data/demo';
+import { createDemoData } from './fixtures/demo';
 import { removalQuantity, stockKind, usableQuantity } from '../src/data/inventory';
 import { stockCondition } from '../src/data/reporting';
 

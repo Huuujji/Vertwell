@@ -1,0 +1,17 @@
+.info-disclosure { margin: 12px 0; }
+.info-disclosure > summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid #84715a; border-radius: 50%; color: #604521; cursor: pointer; list-style: none; }
+.info-disclosure > summary::-webkit-details-marker { display: none; }
+.info-disclosure > summary svg { width: 24px; height: 24px; flex-shrink: 0; }
+.info-disclosure > summary:focus-visible { outline: 3px solid #8a5f1d; outline-offset: 3px; }
+.info-content { margin-top: 12px; padding: 16px; border: 1px solid #d6cabb; border-radius: 12px; background: #faf6ef; line-height: 1.7; }
+.info-content p + p { margin-top: 12px; }
+.review-total-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.review-total-grid article { padding: 16px; border: 1px solid #d6cabb; border-radius: 12px; }
+.review-total-grid dl { margin: 12px 0 0; }
+.review-total-grid dl > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 10px 0; }
+.review-total-grid dd { margin: 0; font-weight: 600; }
+.stock-table th:last-child { text-align: right; }
+.admin-workspace .inventory .stock-table td:last-child .row-actions { display: flex; width: auto; min-width: max-content; justify-content: flex-end; align-items: center; flex-wrap: nowrap; gap: 8px; }
+.stock-table .row-actions > .danger-button { order: 10; }
+@media (max-width: 600px) { .review-total-grid { grid-template-columns: 1fr; } }
+.info-disclosure .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }

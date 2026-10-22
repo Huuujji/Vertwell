@@ -178,7 +178,7 @@ export const permissionScenarios: { name: string; run(db: PermissionDatabase): P
     const events = (await db.query(`select actor_id,actor_name,actor_role,details from public.audit_events
       where actor_id=$1 and entity_type='alert_settings' order by created_at,id`,[f.actors.owner])).rows;
     assert.equal(events.length,2);
-    for (const event of events) { assert.equal(event.actor_name,'Permission owner'); assert.equal(event.actor_role,'Owner'); assert.equal(event.details.after.updated_by,f.actors.owner); }
+    for (const event of events) { assert.equal(event.actor_name,`p4-${f.actors.owner}`); assert.equal(event.actor_role,'Owner'); assert.equal(event.details.after.updated_by,f.actors.owner); }
     assert.equal(await value(db,'select similar_order_threshold as value from public.alert_settings'),8);
   }},
   { name: 'settings and audit roll back together when audit insertion fails', async run(db) {

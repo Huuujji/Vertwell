@@ -29,15 +29,32 @@ async function fixture(db: DB) {
   };
   return {actors,read,command};
 }
-export const stockRecord = (overrides: any={}) => ({id:randomUUID(),sku:`P5-${randomUUID()}`,name:'P5 stock',kind:'Finished',category:'Hobby',unit:'pcs',
+export const stockRecord = (overrides: any={}) => ({id:randomUUID(),sku:`P5-${randomUUID()}`,name:`P5 stock ${randomUUID()}`,kind:'Finished',category:'Hobby',unit:'pcs',
   threshold:'2',unsellable:false,imagePath:null,batches:[{id:randomUUID(),quantityBase:'10',manufactured:null,expires:null,unsellable:false}],...overrides});
-export const productRecord = (stock: any, overrides: any={}) => ({id:randomUUID(),sku:stock.sku,name:'P5 product',category:'Hobby',model:'Retail Item',price:'12.50',
+export const productRecord = (stock: any, overrides: any={}) => ({id:randomUUID(),sku:stock.sku,name:`P5 product ${randomUUID()}`,category:'Hobby',model:'Retail Item',price:'12.50',
   discountType:'None',discountValue:'0',enabled:true,imagePath:null,manufactured:null,expires:null,stockId:stock.id,recipe:[],variants:[],groups:[],bundle:[],...overrides});
 const option = (overrides: any={}) => ({id:randomUUID(),name:'P5 choice',price:'1.00',defaultSelected:false,inputs:[],...overrides});
 const group = (overrides: any={}) => ({id:randomUUID(),name:'P5 group',min:'0',max:'1',options:[option()],...overrides});
 
 // Callers wrap every scenario in BEGIN/ROLLBACK; these never mutate real accounts.
 export const inventoryScenarios: {name:string;run(db: DB):Promise<void>}[] = [
+  {name:'Frontend priority: duplicate names require existing-stock receipts, zero starts/alerts fail, and positive measured fractions work',async run(db) {
+    const f=await fixture(db),stock=stockRecord({name:'Priority stock'}),product=productRecord(stock,{name:'Priority product'});
+    await f.command('product.save',product,{stock});const before=await f.read();
+    await reject(db,()=>f.command('stock.save',stockRecord({name:'  PRIORITY   stock  '})),/already exists/);
+    await reject(db,()=>f.command('product.save',productRecord(stock,{name:' priority PRODUCT '}),{stock}),/already exists/);
+    await reject(db,()=>f.command('stock.save',stockRecord({threshold:'0'})),/positive/);
+    await reject(db,()=>f.command('stock.save',stockRecord({batches:[{id:randomUUID(),quantityBase:'0',manufactured:null,expires:null,unsellable:false}]})),/positive/);
+    assert.deepEqual(await f.read(),before);
+    const measured=stockRecord({kind:'Ingredient',category:'Beverage',unit:'L',threshold:'500',batches:[{id:randomUUID(),quantityBase:'500',manufactured:'2026-10-01',expires:'2099-12-31',unsellable:false}]});
+    const {result}=await f.command('stock.save',measured);
+    assert.equal(Number(result.inventory.balances.find((b:any)=>b.batch_id===measured.batches[0].id).quantity_base),500);
+    // A second delivery keeps the same SKU and identity and appends one batch.
+    stock.batches.push({id:randomUUID(),quantityBase:'2',manufactured:null,expires:null,unsellable:false});
+    const received=await f.command('stock.save',stock,{stockAction:'receive'});
+    assert.equal(received.result.inventory.tables.stock_items.filter((s:any)=>s.id===stock.id).length,1);
+    assert.equal(received.result.inventory.balances.filter((b:any)=>stock.batches.some((x:any)=>x.id===b.batch_id)).reduce((n:number,b:any)=>n+Number(b.quantity_base),0),12);
+  }},
   {name:'Owner/Admin inventory snapshots and account lists are scoped; Staff/inactive/anon/service roles are denied',async run(db) {
     const f=await fixture(db);
     for (const id of [f.actors.owner,f.actors.admin]) {

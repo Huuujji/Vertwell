@@ -5,17 +5,18 @@ import { managementServer } from './fixtures/management-server';
 import { checkoutFixture,checkoutAs,checkoutValue } from '../../backend/scripts/checkout-checks';
 
 test.describe.configure({mode:'serial',timeout:60000});
-let api:Awaited<ReturnType<typeof managementServer>>;
+let api:Awaited<ReturnType<typeof managementServer>>, fixture:Awaited<ReturnType<typeof checkoutFixture>>;
 const output=fileURLToPath(new URL('../../../.review/october-18-p8a-browser/',import.meta.url));
-test.beforeEach(async()=>{api=await managementServer();await api.db.query('begin');await checkoutFixture(api.db);await api.db.query('commit');await api.db.query('reset role');await mkdir(output,{recursive:true});});
+test.beforeEach(async()=>{api=await managementServer();await api.db.query('begin');fixture=await checkoutFixture(api.db);await api.db.query('commit');await api.db.query('reset role');await mkdir(output,{recursive:true});});
 test.afterEach(()=>api?.close());
 async function enter(page:Page,role:'Owner'|'Admin'|'Staff'='Owner'){
   await api.setup(page.context(),role);await api.restore(page,role);
+  await expect(page.locator('.workspace')).toBeVisible();
   await expect(page.locator('.live-connection-status')).toHaveCount(0);
 }
 async function inventory(page:Page){await page.getByRole('button',{name:'Inventory',exact:true}).click();await page.getByRole('button',{name:'All inventory',exact:true}).click();await page.getByLabel('Inventory category',{exact:true}).selectOption('All');}
 async function receive(page:Page,quantity='3'){
-  await page.getByRole('button',{name:'Add stock to P6 retail',exact:true}).click();await page.getByLabel('Quantity Added').fill(quantity);await page.getByLabel('Reason for receipt').fill('Independent session delivery');await page.getByRole('button',{name:'Add Stock',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button',{name:`Add stock to ${fixture.product.name}`,exact:true}).click();await page.getByLabel('Quantity Added').fill(quantity);await expect(page.getByLabel('Reason for receipt')).toHaveCount(0);await page.getByRole('button',{name:'Add Stock',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
 }
 test('private WebSocket inventory updates preserve filters and dirty draft revision across two sessions',async({page,browser})=>{
   await enter(page);await inventory(page);
@@ -24,7 +25,7 @@ test('private WebSocket inventory updates preserve filters and dirty draft revis
   await receive(admin);await expect(page.getByRole('row').filter({hasText:'P6 retail'}).first()).toContainText('13');
   await expect(page.getByLabel('Search inventory',{exact:true})).toHaveValue('P6');
   await page.getByRole('button',{name:'Add Product',exact:true}).click();await page.getByLabel('Product Name',{exact:true}).fill('Unsaved socket draft');
-  await page.getByLabel('SKU',{exact:true}).fill('P8A-DRAFT');await page.getByLabel('Quantity',{exact:true}).fill('5');await page.getByLabel('Quantity Alert',{exact:true}).fill('2');await page.getByLabel('Price',{exact:true}).fill('12.50');await page.getByLabel('Reason for stock change').fill('Unsaved opening');
+  await expect(page.getByLabel('SKU',{exact:true})).toHaveCount(0);await page.getByLabel('Quantity',{exact:true}).fill('5');await page.getByLabel('Quantity Alert',{exact:true}).fill('2');await page.getByLabel('Price',{exact:true}).fill('12.50');await expect(page.getByLabel('Reason for stock change')).toHaveCount(0);
   await receive(admin,'2');await api.invalidate('vertwell:managers',['inventory']);
   await expect(page.getByLabel('Product Name',{exact:true})).toHaveValue('Unsaved socket draft');
   await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.getByRole('alert')).toContainText(/changed|reload|review/i);
@@ -32,11 +33,15 @@ test('private WebSocket inventory updates preserve filters and dirty draft revis
   await other.close();
 });
 test('catalogue events keep the cart and payment fields; reconnect resynchronizes missed stock',async({page,browser})=>{
-  await enter(page,'Staff');await page.getByRole('button',{name:'Add P6 retail to order',exact:true}).click();await expect(page.locator('.cart-line')).toHaveCount(1);
+  const observations:string[]=[];
+  page.on('request',request=>{if(request.url().endsWith('/api/operations/client-events'))observations.push(request.postDataJSON().event);});
+  await enter(page,'Staff');await page.getByRole('button',{name:`Add ${fixture.product.name} to order`,exact:true}).click();await expect(page.locator('.cart-line')).toHaveCount(1);
   await page.getByRole('button',{name:'Pay',exact:true}).click();await page.getByRole('button',{name:'Cash payment',exact:true}).click();await page.getByLabel('Amount Given:',{exact:true}).fill('20');
   const other=await browser.newContext(),admin=await other.newPage();await enter(admin,'Admin');await inventory(admin);await receive(admin);
   await expect(page.getByLabel('Amount Given:',{exact:true})).toHaveValue('20');await expect(page.locator('.cart-line')).toHaveCount(1);
   api.disconnect();await api.invalidate('vertwell:catalogue',['catalogue']);await expect(page.locator('.live-connection-status')).toHaveCount(0,{timeout:15000});
+  await expect.poll(()=>observations,{timeout:15000}).toContain('updates.offline');
+  await expect.poll(()=>observations,{timeout:15000}).toContain('updates.recovered');
   await expect(page.getByLabel('Amount Given:',{exact:true})).toHaveValue('20');await expect(page.locator('.cart-line')).toHaveCount(1);await other.close();
 });
 test('an account role change resets private data scope and subscribes only to permitted topics',async({page})=>{
@@ -49,14 +54,14 @@ test('another cashier checkout and Owner review update Reports and Dashboard wit
   await enter(page);await page.getByRole('button',{name:'Reports',exact:true}).click();await expect(page.getByRole('button',{name:'Export report',exact:true})).toBeEnabled();
   const counterContext=await browser.newContext(),counter=await counterContext.newPage();await enter(counter,'Staff');
   const reviewContext=await browser.newContext(),review=await reviewContext.newPage();await enter(review);await review.getByRole('button',{name:'Dashboard',exact:true}).click();
-  await counter.getByRole('button',{name:'Add P6 retail to order',exact:true}).click();await counter.getByRole('button',{name:'Pay',exact:true}).click();await counter.getByRole('button',{name:'Cash payment',exact:true}).click();await counter.getByLabel('Amount Given:',{exact:true}).fill('20');await counter.getByRole('button',{name:'Confirm payment received',exact:true}).click();
-  await expect(page.getByRole('region',{name:'Transactions',exact:true})).toContainText('Test Staff');await expect(review.getByRole('region',{name:'Notifications and review'})).toContainText('1 awaiting Owner review');
+  await counter.getByRole('button',{name:`Add ${fixture.product.name} to order`,exact:true}).click();await counter.getByRole('button',{name:'Pay',exact:true}).click();await counter.getByRole('button',{name:'Cash payment',exact:true}).click();await counter.getByLabel('Amount Given:',{exact:true}).fill('20');await counter.getByRole('button',{name:'Confirm payment received',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Transactions',exact:true})).toContainText('staff');await expect(review.getByRole('region',{name:'Notifications and review'})).toContainText('1 awaiting Owner review');
   await review.getByRole('button',{name:'Review daily sales',exact:true}).click();const dialog=review.getByRole('dialog',{name:'Daily Sales Review',exact:true});
-  for(const box of await dialog.getByRole('checkbox').all())await box.check();await dialog.getByLabel('Counted cash for included receipts').fill('14');await dialog.getByLabel('Verified GCash receipts amount').fill('0');await dialog.getByRole('button',{name:'Confirm reviewed sales',exact:true}).click();
+  for(const box of await dialog.getByRole('checkbox').all())await box.check();await dialog.getByLabel('Cash counted for selected receipts').fill('14');await dialog.getByLabel('GCash verified for selected receipts').fill('0');await dialog.getByRole('button',{name:'Confirm reviewed sales',exact:true}).click();
   await expect(page.locator('.report-summary').first()).toContainText('₱14.00');await expect(review.getByRole('region',{name:'Notifications and review'})).toContainText('No sales awaiting review');
   const snapshot=await api.read();expect(snapshot.balances.reduce((sum:number,b:any)=>sum+Number(b.quantity_base),0)).toBe(9);await counterContext.close();await reviewContext.close();
 });
-test('real-data roles share preview page components across desktop, tablet, phone and short screens',async({page,browser})=>{
+test('account-only roles retain established components across desktop, tablet, phone and short screens',async({page,browser})=>{
   test.setTimeout(180000);
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   for(const role of ['Owner','Admin','Staff'] as const){

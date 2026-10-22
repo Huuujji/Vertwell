@@ -1,10 +1,625 @@
 # Vertwell handoff
 
+## Current order — finish selected work, final test, then Vercel deployment last (October 21, 2026)
+
+The Project Manager has changed the remaining-task order: finish the selected tasks first, run final acceptance on the resulting source, save the verified release, and make Vercel deployment the last phase. This order supersedes earlier execution-order tables and recommendations wherever they place deployment before unfinished work or final testing. Existing FP identifiers remain unchanged; the step numbers below describe execution order only.
+
+### Original reordering request — verbatim
+
+```text
+can you re order the task and put the deployment on vercel as last. I think we should finish all the tasks first and make a final Test before fully deploying the System
+```
+
+### Remaining work in the revised order
+
+| Order | Task / existing priority | Completion boundary before proceeding |
+| --- | --- | --- |
+| **1** | Shared public-login protection — FP1 finding | Complete and verify login throttling that works across deployed instances, with an appropriate trusted client-identity boundary. The existing per-process counter alone does not establish this. Prepare any hosting-specific activation for the final phase. |
+| **2** | Backup and restore readiness — FP1 finding | Agree backup coverage/retention and the responsible operator; verify recovery with an isolated restore drill. Preserve the official database and existing business data. The completed sales-reset backup is not a full restore drill. |
+| **3** | Monitoring, operational health and recovery — FP1 finding | Establish the operator, useful error/slow-command monitoring and response procedures. Cover authentication, failed checkout reconciliation, database, Storage and private-update availability. Prepare verification beyond the current process/configuration-only health response. |
+| **4** | Representative performance/concurrent-load follow-up — FP5 | Agree the actual shop workload and acceptable timings, exercise representative native mixed workloads, and address measured issues where justified. Preserve the accepted bounded native baseline; large-history optimization is evidence-dependent. Hosted-only measurements belong to the final deployment phase. |
+| **5** | Compatibility and accessibility — FP6 | Complete the available Windows Narrator, zoom and browser checks and address agreed findings. Record the Project Manager's decision on unavailable phone/tablet/Safari/Firefox coverage; emulation is not physical-device verification. Figma comparison and physical printing remain excluded. |
+| **6** | Resolve deferred user-dependent work | FP4's actual shop QR/manual payment trial and the two unfinished receipt requests remain explicitly deferred. The Project Manager must supply the missing requirements/image or confirm continued deferral before final acceptance scope is closed. This reordering does not silently cancel their existing deferral, invent receipt requirements or authorize a real payment. |
+| **7** | Decide and complete optional cleanup | Review the recommendations to remove obsolete unused 501 API placeholders and improve the large frontend bundle. These are recommendations awaiting the Project Manager's scope decision, not newly authorized implementation or confirmed failures in the active services. Complete selected cleanup before the final test; record any deferred work. |
+| **8** | Source/release and environment preparation — FP2/FP3 | Review the complete working diff, secrets/artifact exclusions, release branch/workflow and prepared single-project configuration. Resolve the intended Vercel account/team/project, plan, URL and environment/redirect requirements as decisions or configuration preparation, without deploying. Use the existing Supabase database. Account/site navigation still follows the user's ask-first rule. |
+| **9 — final test gate** | Final acceptance after all selected changes | Run the final root backend/frontend checks, typechecks, both builds, generated-schema consistency and the complete current account-only browser suite on the final source. Include meaningful checks for the new login protection, recovery/error handling, permissions, inventory, checkout/stock/idempotency, reviews/voids/audit, reports and private updates/notifications. Confirm the agreed manual and performance evidence, precise remaining limitations and explicit deferrals. Fix reached failures and repeat affected checks; source changes after acceptance require appropriate revalidation. Historical 167/167 and 66/66 results are the previous baseline, not this new final test. Ask for this task's browser permission before navigation/browser testing. |
+| **10** | Save the verified release — FP2 | Save the reviewed, tested source using the Project Manager's selected commit/push/PR/merge scope. Associate acceptance with the exact release revision and exclude secrets, backups and ignored review artifacts. A changed release revision must be checked before deployment. |
+| **11 — LAST** | Vercel deployment and final environment verification — FP3 | Only after the preceding selected work and final test gate are complete, create the protected deployment of the verified release. Configure the agreed environment and exact Auth origins/redirects; verify Vercel routing/build, deep-link refresh/assets, real authentication/recovery, database/Storage/private updates and agreed deployed workflows. These platform/live-URL checks necessarily occur in this last phase, before public cutover. Present the exact deployment/revision/environment and rollback procedure for the Project Manager's final publication decision. |
+
+**Status of this reordering: documentation only.** No task in this list was implemented, no final test was run, and no Git publication, database change or deployment was performed by recording this order. Existing completed P1–P9 work and acceptance remain preserved. All selected predeployment tasks must be complete and any continued deferrals must be explicitly agreed before the final test gate; no deferred item is represented as completed. External payment-provider APIs, accounting/costing/production features and shift management remain outside the chosen scope. Keep the public README unchanged.
+
+For continuation, read this order first, then the original requirements and the completed-work evidence below. Prepare the exact selected next task; do not deploy early or treat the reordering request as approval to begin all remaining implementations, publish Git changes, make a payment or change the official database. Browser/website permission remains task-specific and ask-first. Vercel is the final phase, with its environment-specific checks before full public deployment.
+
+### October 22, 2026 — resumed at Task 5; automated checks pass, manual evidence pending
+
+**Current status: Task 5 is PARTIALLY COMPLETED.** The new request below resumes the previous Task 4 stop. Tasks 1/3 and Task 4's approved native scope remain completed within their recorded limits; Task 2 remains explicitly deferred and unverified. Do not advance to Task 6 until Task 5's manual evidence/coverage decision is resolved. The whole selected priority and final acceptance remain incomplete. The eleven-row current-order table above still governs; Vercel remains Task 11, LAST.
+
+#### Request resuming this work — full original message, verbatim
+
+```text
+Read C:\Users\ASUS\Documents\Personal\Vertwell\repo\HandsOff.md.
+
+Follow the newest section titled “Current order — finish selected work, final test, then Vercel deployment last.” Read the full original requirements and relevant technical guides, not only the continuation scripts. Older checkpoints are historical wherever the latest instructions supersede them.
+
+Start with the first unfinished selected task and follow the documented order. Implement and verify each task before moving forward. Do not stop at a plan or skip unfinished requirements. Preserve completed work and all existing uncommitted changes.
+
+Browser permission rule:\
+Before operating or navigating a browser, interacting with a website, entering details, or running browser-based tests, ASK for my permission. Identify the specific numbered task and explain the browser activity needed.
+
+Permission applies ONLY to that specific task. When you move to another numbered task, ask again before any browser activity—even within the same chat. Never treat permission as approval for the entire task list, future tasks or future chats. While waiting, continue useful work that does not require browser access.
+
+Other boundaries:
+
+- Keep Vercel deployment as the LAST phase.
+- Complete all selected changes and final system acceptance before deployment.
+- Keep optional and deferred tasks pending until I choose their scope.
+- Preserve the official database, accounts, stock, settings and history. Do not repeat the completed sales reset or rewrite applied migrations.
+- Do not edit the public README.md.
+- Follow the documented approval boundaries for Git publication, database changes, real payments and public deployment.
+
+If a task requires a decision or information from me, explain what is missing and ask a concise question. Continue independent preparation where possible.
+
+Give concise progress updates. Update HandsOff.md with completed changes, actual test results, unresolved issues and the exact next task. Preserve original user messages verbatim. Never claim verification that was not performed.
+
+Begin by identifying the first unfinished task, then proceed with the authorized work.
+```
+
+#### Task 5 browser permission and device answers — exact questions and answers
+
+```text
+For Task 5 only, may I open and operate the local app in Edge, run its compatibility/accessibility browser checks, and use local browser pages to support your Narrator and 200% zoom checks? This permission will end with Task 5.
+```
+
+```text
+Allow Task 5 local browser checks
+```
+
+```text
+For Task 5, how should we handle physical phone/tablet and Safari/Firefox coverage that is currently unavailable?
+```
+
+```text
+I can provide devices or browsers for manual checks
+```
+
+```text
+For Task 5 manual coverage, which devices and browsers can you provide—for example Android Chrome, iPhone/iPad Safari, or Windows Firefox—and can you perform the Windows Narrator and 200% zoom checks?
+```
+
+```text
+i have i phone, android and laptop
+```
+
+This establishes available devices, not results or continued deferral. Exact models/OS/browser versions, Narrator observations, real 200% browser zoom, actual Windows scaling and physical-device outcomes are still missing. Firefox/tablet coverage is not selected or verified. Task 5 local permission was obtained before browser activity; it covers neither another numbered task nor future chats/external account navigation.
+
+#### Task 5 changes and actual verification
+
+- Read the newest order, full original selection/October 19 frontend and follow-up messages, quantity/receipt clarifications, and relevant release-readiness, frontend-priority, Auth, CRUD, checkout, sales-workflow, reports and operations guides. Historical preview/reset/phase instructions were not replayed.
+- Added `Frontend/tests/accessibility.spec.ts` and included it in the current Playwright selection and integration TypeScript check. Three cases cover login/recovery keyboard order and alert errors, password visibility state, all six manager destinations at 1440×900 / 640×360 / 320×568, reduced-motion reflow, navigation focus trapping/restoration, inventory editor focus, payment names/focus, keyboard disclosures/receipt selection, retained selection and discard/focus behavior. These are desktop Edge content-width checks, not actual browser zoom, physical devices or user-heard screen-reader evidence.
+- Added `backend/supabase/COMPATIBILITY_ACCESSIBILITY.md` with a concrete laptop/phone/browser checklist, result requirements and scope limits. No application runtime behavior, migration or official data was changed for this checkpoint.
+- **Initial sandbox attempt:** Edge closed during launch before any app assertion. Runner reported one failed launch and two tests not run. A permitted execution outside that sandbox then ran the tests: two passed; the third timed out because its selector omitted the generated suffix on the fixture product name. This was a test-selector error, not an established application failure. The selector was corrected without changing product naming or runtime behavior.
+- **Final targeted browser run:** `npm run test:e2e --workspace Frontend -- accessibility.spec.ts live-dialogs.spec.ts --reporter=line` passes **7/7 in 30.5 seconds**, no failures/skips. It includes the three new cases and four existing dialog/draft/account-isolation regressions. Local real Express and PGlite execute against test-owned Auth/Storage/private-channel transports; no shop service is used. This is Task 5 affected verification, not Task 9's full current suite.
+- **Final frontend typecheck:** `npm run typecheck --workspace Frontend` passes, including `tsconfig.integration.json` and the new spec. No root unit/schema/build/final-acceptance rerun is claimed for this test/document-only change.
+- Captured 18 manager-page viewport images and payment/review images. Visually inspected the 320×568 Inventory and 640×360 cash/review samples: contained page/dialog widths, visible focus and scrolling modal content. This sampled review does not establish all zoom states or a full accessibility audit.
+- Evidence: ignored workspace-parent `.review/task5-20261022/` contains the pre-task handoff/source/status snapshot, failed and successful logs, final frontend-typecheck log and captures. Its `manual-session.ts` uses the existing environment-isolated test server and fixture transports to open a separate visible Edge **155.0.4283.62** window with sample accounts/stock and two pending sample receipts. The helper successfully started and logged `DISPOSABLE TASK 5 SESSION READY`; the user was asked to perform Narrator/zoom checks. The helper window/server are intentionally left open for those observations at this checkpoint; closing that Edge window closes its scratch database/server. It is loopback-only and cannot serve the phones or another unmanaged browser. Do not put the helper/profile/logs in Git or deployment.
+- Preservation comparison covers **377 pre-existing Git-eligible files**: only the four intended existing test-config/handoff/readiness files changed; all other pre-existing file hashes match. All **nineteen migration sources** and the public README match their pre-task hashes. Removing the new checkpoint/heading annotation reconstructs the complete pre-task handoff exactly after newline normalization, preserving all original messages. `git diff --check` passes for the changed tracked files. Detailed results are in ignored `preservation-check.json`.
+
+#### Task 5 follow-up decisions and native/local phone preparation
+
+The user was asked for the disposable laptop manual observations and a physical-device scope choice. Their full replies, verbatim:
+
+```text
+can you perform it if you can do it then I will give you permission for it
+```
+
+```text
+Arrange isolated local phone access before proceeding
+```
+
+The agent explained that it can operate the browser and Narrator but cannot hear Narrator speech. Exact question and answer:
+
+```text
+For Task 5, may I temporarily operate Windows Narrator while you listen and report whether its announcements are useful? I can control it, but cannot verify its spoken audio myself.
+```
+
+```text
+Allow Narrator control; I will listen and report
+```
+
+- **Actual browser zoom now observed:** used the installed Windows computer-use skill to drive the separate disposable Edge window. Native Edge UI and accessibility text explicitly displayed **Zoom: 200%**. At that actual zoom, inspected Dashboard/navigation, Add Product including lower Cancel/Save actions, POS sample card/cart/totals, cash-payment field/actions, daily-review checkboxes, both information disclosures, stacked expected/verified/difference amounts, optional notes/actions and Escape/discard protection. Vertical page/modal scrolling reached the controls; focus returned to the review opener after cancelling. No checkout or review was confirmed in that laptop session. These are sampled actual-zoom observations, not an exhaustive audit or 200% Windows display-scaling result.
+- **Narrator operation:** launched the existing Windows Narrator with the user's explicit permission and drove login, navigation, editor, payment and review controls while the user was invited to listen. Initial launch reported no targetable window; a fresh inventory found Narrator and its updates notice. An initial notice-input attempt lacked geometry; foreground activation/refresh resolved the native-window interaction. Windows UIA's focused-element field was sometimes stale, so screenshots/visible focus and freshly observed controls were used; no speech was inferred from UIA. **No user audio result has arrived.** Ended Narrator with Insert+Escape; a fresh window inventory returned no Narrator windows. Restored Edge to **100%**, explicitly shown in its native zoom UI. `windows-observations.json` records these observations/limits; native screenshots are in this chat's tool transcript, not claimed as exported image files.
+- **Physical-device scope is now decided:** prepare isolated local phone access before proceeding. It is not deferred to deployment. Added ignored workspace-parent `phone-server.mts`, `verify-phone.mts`, a short-lived local HTTPS certificate/key and local access file under `.review/task5-20261022/`. No certificate was installed, no firewall/security setting changed, no public tunnel/hosting/deployment created. The server binds the laptop's private LAN address on port **5183**, uses the existing disposable database/backend fixtures with fake same-origin Auth/private-update transports, gates access with a session link/cookie, restricts Host/Origin and source paths, and never loads development environment files or proxies the shop backend. The temporary exact link is in the chat and ignored run log; do not publish its access value or certificate key. Phones need the same Wi-Fi and the user's manual handling of any local certificate warning. This is test-transport browser/device coverage, not hosted Auth/email/Storage/private-update availability.
+- **Phone-helper preparation failures and corrections:** sandboxed OpenSSL initially could not create its MSYS named object; the permitted invocation generated only local ignored certificate files. The first LAN browser attempt exposed an HTTP/2 `:authority` versus HTTP/1 Host guard mismatch in the helper; corrected it. A later repeat found an unstable review after the helper simulated invalidation for read-only POST quote/stock requests; limited those broadcasts to actual command routes. Neither issue required production application changes. A log-read attempt failed on file sharing; the session access value was subsequently retained before restart. One wrong chat link was promptly corrected; only the latest link/run log is valid. No failed attempt is counted as physical acceptance.
+- **Final LAN HTTPS smoke passes:** desktop Edge 155.0.4283.62 against the local phone endpoint verified a 403 without its session access, secure context plus native `crypto.randomUUID`, denied backend-source access, sample Owner login, inventory editor/cancel, POS cash dialog/cancel, two pending review checkboxes and selected-receipt totals. **Zero external requests and zero page errors** were observed. Final evidence: `phone-server-smoke-final.log`, `phone-server-smoke.json`, `phone-server-review-smoke.png`. This is a preparation smoke test in desktop Edge, **not** an iPhone/Android result.
+- At this checkpoint the laptop helper on **5180** and isolated phone server on **5183** remain intentionally available for the user. Closing the managed laptop Edge window shuts down its helper. Stop the phone helper when manual testing is finished; do not leave it running as a production service. Its local certificate expires three days after generation and its LAN binding may need updating if the laptop address changes.
+- **Windows scaling attempt blocked:** the Windows computer-use tool refused to launch/control System Settings with `Computer Use was not approved to use systemsettings`. No scaling setting was changed, and no workaround or repeated attempt was made. The user was asked to inspect Settings → System → Display → Scale and report their current percentage plus a 200% test/restoration, or state that it is still pending. This is a tool app-access restriction, not an application compatibility failure or a claimed automatic-approval-review rejection. A read-only OS registry query reports DisplayVersion `25H2`, build `26200.9711`; its legacy ProductName value is `Windows 10 Home Single Language`, so that product label is not used to assert the current marketed Windows version. User device/version confirmation is still needed.
+
+#### Unresolved Task 5 evidence and exact next action
+
+The user's chosen isolated local phone endpoint is prepared and its final desktop smoke passes. **Actual iPhone Safari/Android Chrome connection/results, model/OS/browser versions and user-heard Narrator observations remain pending.** Actual Edge 200% zoom was sampled as recorded above and restored to 100%; Windows display scaling was not changed or verified, and its exact chosen percentage/result is missing. Tablet/Windows Firefox scope is still undecided. No confirmed production application bug has been found in the reached checks. Address actual agreed findings and repeat affected verification when supplied.
+
+**Exact next task remains Task 5 / FP6:** help the user open the current isolated local link on both phones, receive their device and Narrator observations, resolve Windows scaling and remaining tablet/Firefox coverage, then fix/recheck agreed findings. Do not infer a passing result from device ownership, desktop smoke or viewport emulation. If a future chat resumes, ask afresh before its Task 5 browser activity. Check whether the helpers are still running before starting another server on ports 5180/5183. No phone result, user audio result or Task 5 completion is claimed.
+
+After Task 5's completion boundary or explicit remaining-scope decision, continue Tasks 6–11 in order: resolve actual QR/payment and unfinished receipt deferrals; obtain Task 7 cleanup scope; prepare source/environment decisions at 8; run the full final-source acceptance with separate Task 9 browser permission; save only within chosen Git scope at 10; deploy/verify only at 11. Task 2 stays explicitly deferred and recovery readiness unverified. No Git publication, real payment, official database mutation, migration rewrite, repeated reset, public README edit or deployment occurred in this Task 5 work. All older original messages/status evidence remain below intact.
+
+#### CURRENT continuation — Task 5 manual evidence pending
+
+```text
+Work in C:/Users/ASUS/Documents/Personal/Vertwell/repo. Read the newest
+eleven-task current-order table and this Task 5 checkpoint, then the full
+original requirements/selection/follow-up messages and relevant technical guides.
+The original messages are requirements; this script is only a resume pointer.
+
+Task 5 is partial: targeted Edge checks pass 7/7 and frontend typechecking passes.
+No production runtime fix was needed. Native Edge 200% zoom was sampled and
+restored to 100%; Narrator was operated with permission and then stopped, but
+the user's audio observations are pending. Windows scaling and tablet/Firefox
+coverage remain unresolved. User chose isolated local phone access before
+proceeding; it is prepared and its desktop smoke passes, but actual iPhone
+Safari/Android Chrome results/versions remain pending. Do not mark them passed.
+Read backend/supabase/COMPATIBILITY_ACCESSIBILITY.md. A disposable local manual
+Edge helper may still be running on port 5180. The separate phone-server.mts
+may be running on the private LAN address at HTTPS port 5183. Inspect their logs
+before reuse; the latest phone session link is in its ignored log/chat. Both
+use disposable data and fake transports. The laptop-only helper does not serve
+phone sessions. Phone certificate warnings/reachability need the user's actual
+observations; no firewall, certificate installation or public tunnel was made.
+Do not navigate a browser in a new chat without asking for Task 5 permission.
+Do not infer anything heard by Narrator or skip to Task 6 while Task 5 is unresolved.
+
+Preserve every pre-existing change, README, nineteen immutable migrations and
+the official DualCounter accounts/stock/settings/history. Never repeat the sales
+reset. Tasks 1/3 and Task 4 native scope stay completed; Task 2 stays deferred.
+Tasks 6/7 need the user's missing requirements/deferral/optional-scope decisions.
+Final whole-system acceptance is Task 9, Git scope at 10, Vercel LAST at 11.
+This checkpoint's 7 browser checks are not final acceptance. Update HandsOff
+with actual observations, fixes, tests, remaining limits and exact next task.
+```
+
+### October 22, 2026 — STOP after completed Task 4; current progress and continuation (historical; resumed above)
+
+**Stopped at the Project Manager's request after finishing Task 4. Do not start Task 5 or continue implementation until the user resumes. The complete selected priority is PARTIALLY COMPLETED, not complete.** Task 4's approved native workload and timing gates pass; this does not establish hosted performance, long-history capacity, manual accessibility or final release acceptance. Older checkpoints and continuation scripts below are historical wherever this checkpoint supersedes them. The original current-order table, selection, complete frontend-priority messages, follow-up messages and prior evidence remain intact below; these status annotations do not replace or rewrite the requirements.
+
+#### Latest stop instruction — full original message, verbatim
+
+```text
+ after finishing task 4 stop for now. Stop implementation and update HandsOff.md to save the current progress.
+
+Preserve my full original priority requirements without summarizing or rewriting them. For each requirement, record whether it is completed, partially completed, or still pending, including any unverified work.
+
+Record the changes made, validation results, known issues, and anything interrupted. Update the continuation script to point to the original priority requirements and tell the next chat exactly where to resume.
+
+Do not mark the whole priority task complete unless every requirement is implemented and verified.
+```
+
+#### Task 4 decisions — exact questions and answers
+
+```text
+For Task 4, what peak workload and timings should I test? A starting assumption is 3 simultaneous cashiers, 500 receipts/day, 5 items per usual basket and 20 for a large basket; 95% of quotes within 1 second, checkouts within 2 seconds and reports within 5 seconds. Supply actual shop figures, or approve these as test assumptions rather than measured usage.
+```
+
+```text
+Use these test assumptions and targets
+```
+
+```text
+For Task 4 only, may I consult official PostgreSQL performance documentation and run local HTTP/browser performance checks if needed? The native workload will use an isolated local database, with no shop-data changes or deployment.
+```
+
+```text
+Allow Task 4 documentation and local checks
+```
+
+That permission was used to read official PostgreSQL documentation. No Task 4 browser navigation, browser test or HTTP performance test was needed/performed. It is not Task 5 permission or standing permission for another chat.
+
+#### Each current-order requirement — status at this stop
+
+Read the **full original requirement and completion boundary in the eleven-row current-order table above**. This table annotates its status; it does not redefine its scope. Completed below always states the verification boundary. Final-environment checks remain in Task 11.
+
+| Current order | Status | Completed evidence / unfinished or unverified requirement |
+| --- | --- | --- |
+| 1 — shared login protection | **Completed within predeployment scope** | Atomic shared counter, trusted identity, closed failure behavior, independent native concurrency and approved hosted migration/rollback checks pass. Task 1 root 175/175 and affected Edge 17/17 pass; later root checks also pass. Actual Vercel ingress/activation is still unverified, assigned to Task 11. |
+| 2 — backup/restore | **Partially completed; explicitly deferred** | Policy, coverage, retention, targets and user as operator agreed; documentation/preparation only. Destination and separate key storage unanswered. No official backup, off-device copy, schedule or restore drill. Ignored archive draft is unused, unintegrated and untested. User explicitly said `Defer Task 2; continue to Task 3`; keep recovery readiness unverified. |
+| 3 — operations/monitoring/recovery | **Completed within selected predeployment scope** | User is operator; structured safe error/slow/write records, dependency readiness reads, Auth/profile deadlines, bounded client observations and operator guide/helper implemented. Root 183/183, affected API 31/31 and affected Edge 23/23 pass. Actual platform logging/access/retention and live dependency/operator checks await Task 11. Continuous automated alerts are not configured or claimed. |
+| 4 — representative native mixed load | **Completed for approved assumptions and native scope** | Fresh native nineteen-migration fixture; three cashiers, 500 genuine receipts, four product models and concurrent Owner reads. All timing gates and stock/payment/revision/exact-retry assertions pass; measurements/limits below. No hosted/API/browser latency or larger coherent-history SLA established. No runtime optimization/new migration made. |
+| 5 — compatibility/accessibility | **Partially completed overall; next task still pending** | Historical Edge automation exists; this chat did not start Task 5. User-observed Windows Narrator, 200% zoom/scaling and agreed findings remain unverified. Explicit scope decision for unavailable physical phone/tablet/Safari/Firefox coverage remains pending. Emulation is not physical-device evidence. Figma comparison/physical printing remain excluded. |
+| 6 — actual QR/manual payment | **Still pending; explicitly deferred** | Keep the accepted sample. Actual shop image and user-run manual payment/receipt trial are absent. No real payment is authorized or performed. Confirm missing scope or continued deferral before final acceptance. |
+| 6 — “Receipt is for a day only” | **Still pending; explicitly deferred** | Original sentence is unfinished; user must finish constructing the task. No interpretation or implementation. |
+| 6 — “Remove unknown phrase on receipt” | **Still pending; explicitly deferred** | Original sentence is unfinished; exact phrase/scope is missing. No interpretation or implementation. |
+| 7 — obsolete unused 501 routes | **Still pending scope decision** | Optional recommendation remains unselected. No removal in this chat. |
+| 7 — frontend bundle | **Still pending scope decision** | Existing 731.05 kB main-chunk warning remains. Build passes; optional optimization is unselected. |
+| 8 — source/release/environment preparation | **Partially completed** | Single-project configuration and local deployment entry were prepared previously and still typecheck. Full final diff/secrets/exclusions review and release workflow, account/team/project/plan/app URL, environment and Auth redirect decisions remain unresolved. Database choice is settled: retain DualCounter. No account navigation/linking/deployment. |
+| 9 — final system acceptance | **Still pending** | Current root/typecheck/build/schema checks pass, but complete current account-only browser suite plus agreed manual/performance/deferral acceptance must run on the final selected source after remaining work. Task 1's 17 and Task 3's 23 affected cases are not this final whole-system run. Historical 167/167 and 66/66 are not new final acceptance. Ask separately for Task 9 browser permission. |
+| 10 — save verified release | **Still pending** | No commit, push, PR or merge performed. User must choose the exact Git publication scope; acceptance must identify the eventual release revision and exclude ignored/private artifacts. |
+| 11 — Vercel deployment LAST | **Still pending** | No project linked, platform build, protected deployment, live-origin validation or public cutover. All preceding selected work/final acceptance and explicit deferral decisions must be resolved first. Exact deployment/environment/revision and rollback procedure need final publication approval. |
+
+The seven original selected recommendations map to these rows: current-version initial acceptance is historical completed evidence, with new final acceptance pending at 9; FP1 review is completed but its release readiness remains partial across 1–3/8/11; FP5 native follow-up is completed within 4's limits; FP6 remains partial at 5; FP4 is deferred at 6; FP2 remains partial at 8/10; FP3 remains partial at 8 and pending at 11. No whole selected-priority completion is claimed.
+
+#### Each original October 19 frontend requirement — status annotation
+
+The complete **“Original frontend-priority request — verbatim, not summarized”** and **“Additional tasks — follow-up message, verbatim (October 19, 2026)”** remain below unchanged, including links, escapes, unfinished sentences and original ordering. Read them in full; this index supplies status only. Implementation details and limitations remain in the October 21 checkpoint and `backend/supabase/FRONTEND_PRIORITY.md`. Existing accepted implementation is preserved; this Task 4 chat added no frontend behavior. Completed rows refer to recorded unit/SQL/API and current account-only browser evidence, not an unperformed Narrator/device/live-platform check. Global manual/device/final-source acceptance remains pending at Tasks 5/9/11.
+
+| Original requirement, in original order | Status | Evidence / explicit limit |
+| --- | --- | --- |
+| 1 — information icon/disclosure and readable explanations | **Completed within recorded local scope** | SVG disclosures and spaced, simpler calculation explanations implemented/tested. Manual screen-reader observation still pending Task 5. |
+| 2 — password hidden from browser inspection | **Partially completed; literal request cannot be verified as fulfilled** | Masked fields, server-managed stored credentials, no stored password/hash returned, minimized login response and digested retry signature implemented. A browser owner can inspect their typed password/session; this limitation remains unresolved as an absolute concealment request. Do not claim client hashing hides it. |
+| 3 — username instead of full name | **Completed within recorded scope** | Navigation/new operational attribution uses username. Editable account full names and immutable old attribution remain, as documented; no history rewrite. |
+| 4 — UID hidden from browser inspection | **Partially completed; literal request cannot be verified as fulfilled** | Unnecessary Auth response fields removed. Required subject IDs/tokens remain inspectable by the browser owner and necessary for verified session/role/private-update behavior. No claim they are hidden. |
+| 5 — hide single-page pagination | **Completed within recorded local scope** | Controls appear only for two or more pages; recorded automated coverage. |
+| 6 — right-aligned Inventory actions/Remove | **Completed within recorded local scope** | Shared right alignment implemented; final manual zoom/device observation still pending Task 5. |
+| 7 — positive quantity/alert validation | **Completed under user's exact quantity clarification** | Positive measured fractions; pieces/bottles whole and at least one. Existing corrections may reach zero; unit/SQL validation passes. Original clarification remains verbatim below. |
+| 8 — VAT validation | **Completed within recorded scope** | Fixed 12% subtotal/tax/rounding and total validation covered. |
+| 9 — automatic SKU and duplicate-name receiving confirmation | **Completed within recorded scope** | Database assignment, no SKU/Generate input, existing-stock batch confirmation and SQL race rejection implemented/tested. |
+| 10 — Reports attention at top | **Completed within recorded local scope** | Current attention precedes report summaries/tables. |
+| 11 — unfinished day-only receipt request | **Still pending; explicitly deferred** | Missing user's completed requirement; see Task 6. |
+| 12 — unfinished unknown-phrase receipt request | **Still pending; explicitly deferred** | Missing exact phrase and completed scope; see Task 6. |
+| 13 — newest-first table order | **Completed within recorded scope** | Newest records first with stable ties; canonical batch numbers/consumption order preserved. |
+| 14 — page URLs; optional replacement of localhost | **Completed within allowed local scope** | Role-aware page paths/direct links/history implemented/tested; original request permits retaining localhost. Custom/live origin remains unverified in Task 11. |
+| 15 — remove Explore preview/production mock data | **Completed within recorded scope** | Real accounts required; sample data isolated to tests/fixtures. |
+| 16 — replace “Two Shops one System” sentence | **Completed within recorded local scope** | Login wording replaced and account-only browser baseline recorded. |
+| 17 — requested sales reset preserving accounts/stock | **Completed and hosted verification recorded** | Exact approved October 21 snapshot backed up/reset; protected hashes/batch balances/trigger restoration pass. Do not rerun it. This is not Task 2 disaster-recovery verification. |
+| 18 — selected-receipt daily review, recalculated totals/readable Cash/GCash | **Completed within recorded scope** | Exact checked targets/totals and separated amount cards implemented/tested. Unchecked receipts stay pending. |
+| 19 — hide empty audit daily-review panel | **Completed within recorded local scope** | Empty queue panel hidden; recorded coverage retained. |
+| Follow-up 1 — optional review notes | **Completed within recorded scope** | Optional notes, including explicit acceptance of a displayed difference, implemented/tested. |
+| Follow-up 2 — remove creation/receipt reason input, keep edit reason | **Completed within recorded scope** | System reasons for creation/receipt; edit reason retained, implemented/tested. |
+
+The original website/navigation rule is preserved in full below and is **in force**, refined by the latest task-specific ask-first instruction. All recorded original requirements remain available; no completed historical behavior is discarded to satisfy a newer checkpoint.
+
+#### Task 4 changes, actual validation and known limits
+
+- Added `backend/scripts/profile-mixed.ts`, `profile-mixed.ps1`, the backend `profile:mixed` command, `backend/supabase/PERFORMANCE_MIXED.md` and an updated release-readiness pointer. No production application behavior, query, index, schema or migration changed in Task 4. The separate prior Task 1/3 implementation and Task 2 deferral remain documented in full below.
+- Native PostgreSQL 18.6/Node 24.18.0 on Windows, sixteen logical CPUs/15.82 GiB RAM. New unique loopback-only cluster applies all nineteen immutable SQL migrations with test-owned Auth/Realtime. Twenty used products cover Retail Item, Recipe, Variants and Bundle, optional ingredient modifiers, variant stock and fixed bundle components. No hosted account, shop data, Storage or real payment is used.
+- Separate synchronized three-cashier race: **one committed receipt/two explicit revision conflicts**. Day-volume workload: **500 genuine receipts** (450 five-line, 50 twenty-line) with Cash/synthetic GCash, **327 mixed Owner reads** and **20 exact retries**. Unique receipt/operation counts, payment totals, 500 new revisions, per-item usage/Consumption ledger and nonnegative batch balances all reconcile. Exact retries return the original receipt without another stock deduction/revision.
+- **Actual timing gates pass:** quote p95 **22.54 ms**, successful checkout p95 **188.62 ms**, reports p95 **1,169.06 ms** against agreed 1,000/2,000/5,000 ms targets. Successful five-line p95 **181.19 ms**; successful twenty-line p95 **272.91 ms**. Largest quote/checkout/report durations **109.06/298.26/1,290.60 ms**. All-outcome checkout p95 including conflicts is **171.76 ms**; conflicts are not counted as successful checkouts.
+- **Known concurrency limit:** the 67.65-second compressed burst produced **653 day-workload PT409 conflicts among 1,153 attempts (56.63%)**, each followed by an explicitly simulated fresh user review/new quote/new operation. This is native command timing, not human review time or smooth real cashier experience. The global revision protection is preserved; no silent production write retry was introduced. Real shop arrival patterns were not measured.
+- **Known scaling limit:** the largest serialized report was **7,696,561 bytes**; final report plan took **1,030.24 ms** with temporary block activity. Function timing identifies history-dependent duplicate detection/report construction as follow-up candidates, not a proved fix or a reason to rewrite applied SQL. This one coherent 500-receipt day plus separate race does not verify a larger-history mixed-load SLA, hosted network/Auth/Storage/browser rendering or physical devices. Earlier 1k/5k/20k synthetic detector evidence remains separate and unchanged. No measured selected native timing gate failed; no speculative SQL optimization was made.
+- **Post-run checks actually completed:** root `npm test` **143 backend + 40 frontend = 183/183**, zero failures/skips; root typechecks including the new scripts and unified deployment entry; both builds; exact generated-schema comparison in the root frontend suite. Existing frontend main chunk **731.05 kB** warning remains Task 7's unselected optimization. This is not Task 9 final browser/manual acceptance.
+- **Safety checks actually completed:** remote origin and ordinary local database refused before connection, with no output directory created. All four new scratch clusters have recorded shutdown and no `postmaster.pid`. Public README and all nineteen applied migration sources match the pre-Task-4 hashes; pre-existing source changed only in the intended package/guide/handoff scope. Old native profiler and artifacts are retained. Prior handoff body and every original requirement/message remain intact.
+- **Fixture preparation failures retained:** first run failed reused SKU (23505); second failed missing required Food product dates (23514); third failed two variants sharing one product/stock pair (23505). Corrected the new fixture, preserving existing constraints; fourth run completed. These failures occurred before workload measurements and are not application performance failures. No reached workload/reconciliation failure remains. No test was interrupted mid-run by the requested stop; remaining numbered tasks were intentionally not started.
+- **Evidence:** ignored `.review/task-4-performance/` holds the pre-task source/handoff snapshot, four run logs, guard/typecheck/root-test/build logs, successful-basket analysis and preservation checks. Successful native evidence is `run-e41665e293bb4f158806e70f2f2bb8eb/{result,samples,plans}.json`, with cluster shutdown log retained. Review artifacts, local binaries/clusters and backup drafts remain excluded from Git/deployment.
+- **Boundaries preserved:** no official database/business/account/settings/history change, migration apply/rewrite, repeated sales reset, credential change, real payment, account navigation, paid service, Git commit/push/PR/merge or deployment in Task 4. User data and all pre-existing uncommitted work remain preserved. Vercel stays Task 11, last.
+
+#### CURRENT continuation script — authoritative after the Task 4 stop
+
+```text
+Work in C:/Users/ASUS/Documents/Personal/Vertwell/repo.
+The user requested a stop after Task 4; wait for a new request to resume.
+Do not start another task merely because this continuation script is read.
+
+Read the complete newest “Current order — finish selected work, final test,
+then Vercel deployment last” section and this Task 4 stop/status checkpoint.
+Also read the full originals below: “Original selection — verbatim”,
+“Original frontend-priority request — verbatim, not summarized”,
+“Additional tasks — follow-up message, verbatim (October 19, 2026)”,
+the quantity/receipt clarifications, and the full starting request preserved
+under “Request starting this continuation — verbatim”. Do not use only this
+script or shorten/rewrite any original requirement. Older scripts/counts are
+historical where superseded. Keep all original messages and completed work.
+
+Exact next implementation task when the user resumes: Task 5 / FP6 Windows
+compatibility and accessibility. Task 2 was explicitly deferred; Tasks 1/3
+and Task 4's agreed native scope are complete within their recorded limits.
+Do not restart them or silently claim their hosted/restore limits are verified.
+Read backend/supabase/RELEASE_READINESS.md, PERFORMANCE_MIXED.md,
+FRONTEND_PRIORITY.md and the relevant workflow/Auth/operations guides in full.
+
+Before ANY Task 5 browser/web/navigation/detail entry/browser tests, ask for
+Task 5-specific permission identifying the activity. All earlier task/browser
+permissions end at their task and do not carry into a future chat. While
+waiting, inspect source/test coverage and prepare a concise Windows checklist.
+User-observed Narrator announcements cannot be inferred by the agent. Complete
+agreed Windows Narrator, 200% zoom/scaling and browser checks, address actual
+findings, and record browser/device versions and exact results. Obtain an
+explicit decision for unavailable physical phone/tablet/Safari/Firefox scope;
+viewport emulation is not physical coverage. Figma/physical printing excluded.
+
+Then follow Tasks 6–11 in order after user decisions/approvals. Keep Task 2
+backup/restore, Task 6 actual QR/manual trial and both unfinished receipt asks
+pending until explicitly resumed/scoped or continued deferral is confirmed.
+Keep sample QR. Ask for missing receipt wording; invent nothing. Task 7 optional
+501/bundle cleanup remains unselected. No real payment. Do not add the QR's
+chat-only path to this file. Absolute password/UID concealment in browser-owner
+DevTools remains a documented unmet limitation; do not promise it is complete.
+
+Preserve the official DualCounter database izdemgzdywtxhvgvsian, all current
+accounts/stock/settings/history and all pre-existing uncommitted changes.
+Nineteen applied migrations are immutable, including
+20261022010000_shared_login_protection.sql. Never rerun the completed sales
+reset. Public README.md stays unchanged. New official database mutations,
+Git publication, real payments and public deployment require their documented
+separate scope/approval. Never commit/deploy ignored review artifacts, backups,
+environment files, native binaries or scratch clusters.
+
+The entire priority remains incomplete. Task 9 must run the full current
+account-only browser suite and root/typecheck/build/schema checks on final
+selected source, with agreed manual/performance evidence and explicit remaining
+deferrals. Current 183/183 and affected browser checks are checkpoint evidence,
+not that final gate. Save the exact verified release only within the user's
+Git scope at Task 10. Vercel deployment and live-origin/environment checks are
+Task 11, LAST, followed by the user's final public cutover decision.
+Update this file with actual results, unresolved requirements and exact next
+task. Never mark the whole priority complete while a requirement is unfinished
+or unverified, and never claim an unperformed verification.
+```
+
+### October 22, 2026 — Task 3 monitoring and operational recovery completed locally
+
+**Task 3's selected predeployment work is implemented and verified. Exact next task: Task 4 — agree the shop workload/timing targets, then run representative native mixed-load measurements.** The Project Manager is the monitoring operator. Their separate Task 3 permission covered official documentation and local browser checks only, excluding account navigation, paid-service setup and deployment; it does not extend to Task 4. Task 2 remains explicitly deferred and unverified as recorded below.
+
+- Added bounded structured API records and server-generated `X-Request-ID` correlation for errors, slow requests, login outcomes, business writes and accepted operational observations. Allowlisted route templates omit record IDs; unknown paths are `unmatched`. No body, query, caller headers, IP, account ID/name/email, payment/reference data, token, raw provider error or stack is emitted by this observer. Request IDs supplied by callers are ignored. A failed logging sink cannot change/retry the business response. Interrupted/5xx command outcomes are labeled **unconfirmed**, not asserted rolled back.
+- The default slow investigation threshold is 2,000 ms (`SLOW_REQUEST_MS`, validated 100–60000), not a new shop SLA. Healthy routine reads remain quiet. Source emits to the local/platform console sink; it does not claim durable cross-instance aggregation or an active alerting service.
+- Public `/api/health` remains liveness. New **Owner-only** `/api/health/ready` verifies actual Auth/current profile, caller-scoped `business_access` and private Storage listing, with safe degraded responses and bounded waits. It explicitly reports private updates as requiring client observation and checkout reconciliation as requiring receipt review. It does not prove image-byte delivery, every service workflow, backup restoration or global readiness. Admin/Staff/anonymous access and scope overrides are rejected.
+- Auth token checks/password exchanges and current-profile reads have five-second deadlines. Provider outage/timeout/throttling returns generic 503 rather than mislabeling a usable account/session as invalid credentials. Genuine expired/invalid tokens remain 401. Business SQL mutation cancellation/retry semantics and account/permission boundaries are preserved.
+- Added authenticated, strictly allowlisted client observations for private-update interruption/recovery, uncertain checkout/reconciliation and optional POS image failures. Only the event name is sent. Reporting is best effort with no retry, bounded time and per-event debounce; receiving app instances suppress repeats with bounded local memory. These hints are not trusted proof of a commit/service outage or a shared security rate limit. Existing carts/drafts, exact-operation recovery, reconnect reloads and once-only stock deductions remain unchanged.
+- Added `backend/supabase/OPERATIONS.md`, a private-setting example and `operations:check` read-only helper. The guide defines the operator's opening/incident inspection routine, initial investigation triggers, Auth/database/Storage/private-channel triage, safe checkout reconciliation and recovery verification. The helper defaults to loopback, rejects redirects, requires an exact opted-in HTTPS origin for hosted use and cannot call a missing Owner token a passing private check. A direct refusal check confirmed the hosted guard rejects before a request.
+- **Actual verification:** final root `npm test` passes **143 backend + 40 frontend = 183/183**, no failures/skips. Final affected API recheck passes **31/31**, including provider 429/503, Auth/profile deadlines, permission denial, read-probe failures/Storage timeout, bounded client input/debounce, privacy, slow-command records and failed logging sink. Root typechecks and both builds pass. Generated-schema equality passes in the root frontend unit suite. The existing frontend chunk warning remains pending Task 7's scope choice.
+- **Affected local Edge coverage: 23/23 passed in 1.8 minutes.** Auth/recovery, checkout and private updates use disposable Auth/Storage/SQL fixtures. A lost committed response emits unconfirmed/reconciled observations, survives refresh and exact retry, and retains one revision/deduction. Private-channel disconnection/rejoin emits offline/recovered observations while keeping cart/payment and resynchronizing data. This is Task 3 affected verification, **not** the Task 9 final whole-system suite.
+- Initial focused test failures came from an overly broad fixture signal assertion and a JSON-null rejection expectation; corrected expectations pass. No reached application failure remains from those test runs. Ignored `.review/task-3-operations/` contains logs, source hashes, pre-task handoff and the exact changed-file inventory. All **19 applied migration-source hashes** and the public README match the pre-task baseline; other existing files changed only within Task 3's intended source/tests/config/guides/handoff scope. Changed-source whitespace checks pass. Port 5180 is free after browser teardown.
+- **No official database, account, password, settings, Storage image, history, shared counter or applied migration was changed by Task 3.** No hosted account navigation/login, recovery email, real payment, external monitoring subscription, scheduled monitor, Git publication or deployment occurred. The unused Task 2 draft remains ignored and unintegrated.
+
+**Task 3 final-environment boundary:** actual Vercel log collection/access/retention, live Owner probes, real private object delivery/channel joins and the agreed operator workflow must be verified in Task 11 on the selected release/environment. Continuous automated alerts/log export are not configured; the prepared workflow uses operator inspection unless the user separately selects those services. Do not represent this local checkpoint as live platform acceptance. Task 2's explicitly deferred restore limitation remains visible at final acceptance/publication. No Task 4 optimization, Task 5 device acceptance, deferred receipt/QR trial, optional cleanup, Git release or deployment is completed by this checkpoint.
+
+**Task 4 decision gate at this checkpoint:** the workload/targets and separate browser/documentation permission below have been asked; no answer has yet been received. Independent preparation read the existing native profiler, fresh-cluster wrapper and checkout/inventory fixtures. Preserve the accepted bounded baseline; do not overwrite its measurement artifacts or count its synthetic detector projections as complete payment/stock history. No Task 4 browser/web operation, new benchmark, SQL optimization or migration has been performed. After the user supplies/accepts workload assumptions, use a fresh isolated native database, exercise mixed reads/writes and record explicit revision conflicts plus once-only stock/receipt reconciliation. Hosted measurements remain Task 11.
+
+```text
+For Task 4, what peak workload and timings should I test? A starting assumption is 3 simultaneous cashiers, 500 receipts/day, 5 items per usual basket and 20 for a large basket; 95% of quotes within 1 second, checkouts within 2 seconds and reports within 5 seconds. Supply actual shop figures, or approve these as test assumptions rather than measured usage.
+```
+
+```text
+For Task 4 only, may I consult official PostgreSQL performance documentation and run local HTTP/browser performance checks if needed? The native workload will use an isolated local database, with no shop-data changes or deployment.
+```
+
+### October 22, 2026 — Task 2 explicitly deferred; continue with Task 3
+
+**The Project Manager explicitly deferred all of Task 2 and directed continuation with Task 3.** Task 2 is not complete: no official backup, recovery-key setup, off-device copy, schedule or isolated restore drill was performed. The agreed starting policy remains recorded for when the user resumes it: database/Auth metadata, inventory image files and recovery configuration; seven daily/four weekly copies; target at most 24 hours of lost data and four-hour recovery; Project Manager as backup operator. These times remain unverified targets. The destination and separate recovery-key storage are unresolved.
+
+Task 2 work before deferral: read official Supabase/PostgreSQL backup/restore documentation; confirmed Storage files need separate backup and provider configuration needs separate recovery records. Native backup binaries are present. The new, unused and untested archive-utility draft was retained at ignored `.review/task-2-backup/preparation/backup-archive.ts`; it is not integrated into the application's source/scripts or represented as a working backup system. Source hashes and the pre-Task-2 handoff are retained under that ignored directory. No Task 2 database, account, Storage, Git or deployment change occurred.
+
+**Exact next task: Task 3 — monitoring, operational health and recovery.** The user separately approved Task 3 official-documentation access and local browser checks, excluding account navigation, paid-service setup and deployment, and selected themselves as monitoring operator. This permission ends before Task 4. Task 1 remains complete within its recorded predeployment boundary. Task 2's recovery limitation must be included in final acceptance/publication decisions and not silently converted into a pass. The explicit deferral authorizes moving to Task 3 despite the earlier Task 1 checkpoint's instruction to finish Task 2 first.
+
+#### Task 2 decisions and deferral — exact questions and answers
+
+```text
+For Task 2 only, may I read official Supabase backup/restore documentation and plan details? Any account navigation or changes would need their specific scope identified first.
+```
+
+```text
+Allow Task 2 documentation access
+```
+
+```text
+For Task 2, may I use this starting policy: back up database/Auth metadata, inventory image files and recovery configuration; retain 7 daily and 4 weekly copies; target at most 24 hours of lost data and recovery within 4 hours; you own backup checks? Please give a different operator or targets if needed.
+```
+
+```text
+Approve this policy; I am the operator
+```
+
+```text
+For Task 2, where should encrypted backups be stored, and where will you keep the recovery key separately? Please name a folder or external drive and a key-storage choice such as a password manager or separate USB. Don’t paste a key or password here. I’ll prepare and test the restore tooling while waiting.
+```
+
+```text
+lets skip this for now
+```
+
+```text
+Does “skip this for now” mean defer all of Task 2 and continue to Task 3, or defer only the storage/key choice while I finish local backup-tool tests? I need the scope clear so the handoff doesn’t mark recovery as verified.
+```
+
+```text
+Defer Task 2; continue to Task 3
+```
+
+#### Task 3 permission and operator — exact questions and answers
+
+```text
+For Task 3 only, may I read official Supabase/Vercel monitoring documentation and run local browser checks of operational error and recovery behavior? This does not include account navigation, paid-service setup or deployment.
+```
+
+```text
+Allow Task 3 documentation and local browser checks
+```
+
+```text
+For Task 3, will you also be the monitoring operator—the person who checks failures and follows the recovery guide—or should someone else own that role?
+```
+
+```text
+I am the monitoring operator
+```
+
+### October 22, 2026 — Task 1 shared public-login protection completed
+
+**Task 1 is complete within its predeployment boundary. Next: Task 2, backup and restore readiness.** The original reordering-only status above describes the October 21 documentation action; the implementation and tests below were performed afterward. Do not restart completed Task 1 or advance to Task 3 before Task 2's policy/operator decision and isolated restore verification are complete. Vercel deployment remains Task 11, last; its actual ingress/environment checks remain there.
+
+- Added per-app login middleware with a shared PostgreSQL fixed-window counter: ten attempts/minute per canonical IPv4 address or IPv6 /64, including successful logins. The server-only RPC serializes concurrent attempts; only HMAC digests/counts/expiry are saved in a private operational table. No raw IP, account identifier, password, token or business row is stored there.
+- Direct Node identity uses the socket, ignoring supplied forwarding headers. Only the Vercel runtime uses its platform-controlled `x-vercel-forwarded-for`; invalid/missing/list/port/zone identities fail closed. Express `trust proxy` stays off. Production/Vercel requires shared mode; a memory override, failed/malformed RPC or timeout returns generic 503 before Auth/username lookup. Denials return 429 and `Retry-After`. Development-only memory limits remain scoped to each app.
+- After the explicit approval below, applied **only** additive migration `20261022010000_shared_login_protection.sql` on DualCounter `izdemgzdywtxhvgvsian`. SHA-256: `ca248ef0cb34b93e73fd57aba9ecbec5e729335694c7d2284104deec852b40eb`. All **19** applied hashes/schema/grants pass. All eighteen earlier migration sources remain immutable and were skipped by the migration tool. Preserve this nineteenth source too; never rewrite/replay it.
+- Focused SQL/HTTP checks: **8/8 passed**. Two Express app instances admitted ten of 24 overlapping requests, with fourteen explicit denials; expiry, successful-login counting, identity canonicalization/spoof rejection, unsafe production mode, timeout/provider failure, strict privileges, saturation and bounded cleanup pass. The first sandboxed HTTP run was blocked by loopback `EACCES`; the permitted rerun passed. A test-only TypeScript typing issue was corrected before the successful full typecheck.
+- Native PostgreSQL **18.6**: **24 independent connections admitted 10/denied 14**, including after expiry; 24 distinct budgets admitted 24. Anonymous/authenticated denial and a forced two-second row-lock timeout pass. The wrapper stopped its unique loopback scratch cluster; no service was installed.
+- Root checks: **137 backend + 38 frontend = 175/175**. Root typechecks, both builds and generated-schema consistency pass. The frontend's existing large-chunk warning remains pending Task 7's scope decision. Affected local Edge browser checks: **17/17 passed in 44.5 seconds**, including new login 429/503 messages, closed account content and explicit later retry. These are Task 1 results; the new Task 9 final whole-system suite has not run.
+- Hosted rollback-only checks pass service-only RPC access, no direct counter-table grants, ten admissions then denial and fresh budget after expiry. **All 70 pre-existing public/private/Auth/Storage table counts/fingerprints match the pre-migration snapshot; all 71 tables including the new counter match before/after rolled-back checks.** No hosted login/password change/email, real payment, account/stock/settings/history change, sales reset, Git publication or deployment was performed.
+- Technical contract: `backend/supabase/LOGIN_PROTECTION.md`. Updated release/authentication guides and generated schema; added native and exact-project gated rollback verification tools. Ignored `.review/task-1-login/` retains logs, source preservation hashes/copies, native evidence and aggregate hosted fingerprints. Exclude these artifacts, clusters, environment files and backups from Git/deployment.
+- Remaining Task 1 hosting activation belongs to **Task 11 only**: use the shared Supabase project/server secret, verify actual Vercel header overwrite/ingress across invocations and networks, expiry and closed failures. No new external store/subscription is required. Shared-IP users share the ten/minute budget; consider actual shop login demand in Task 4. Inactive HMAC counter rows are cleaned opportunistically, not by a guaranteed physical-deletion deadline. Provider-direct Supabase Auth endpoints retain their own separate protection.
+
+**Exact next task:** Task 2 — agree backup coverage, retention/recovery targets and the responsible operator, then implement/verify an isolated restore drill. The prior reset backup does not satisfy this. Official data remains preserved. Obtain a separate Task 2 browser/website permission before any Task 2 web/documentation/account navigation or browser testing. Monitoring/load/accessibility follow in Tasks 3–5. Receipt requests and actual QR/payment trial remain deferred until Task 6's explicit decision; optional cleanup remains unselected until Task 7. No later task is represented as completed.
+
+**Final preservation checks:** all 18 pre-existing migration-source hashes and the public README hash match the pre-task snapshot. The entire earlier HandsOff body matches after removing only this new checkpoint (line-ending-normalized comparison). Changed existing files are limited to the intended Task 1 source/tests/configuration/guides/generated contract/handoff; other pre-existing source hashes are unchanged. The Task 1 changed-source whitespace check passes. Port 5180 has no listener and the unique native scratch cluster has no running postmaster PID file.
+
+**Task 2 decision gate at this checkpoint:** separate documentation permission and the policy/operator question below have been asked; no answer has been received yet. Independent local preparation confirmed native `pg_dump`, `pg_restore` and `psql` are available, and confirmed the prior sales-reset backup is limited to that operation. No Task 2 web access, official backup, schedule, restore drill or policy implementation is claimed. After the policy is chosen, resolve the encrypted backup destination and separate recovery-key/off-device-copy arrangement before calling recovery ready. The proposed recovery times are targets pending drill evidence, not a guarantee.
+
+```text
+For Task 2 only, may I read official Supabase backup/restore documentation and plan details? Any account navigation or changes would need their specific scope identified first.
+```
+
+```text
+For Task 2, may I use this starting policy: back up database/Auth metadata, inventory image files and recovery configuration; retain 7 daily and 4 weekly copies; target at most 24 hours of lost data and recovery within 4 hours; you own backup checks? Please give a different operator or targets if needed.
+```
+
+#### Request starting this continuation — verbatim
+
+```text
+Read C:\Users\ASUS\Documents\Personal\Vertwell\repo\HandsOff.md.
+
+Follow the newest section titled “Current order — finish selected work, final test, then Vercel deployment last.” Read the full original requirements and relevant technical guides, not only the continuation scripts. Older checkpoints are historical wherever the latest instructions supersede them.
+
+Start with the first unfinished selected task and follow the documented order. Implement and verify each task before moving forward. Do not stop at a plan or skip unfinished requirements. Preserve completed work and all existing uncommitted changes.
+
+Browser permission rule:
+Before operating or navigating a browser, interacting with a website, entering details, or running browser-based tests, ASK for my permission. Identify the specific numbered task and explain the browser activity needed.
+
+Permission applies ONLY to that specific task. When you move to another numbered task, ask again before any browser activity—even within the same chat. Never treat permission as approval for the entire task list, future tasks or future chats. While waiting, continue useful work that does not require browser access.
+
+Other boundaries:
+- Keep Vercel deployment as the LAST phase.
+- Complete all selected changes and final system acceptance before deployment.
+- Keep optional and deferred tasks pending until I choose their scope.
+- Preserve the official database, accounts, stock, settings and history. Do not repeat the completed sales reset or rewrite applied migrations.
+- Do not edit the public README.md.
+- Follow the documented approval boundaries for Git publication, database changes, real payments and public deployment.
+
+If a task requires a decision or information from me, explain what is missing and ask a concise question. Continue independent preparation where possible.
+
+Give concise progress updates. Update HandsOff.md with completed changes, actual test results, unresolved issues and the exact next task. Preserve original user messages verbatim. Never claim verification that was not performed.
+
+Begin by identifying the first unfinished task, then proceed with the authorized work.
+```
+
+#### Task 1 browser permission — exact question and answer
+
+```text
+For Task 1 only, may I use browser/web access to read official hosting and rate-limit documentation and, if needed, run local browser checks of login throttling? This permission would end before Task 2.
+```
+
+```text
+Allow Task 1 browser/web access
+```
+
+#### Task 1 database approval — exact question and answer
+
+```text
+Task 1 passes local checks: 175/175 root checks, 17/17 Edge checks, and native PostgreSQL concurrency tests. May I apply only the new shared-login-counter migration (20261022010000_shared_login_protection.sql) to DualCounter (izdemgzdywtxhvgvsian), then run schema and rollback-only limiter checks? It adds a private operational counter and server-only function; existing migrations, accounts, stock, settings and history stay intact. Your documented database boundary requires this separate approval.
+```
+
+```text
+Approve Task 1 migration and checks
+```
+
+## Previous selected-work checkpoint — seven final recommendations (October 21, 2026)
+
+The Project Manager selected all seven recommendations from the earlier read-only backend review. The table below preserves that selection and its completed-work evidence; its execution order is superseded by the current order above. The selection superseded the earlier instruction to wait for a selection of FP1–FP6. It does not authorize replaying the completed sales reset, changing the two unfinished receipt requirements, exposing secrets, rewriting applied migrations, or bypassing the user's website-navigation rule. Keep the public README unchanged unless its edit is explicitly requested.
+
+### Original selection — verbatim
+
+```text
+lets go with the 7 recommendations you have
+```
+
+| Execution order | Selected work | Status at selection / required boundary |
+| --- | --- | --- |
+| **1 — current-version acceptance** | Adapt end-to-end coverage for the account-only October 21 application and verify the final source; prepare clear browser/manual checks. The old preview-dependent 276-case result is historical. | **Complete within the disposable current-suite scope: final isolated run passes 66/66 in 3.1 minutes, no skipped/failed cases.** Root checks pass 167/167, typechecks/builds/schema pass. Explicit browser permission for this task was subsequently granted below; future tasks must ask first. Production preview was not restored. |
+| **2 — FP1** | Release-readiness review of the current source, environment, security/recovery/operations and acceptance gaps. | **Review complete; release requirements identified.** `backend/supabase/RELEASE_READINESS.md` records concrete gaps including shared public-login throttling, target/environment values, recovery email/redirect verification, backups/restore and monitoring. Review completion does not mean public deployment readiness. |
+| **3 — FP5** | Native PostgreSQL performance and concurrent-load testing, extending completed P12 disposable measurements. | **Bounded native baseline passed.** PostgreSQL 18.6 on Windows, real independent connections, oversell/exact-retry/count reconciliation and 1k/5k/20k detector measurements are recorded below. Hosted throughput, agreed shop workload/SLA and a large-history mixed-load optimization remain unestablished. |
+| **4 — FP6** | Actual-device/browser/accessibility verification. | **Windows Edge automated coverage performed; manual Narrator/zoom and other environments remain unverified.** User has Windows only for now. Desktop viewport emulation is not physical phone/tablet/Safari verification. The guide provides manual Windows instructions. |
+| **5 — FP4** | Actual shop QR replacement and manual payment trial. | **Deferred again at the user's choice: keep the sample for now.** Actual shop QR and the user's trial remain dependencies. Do not invent a real QR or submit a payment on the user's behalf. Its path remains chat-only when requested. |
+| **6 — FP2** | Review/save current work and choose the GitHub release/merge workflow. | **Source/release preparation complete; Git publication remains pending the release destination/workflow.** Current branch `Backend/Backend_Phase` at `f22bf5f`, tracking `origin/Backend_Phase`; local `main` at `90a6704`. Local work preserved; no new commit/push/PR/merge performed. Do not publish secrets or ignored artifacts. |
+| **7 — FP3** | Prepare and deploy the agreed hosting/environment configuration and verify the resulting application. | **Single-project Vercel configuration prepared, typechecked and locally smoke-checked; target/cutover remains pending.** Root `vercel.json`, shared `api/index.ts`/ES-module package, `tsconfig.deploy.json`, `.vercelignore` and the guide are ready for review. **Use the existing Supabase database, as the user selected below.** The user is new to Vercel and requested account-creation instructions; account/team/project, app URL and release branch remain unresolved. No linked project, platform build or deployment is claimed. |
+
+The two receipt requests remain deferred until the user finishes constructing them. Accounting/costing/production-batch features and external payment-provider APIs are not added. Original messages, current accounts/credentials/settings/history, all eighteen applied migration sources and the approved reset's preserved stock balances must remain intact.
+
+### Current clarifications and browser permission (October 21, 2026)
+
+The Project Manager has **Windows only for now** for actual-device checks and chose **Keep the sample for now** for the shop QR. FP4's real-shop QR/payment trial remains deferred. Do not treat Windows viewport emulation as testing a physical phone, tablet or Safari.
+
+After the user's attempted frontend command returned `Missing script: "test"`, the correct browser command was clarified as `npm run test:e2e --workspace Frontend`. The user then granted browser navigation for this task only and asked for a persistent ask-first rule, verbatim:
+
+```text
+after running it in the PowerShell this is the output
+also I'll allow you to navigate the browser for this task only. add it in the handsoff that I may allow you to navigate browser but you should ask first always ask.
+```
+
+**Browser rule from now on: always ask the user before browser/website navigation or entering details. The user may explicitly allow it for a particular task.** That explicit permission applies to the currently selected seven-recommendation task; it is not standing permission for future chats/tasks. Within this task's authorized scope, the agent can run the disposable browser acceptance suite. Future tasks must ask first and otherwise give the user clear instructions under the original navigation/token-use rule preserved below. No permission to make real payments or expose credentials is implied.
+
+The user also asked why two Vercel projects were proposed. Two projects are not required for one working application. Review a single-project setup with the frontend and `/api` under one origin; hosting/project selection and actual publication remain unresolved until a concrete setup is presented. Do not interpret that question as confirmation of two projects or approval of a particular Vercel account/project.
+
+**Database decision, verbatim:**
+
+```text
+since we are the last phase of the development we should use the official Database that we are using
+```
+
+Use the current DualCounter Supabase database for the intended deployment. No database copy or replacement was requested. Preserve its current accounts, catalogue, settings, stock and history. The user has not used Vercel before and asked, verbatim:
+
+```text
+give me instructions on how to create new account because this is my first time using Vercel
+```
+
+Give easy steps to sign up with the GitHub account that owns/can access the Vertwell repository, then wait for the user's account/project setup. A paid plan or live deployment has not been selected by that account-creation request. Before choosing a hosting plan for actual shop use, consider Vercel's documented non-commercial restriction on Hobby; do not promise that free Hobby covers the shop's live commercial operation.
+
+### Work performed and precise remaining boundaries
+
+- Added six current account-only browser cases and adapted existing login, stock receiving, username attribution and review-label assertions. Playwright now selects 66 current regressions across ten files; isolated component harnesses remain test-only. Historical preview-dependent files are retained, not counted as passing current tests.
+- Added an Express app factory and scoped the in-memory login counter to its app instance so independent disposable test servers do not share a limiter. The deployed app retains the ten-attempt/minute behavior and still requires a shared/platform limit for multi-instance public use. Existing API permission/login-limit checks pass.
+- Browser test configuration explicitly avoids local environment/config loading and the development API proxy. A test-owned middleware rejects unrouted `/api` requests with HTTP 503; direct verification confirms rejection. Auth/API/storage data remain test-owned, and no production preview or real payment behavior was added.
+- Root checks pass **129 backend + 38 frontend = 167/167**; typechecks include current browser setup/specs and the unified deployment entry. Both builds and generated-schema consistency pass. Production dependency audit reports zero advisories at this checkpoint. The build's main-chunk size warning remains an optimization follow-up.
+- Readiness, current evidence and deployment/Narrator instructions are in `backend/supabase/RELEASE_READINESS.md`. Technical-guide current-status introductions now reflect eighteen migrations and the selected work; their historical phase records remain intact. The public repository-root README remains unchanged.
+- Added `backend/scripts/profile-native.ts`, `profile-native.ps1` and `npm run profile:native --workspace backend`. The wrapper creates only a fresh unique localhost cluster under ignored review artifacts and stops it in `finally`; no Windows service is installed. The official EDB PostgreSQL 18.6 archive was verified against its distributor SHA-256 sidecar. Successful measurements ran without the root/browser suites in progress; both scratch servers from launcher preparation/the final run were verified stopped.
+- Native correctness: eight competing commands for one usable unit committed **one receipt/seven explicit conflicts/no oversell**. Eight simultaneous exact retries returned **one receipt/seven replays/one deduction**. Four independent connections/twenty attempts with one- and five-line baskets each committed five receipts and returned fifteen explicit revision conflicts, with stock/receipt counts reconciled and no silent write retries. These bounded contention cases precede the large synthetic history.
+- Native warmed detector medians (three timed samples each): **1k history — 41.43 ms affected cashier / 125.55 ms all; 5k — 195.14 / 612.92 ms; 20k — 809.90 / 2,373.17 ms.** The three-cashier/twenty-configuration synthetic workload matches P12's detector shape; the genuine qualifying burst keeps its identity/revision. Synthetic projections are not stock/payment reconciliation evidence. These are local native SQL timings, not hosted API throughput or an agreed SLA. No SQL optimization or migration change was made. Evaluate signature reuse/projection before high-volume use against chosen mixed-load targets.
+- Artifacts: ignored `.review/final-acceptance/` stores check logs, source-secret scan and pre-task preservation snapshot; `.review/fp5-native/result.json` and `plans.json` store native measurements/query plans. Local native binaries/clusters remain ignored for inspection. Never commit/deploy them or the retained sales-reset backup.
+- Preservation: hashes match for the root README and **all 18 migration sources**; the entire pre-task handoff body is preserved (line-ending-normalized comparison). The sample QR hash is unchanged. Current local server secret values were absent from 358 source files eligible for Git and all 85 browser build files; no non-example environment file was eligible for Git. This comparison is scoped evidence, not an unrestricted secret/security audit.
+- **Final browser-isolation result: 66/66 passed in one clean 3.1-minute run**, with no failures/skips. Log: `.review/final-acceptance/browser-tests-isolated.log`. The additional HTTP check confirms an unrouted `/api/health` receives 503 from the test-only middleware. The prepared deployment ES-module entry is callable and its local health/JSON-404/unauthenticated-denial smoke check passes; Vercel platform routing/build still awaits a real target.
+- **Still needed:** user-observed Windows Narrator/zoom; actual QR/manual payment trial when supplied; Vercel signup/account/team/project/app URL, hosting-plan and release branch/workflow decisions; exact live origin/Auth redirects, platform/public-login rate limit and real recovery/backup/monitoring verification. **The database choice is settled: use the existing Supabase database.** No new hosted data reset/business trial, credential change, commit, push, PR, merge or deployment was performed in this task. Do not restart these checks just because older historical sections say FP1–FP6 are unselected; the newest selection governs.
+
 ## Newest priority — frontend fixes for a separate new chat (October 19, 2026)
 
-**Status: recorded only; implementation, investigation and verification are pending for the new task.** The user explicitly requested preserving the full message without summarizing so their intent passes to the next chat. This update adds documentation only. It does not start these fixes, navigate any website, change application code or delete database transactions. Read the entire original message below before starting the new task.
+**Current status (October 21): frontend-priority implementation and the additive hosted migration are complete; verification is recorded below. The requested hosted sales reset is complete after the user’s direct approval: 22 sales and related records removed, backup saved, and accounts/catalogue/settings plus all batch balances verified unchanged. Both unfinished receipt requests remain deferred at the user’s instruction. Password/auth-ID visibility in the browser has the explicit limitation recorded below.**
+
+**Historical recording status (October 19; superseded by the October 21 implementation below): recorded only.** The user explicitly requested preserving the full message without summarizing so their intent passes to the next chat. This update adds documentation only. It does not start these fixes, navigate any website, change application code or delete database transactions. Read the entire original message below before starting the new task.
 
 This is a new frontend-priority request, separate from FP1–FP6 below. Those Final Priorities remain waiting for the Project Manager's decision. The previous accepted application checkpoints remain historical evidence for their recorded source snapshots; they do not establish that the newly reported issues are fixed.
+
+### October 21, 2026 — implementation of the complete newest request
+
+The user asked this chat to read HandsOff.md and implement the highest-priority task, following the full original message rather than only its continuation script. The October 19 original request and additional two-item message below remain intact. This authorizes this frontend-priority task; it does not select FP1–FP6.
+
+**Clarification received, verbatim:**
+
+> skip that part and labeled it as unfinished task so for later im gonna finished constructing that task
+
+This applies to both unfinished receipt sentences. **UNFINISHED — deferred at the user's instruction:** “Receipt is for a day only” and “Remove unknown phrase on receipt.” Do not infer their missing scope or implement them until the user finishes constructing those tasks.
+
+**Quantity clarification received, verbatim:**
+
+> 0.5 with fractions is allowed and if the unit of quantity uses whole number greater than or equal to one is accepted
+
+Implementation uses positive fractional quantities/alerts for measured units and whole quantities/alerts of at least 1 for pieces/bottles. Existing stock corrections can reach zero.
+
+**Implemented in source:**
+
+- Accessible clickable SVG information disclosures; simpler daily-review explanations with spacing and separate Cash/GCash expected, verified and difference cards.
+- Daily-review totals and submitted targets use checked receipts only, with at least one selected receipt. Unchecked receipts remain pending. Notes are optional, including an explicitly accepted displayed difference. Empty audit Daily Sales Review queues are hidden.
+- Real-account login only; removed Explore preview and production mock initialization. Sample datasets now live under tests/fixtures. Replaced “Two Shops one System.”
+- URLs for Login, Dashboard, Inventory, POS, Reports, Audit-Trail and Users, including initial role-aware direct links and history navigation. Localhost is retained; no domain/deployment change.
+- Username in navigation/current operational UI and new database audit/sales attribution. Full names remain available where needed to manage account details; existing historical evidence is not rewritten.
+- Pagination hidden below two pages; right-aligned inventory row actions with Remove last; newest-first records and latest batch display while preserving canonical batch numbering and checkout consumption ordering.
+- Automatic database SKU assignment with no SKU input/Generate button. Duplicate normalized names prompt before receiving against the existing stock; SQL rejects races. New-stock and receipt audit reasons are supplied by the system; edit-stock reasons remain.
+- Positive creation/receipt quantities and alerts with the clarified whole/fraction rule. Fixed 12% VAT verified against checkout subtotal and rounding, alongside existing total validation.
+- Reports place current Needs attention before summaries and tables.
+- Reduced login response to required tokens and removed plaintext passwords from account-creation retry signatures. Stored passwords are managed by Supabase Auth and are never returned by account/profile APIs. **A password being typed and IDs/tokens required by authentication remain inspectable on the browser owner's device. No false claim of hiding them from DevTools is made.**
+
+**Database and reset:** new additive migration 20261021010000_frontend_priority_contracts.sql; all earlier migration sources remain unchanged. Privileged reset CLI prepared and tested, with backup, exact-snapshot confirmation, transactional trigger restoration and protected data/balance checks. Hosted dry run found 22 sales, 22 payments, 3 daily reviews, 4 void requests and related evidence; it rolled back with accounts/catalogue/settings and every batch balance preserved. Hosted migration applied and verified on DualCounter izdemgzdywtxhvgvsian: all 18 migration hashes, schema and grants pass. New migration SHA-256: 85fbb6e3ff86a16dafbe142913f0db25bd4621e2afc7a27cfa8222e1106b52ed. The first commit-mode sales reset attempt was rejected before execution by automatic approval review because direct authorization for the exact destructive hosted reset was required. The user subsequently answered the explicit approval question, verbatim:
+
+> Approve the sales reset
+
+**Approved reset completed October 21, 2026, at approximately 6:55 PM Asia/Manila.** The exact previously reviewed 22-sale snapshot still matched its confirmation token. The CLI saved the affected-row backup before committing, removed the 22 sales and related payments, purchased receipt/usage records, 3 reviews, 4 void requests, retry records and sales notifications. It retained all accounts, stock/catalogue definitions, settings and every batch's physical quantity. The 61 stock movements remain; prior sale-linked consumption is now an unlinked correction for the same amount, so inventory was not replenished. Unrelated account/inventory audit evidence remains (146 audit events after reset).
+
+Backup (outside the repository, in the ignored workspace review directory): C:/Users/ASUS/Documents/Personal/Vertwell/.review/sales-reset/1792580143584-izdemgzdywtxhvgvsian.json. Post-commit verification: C:/Users/ASUS/Documents/Personal/Vertwell/.review/sales-reset/post-reset-check.json. Verification at 6:56 PM Asia/Manila confirmed all sales/payment/receipt/review/void/retry/notification tables empty, every protected account/catalogue/settings hash and batch-balance hash equal to the backup, and zero disabled user triggers. No further reset is pending; do not rerun the destructive command on later business sales without a new user request.
+
+**Verification:** 129 backend checks and 38 frontend unit/render checks pass (167 total). Final root typechecks, both production builds and generated-schema consistency pass. The inventory disk-persistence case was rerun after replacing its positional scenario reference with a name lookup (17/17 inventory cases). The final name-field duplicate prompt is also checked on blur, so the user need not fill an entire new-item form before being warned. Tests include selected-receipt review, optional discrepancy notes, duplicate-name guards, zero/fraction rules, reset rollback/guard restoration and a new checkout after reset. No website navigation, browser form entry, commit/push, deployment, FP work or root README edit was performed. The older 276-browser-run checkpoint is historical; preview-dependent browser suites do not verify this new account-only application.
+
+Technical contract: backend/supabase/FRONTEND_PRIORITY.md. Manual browser verification remains for the user under the navigation/token-use rule.
 
 ### Website navigation and token-use rule — user's full wording
 
@@ -60,7 +675,7 @@ add this in the list of task as well
 - as the Product and Ingredient there is Reason for stock change remove this Input box, but you can keep the Reason for stock change in Editing Ingredient or Product.
 ```
 
-### Continuation for the new frontend-fixes chat
+### Historical continuation for the new frontend-fixes chat — superseded by the October 21 progress
 
 ```text
 Start in C:/Users/ASUS/Documents/Personal/Vertwell/repo when the user opens the

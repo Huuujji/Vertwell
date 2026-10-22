@@ -43,6 +43,7 @@ export function decodePosProduct(value:unknown):PosProduct {
 function decodeTotals(value:unknown) {
   const r=record(value);if(r.version!==1)invalidResponse('checkout version');
   const subtotal=money(r.subtotal),tax=money(r.tax),total=money(r.total);
+  if ((scaledDecimal(subtotal,2)*12n+50n)/100n !== scaledDecimal(tax,2)) invalidResponse('checkout VAT');
   if(scaledDecimal(subtotal,2)+scaledDecimal(tax,2)!==scaledDecimal(total,2))invalidResponse('checkout total');
   const lines=array(r.lines).map(value=>{const l=record(value);return {productId:id(l.productId),variantId:l.variantId===null?null:id(l.variantId),name:text(l.name),sku:text(l.sku),
     quantity:integer(l.quantity),unitPrice:money(l.unitPrice),originalUnitPrice:money(l.originalUnitPrice),
@@ -63,7 +64,7 @@ export function decodeReceipt(value:unknown):CheckoutReceipt {
     stockCommitted:true,replayed:bool(r.replayed),method:choice(text(r.method),['Cash','GCash']),cashierName:text(r.cashierName),cashierRole:choice(text(r.cashierRole),['Owner','Admin','Staff']),
     reference:r.reference===null?null:text(r.reference),cashTendered:r.cashTendered===null?null:money(r.cashTendered),change:r.change===null?null:money(r.change),providerVerified:false};
 }
-export function createCheckoutData(request:Transport) {
+export function createCheckoutData(request:Transport, observe: (event: 'storage.unavailable') => void = () => {}) {
   return {
     async catalogue(signal?:AbortSignal){
       const items:PosProduct[]=[];
@@ -80,7 +81,7 @@ export function createCheckoutData(request:Transport) {
           const signed=record(await request('/api/pos/image-urls',{method:'POST',body:JSON.stringify({paths}),signal}));
           const urls=new Map(array(signed.images).map(value=>{const i=record(value);const url=text(i.signedUrl);if(!/^https:\/\//.test(url))invalidResponse('image URL');return [text(i.path),url];}));
           page.forEach(p=>{p.imageUrl=p.imagePath?urls.get(p.imagePath):undefined;});
-        }catch{/* Optional images do not prevent a sale; refresh retries signing. */}
+        }catch{observe('storage.unavailable');/* Optional images do not prevent a sale; refresh retries signing. */}
         items.push(...page);
         if(r.hasMore===false) {if(new Set(items.map(p=>p.id)).size!==items.length)invalidResponse('duplicate POS products');return items;}
         if(r.hasMore!==true||page.length!==100)invalidResponse('POS pagination');

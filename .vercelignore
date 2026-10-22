@@ -1,0 +1,13 @@
+.review/
+.npm-cache/
+.env
+.env.*
+backend/.env
+backend/.env.*
+Frontend/.env
+Frontend/.env.*
+node_modules/
+**/node_modules/
+**/test-results/
+**/playwright-report/
+HandsOff.md

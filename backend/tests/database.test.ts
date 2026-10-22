@@ -23,7 +23,7 @@ async function initialize(database: PGlite) {
 before(async () => {
   const files = (await readdir(new URL('migrations/', sqlRoot))).filter(name => name.endsWith('.sql')).sort();
   migrations = await Promise.all(files.map(name => readFile(new URL(`migrations/${name}`, sqlRoot), 'utf8')));
-  assert.equal(files.length, 17);
+  assert.equal(files.length, 19);
   db = new PGlite();
   await initialize(db);
 });
@@ -86,7 +86,7 @@ test('fresh migrations expose only scoped P4 reads and restricted functions, wit
   assert.deepEqual(grants.rows, ['alert_settings','payments','sale_item_modifiers','sale_items','sales','void_requests']
     .map(table_name => ({table_name,grantee:'authenticated',privilege_type:'SELECT'})));
   assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public'`), 24);
+    where n.nspname='public'`), 25);
   for (const role of ['anon', 'authenticated', 'service_role']) {
     assert.equal(await scalar(`select has_schema_privilege($1,'private','USAGE')`, [role]), role === 'authenticated');
     assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
@@ -347,13 +347,13 @@ test('void history retains every request and resolved decisions cannot be replac
   assert.equal(await scalar('select count(*)::int from public.void_requests where sale_id=$1', [receipt]), 2);
 });
 
-test('review reconciliation requires explanation, records receipt verification once and remains immutable', async () => {
+test('review reconciliation allows optional notes, records receipt verification once and remains immutable', async () => {
   await actor();
   const receipt = await sale();
   const insert = `insert into public.daily_sales_reviews(business_date,owner_id,owner_name,expected_cash,expected_gcash,
     verified_cash,verified_gcash,counted_cash,opening_cash,additions,removals,refunds,explanation,outcome,operation_id)
     values ('2026-01-02',$1,'Original Owner',56,0,$2,0,56,0,0,0,0,$3,$4,$5) returning id`;
-  await rejected(insert,/check constraint/, [owner,50,'','Reviewed with explained discrepancy',randomUUID()]);
+  await scalar(insert,[owner,50,'','Reviewed with discrepancy',randomUUID()]);
   await rejected(insert,/check constraint/, [owner,50,'Explained','Matched',randomUUID()]);
   const review = String(await scalar(insert, [owner,56,'','Matched',randomUUID()]));
   await db.query('insert into public.daily_sales_review_items values ($1,$2,true,56)', [review,receipt]);

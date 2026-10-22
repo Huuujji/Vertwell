@@ -50,7 +50,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
   for(const u of t.sale_item_stock_usage)if(!lines.has(u.sale_item_id)||!stocks.has(u.stock_item_id))invalidResponse('purchased stock usage');
   const orderLines=(id:string)=>t.sale_items.filter(l=>l.sale_id===id);
   const matches=(category:string)=>f.category==='All categories'||(f.category==='Hobby'?category==='Hobby':category!=='Hobby');
-  const timed=t.sales.filter(s=>within(s.occurred_at)).sort((a,b)=>a.occurred_at.localeCompare(b.occurred_at)||a.id.localeCompare(b.id));
+  const timed=t.sales.filter(s=>within(s.occurred_at)).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)||b.id.localeCompare(a.id));
   const sales=timed.filter(s=>f.category==='All categories'||orderLines(s.id).some(l=>matches(l.category)));
   // Allocate rounded cents once to Hobby; the complementary share always adds back.
   const share=(s:typeof t.sales[number],value:string)=>{
@@ -78,7 +78,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
       if(s.status==='Voided')exceptions.push([s.order_number,'Voided receipt','No automatic stock return or external payment refund. See recorded movements.']);
     }
   }
-  const balances=t.stock_items.map(item=>{
+  const balances=[...t.stock_items].sort((a,b)=>b.created_at.localeCompare(a.created_at)||b.id.localeCompare(a.id)).map(item=>{
     const ownBatches=t.stock_batches.filter(b=>b.stock_item_id===item.id),ids=new Set(ownBatches.map(b=>b.id));
     const moves=t.stock_movements.filter(m=>ids.has(m.batch_id));
     const dated=moves.map(m=>({...m,date:m.business_date??day(m.occurred_at),q:n(m.quantity_base)}));
@@ -129,7 +129,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
   }
   const selectedIds=new Set(sales.map(s=>s.id)),timedIds=new Set(timed.map(s=>s.id));
   const saleLabel=(id:string)=>allSales.get(id)?.order_number??id;
-  const stockUsage=t.sale_item_stock_usage.filter(u=>{const l=lines.get(u.sale_item_id)!;return timedIds.has(l.sale_id)&&allSales.get(l.sale_id)!.stock_committed===true;});
+  const stockUsage=t.sale_item_stock_usage.filter(u=>{const l=lines.get(u.sale_item_id)!;return timedIds.has(l.sale_id)&&allSales.get(l.sale_id)!.stock_committed===true;}).sort((a,b)=>allSales.get(lines.get(b.sale_item_id)!.sale_id)!.occurred_at.localeCompare(allSales.get(lines.get(a.sale_item_id)!.sale_id)!.occurred_at)||b.id.localeCompare(a.id));
   const usageRows=stockUsage.map(u=>{
     const l=lines.get(u.sale_item_id)!,s=allSales.get(l.sale_id)!;
     const modifiers=t.sale_item_modifiers.filter(m=>m.sale_item_id===l.id).map(m=>m.name).join(', ');
@@ -139,7 +139,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
   const usageTotals=new Map<string,{name:string;sku:string;unit:string;q:bigint}>();
   for(const u of stockUsage){const key=`${u.stock_item_id}:${u.sku}:${u.unit_code}`,v=usageTotals.get(key)??{name:u.name,sku:u.sku,unit:u.unit_code,q:0n};v.q+=n(u.quantity_base);usageTotals.set(key,v);}
   const reviewIds=new Set(t.daily_sales_review_items.filter(i=>selectedIds.has(i.sale_id)).map(i=>i.review_id));
-  const reviews=t.daily_sales_reviews.filter(r=>reviewIds.has(r.id));
+  const reviews=t.daily_sales_reviews.filter(r=>reviewIds.has(r.id)).sort((a,b)=>b.reviewed_at.localeCompare(a.reviewed_at)||b.id.localeCompare(a.id));
   const financial:ReportSection[]=[
     section('Sales summary',['Metric','Value'],[
       ['Completed total (recorded tax included)',pesos(total)],['Completed subtotal (before recorded tax)',pesos(sum(completed.map(allocatedSubtotal)))],
@@ -152,16 +152,16 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
       `${s.status}\n${pesos(share(s,s.total))}`,s.status==='Voided'?`${s.voided_name} (${s.voided_role})\n${s.void_reason}\nNo automatic refund or stock return`:'—'])),
     section('Purchased items and configurations',['Order / product / SKU','Category / quantity','Original / sold unit price','Purchased configuration'],
       sales.flatMap(s=>orderLines(s.id).filter(l=>matches(l.category)).map(l=>[`${s.order_number}\n${l.name} / ${l.sku}`,`${l.category}\n${l.quantity}`,`${pesos(cents(l.original_unit_price))} / ${pesos(cents(l.unit_price))}`,configuration(l.configuration_snapshot)]))),
-    section('Recorded payments',['Order / method','Amount','Reference / tendered / change','Verification'],t.payments.filter(p=>selectedIds.has(p.sale_id)).map(p=>[
+    section('Recorded payments',['Order / method','Amount','Reference / tendered / change','Verification'],t.payments.filter(p=>selectedIds.has(p.sale_id)).sort((a,b)=>b.recorded_at.localeCompare(a.recorded_at)||b.id.localeCompare(a.id)).map(p=>[
       `${saleLabel(p.sale_id)}\n${p.method}`,pesos(cents(p.amount)),p.reference??`${pesos(cents(p.cash_tendered??'0'))} tendered\n${pesos(cents(p.change_given??'0'))} change`,
       p.method==='GCash'?'Reference recorded; provider verification unavailable':'Recorded cash receipt'])),
     section('Daily Sales Reviews · original receipt sets',['Review / business date / Owner','Original expected / verified','Counted / adjustments','Outcome / explanation / original included orders'],reviews.map(r=>[
       `${r.id}\n${r.business_date}\n${r.owner_name} (${r.owner_role})\n${stamp(r.reviewed_at)}`,`Cash ${pesos(cents(r.expected_cash))} / ${pesos(cents(r.verified_cash))}\nGCash ${pesos(cents(r.expected_gcash))} / ${pesos(cents(r.verified_gcash))}`,
       `Counted ${pesos(cents(r.counted_cash))}\nOpening ${pesos(cents(r.opening_cash))}\nAdded ${pesos(cents(r.additions))}\nRemoved ${pesos(cents(r.removals))}\nRefunds ${pesos(cents(r.refunds))}`,
-      `${r.outcome}\n${r.explanation||'No discrepancy'}\n${t.daily_sales_review_items.filter(i=>i.review_id===r.id).map(i=>`${saleLabel(i.sale_id)} (${i.sale_id}); receipt verified: ${i.receipt_verified}; amount ${pesos(cents(i.verified_amount))}`).join('\n')}`])),
-    section('Recorded cash adjustments',['Review / order','Type / amount','Actor / time','Reason'],t.cash_movements.filter(c=>c.review_id?reviewIds.has(c.review_id):c.sale_id?selectedIds.has(c.sale_id):within(c.occurred_at)).map(c=>[
+      `${r.outcome}\n${r.explanation||'No review note entered'}\n${t.daily_sales_review_items.filter(i=>i.review_id===r.id).map(i=>`${saleLabel(i.sale_id)} (${i.sale_id}); receipt verified: ${i.receipt_verified}; amount ${pesos(cents(i.verified_amount))}`).join('\n')}`])),
+    section('Recorded cash adjustments',['Review / order','Type / amount','Actor / time','Reason'],t.cash_movements.filter(c=>c.review_id?reviewIds.has(c.review_id):c.sale_id?selectedIds.has(c.sale_id):within(c.occurred_at)).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)||b.id.localeCompare(a.id)).map(c=>[
       c.review_id??(c.sale_id?saleLabel(c.sale_id):'Independent movement'),`${c.kind}\n${pesos(cents(c.amount))}`,`${c.actor_name} (${c.actor_role})\n${stamp(c.occurred_at)}`,c.reason])),
-    section('Void requests and decisions',['Order / status','Requester / time / reason','Decision actor / time','Decision reason'],t.void_requests.filter(v=>selectedIds.has(v.sale_id)).map(v=>[
+    section('Void requests and decisions',['Order / status','Requester / time / reason','Decision actor / time','Decision reason'],t.void_requests.filter(v=>selectedIds.has(v.sale_id)).sort((a,b)=>b.requested_at.localeCompare(a.requested_at)||b.id.localeCompare(a.id)).map(v=>[
       `${saleLabel(v.sale_id)}\n${v.status}`,`${v.requested_name} (${v.requested_role})\n${stamp(v.requested_at)}\n${v.reason}`,v.reviewed_at?`${v.reviewed_name} (${v.reviewed_role})\n${stamp(v.reviewed_at)}`:'Awaiting decision',v.decision_reason??'—'])),
   ];
   const inventory:ReportSection[]=[
@@ -179,10 +179,10 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
     section(`Stocks remaining · current on hand (${snapshot.businessDate})`,['Item / SKU','Physical / usable','Unit','Threshold / availability'],balances.map(b=>[
       `${b.item.name} / ${b.sku}${b.item.archived_at?' · Archived':''}`,`${b.display(b.current)} physical\n${b.display(b.usable)} usable`,b.unit,
       `${b.display(n(b.item.threshold_base))} reorder\n${b.item.archived_at?'Archived':b.usable===0n?'Out of usable stock':b.usable<=n(b.item.threshold_base)?'Low Stock':'Available'}`])),
-    section('Stock movements · full business days',['Date / batch / item / SKU','Movement / quantity / unit','Order / actor','Reason'],t.stock_movements.filter(m=>onDays(m.occurred_at)).map(m=>[
+    section('Stock movements · full business days',['Date / batch / item / SKU','Movement / quantity / unit','Order / actor','Reason'],t.stock_movements.filter(m=>onDays(m.occurred_at)).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)||b.id.localeCompare(a.id)).map(m=>[
       `${stamp(m.occurred_at)}\n${m.batch_id}\n${m.stock_name} / ${m.stock_sku}`,`${m.kind}\n${qty(n(m.quantity_base),m.unit_code)} ${m.unit_code}`,
       `${m.sale_item_id?saleLabel(lines.get(m.sale_item_id)?.sale_id??''):''}\n${m.actor_name} (${m.actor_role})`,m.reason])),
-    section('Current stock batches and expiry',['Item / SKU / batch','Physical / usable','Manufactured / expires','Availability'],t.stock_batches.map(b=>{
+    section('Current stock batches and expiry',['Item / SKU / batch','Physical / usable','Manufactured / expires','Availability'],[...t.stock_batches].sort((a,b)=>b.received_at.localeCompare(a.received_at)||b.id.localeCompare(a.id)).map(b=>{
       const item=stocks.get(b.stock_item_id)!,q=sum(t.stock_movements.filter(m=>m.batch_id===b.id).map(m=>n(m.quantity_base)));
       const usable=!item.archived_at&&!b.archived_at&&!item.unsellable&&!b.unsellable&&(!b.expires_on||b.expires_on>=snapshot.businessDate);
       return [`${item.name} / ${skus.get(item.sku_id)}\n${b.id}`,`${qty(q,item.unit_code)} / ${qty(usable?q:0n,item.unit_code)} ${item.unit_code}`,`${b.manufactured_on??'Unrecorded'} / ${b.expires_on??'Unrecorded'}`,b.archived_at||item.archived_at?'Archived':!usable?'Expired / unsellable':'Usable'];

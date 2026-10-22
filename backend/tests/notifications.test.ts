@@ -26,7 +26,7 @@ async function requested(){
 }
 test('void notifications save original evidence and per-account read markers without changing business state',async()=>{
   const f=await requested(),before=await f.physical();await checkoutAs(db,f.actors.owner);
-  const item=(await feed()).items[0];assert.equal(item.kind,'Void requests');assert.equal(item.evidence.actor,'P6 staff');
+  const item=(await feed()).items[0];assert.equal(item.kind,'Void requests');assert.equal(item.evidence.actor,`p6-${f.actors.staff}`);
   assert.deepEqual(item.orderIds,[f.sale.saleId]);assert.equal((await feed()).unread,1);
   await mark(item);assert.equal((await feed()).unread,0);assert.equal((await feed()).items[0].read,true);
   await checkoutAs(db,f.actors.admin);assert.equal((await feed()).unread,1);await mark(item);

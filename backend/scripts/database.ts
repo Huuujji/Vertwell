@@ -129,6 +129,7 @@ async function verify(client: pg.Client) {
     {proname:'business_access',rolname:'authenticated'},
     {proname:'check_checkout_product',rolname:'authenticated'},
     {proname:'checkout',rolname:'authenticated'},
+    {proname:'consume_login_attempt',rolname:'service_role'},
     {proname:'current_profile',rolname:'authenticated'},
     {proname:'inventory_command',rolname:'authenticated'},
     {proname:'quote_checkout',rolname:'authenticated'},

@@ -24,3 +24,16 @@ test('an explicit checkout retry sends the original operation exactly; a failed 
   const service=createCheckoutData(request);await assert.rejects(()=>service.checkout(command));assert.equal(bodies.length,1);
   assert.equal((await service.checkout(command)).replayed,true);assert.equal(bodies[0],bodies[1]);
 });
+
+test('optional image failure emits bounded availability state while preserving the sellable catalogue',async()=>{
+  const hints:string[]=[];
+  const request=createApiClient({fetcher:async url=>String(url).includes('/pos/image-urls')
+    ? Response.json({error:{message:'Storage unavailable'}},{status:503})
+    : Response.json({version:1,checkoutReady:true,revision:'1',businessDate:'2026-10-22',hasMore:false,items:[{
+      id,name:'Test product',sku:'TEST-1',category:'Hobby',model:'Retail Item',basePrice:'12.50',priceFrom:null,priceTo:null,
+      discountType:'None',discountValue:'0',available:true,imagePath:`${id}/${id}.png`,variants:[],groups:[],components:[],
+    }]})});
+  const products=await createCheckoutData(request,event=>hints.push(event)).catalogue();
+  assert.equal(products.length,1);assert.equal(products[0]!.available,true);assert.equal(products[0]!.imageUrl,undefined);
+  assert.deepEqual(hints,['storage.unavailable']);
+});

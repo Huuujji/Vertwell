@@ -16,6 +16,8 @@
 // 20261018020000_pos_stock_feedback.sql: 7e738185ac211ca9b9bebcbd79017f61986c7256d0b7a536cb0bbcbd2d53c2c8
 // 20261018030000_in_app_notifications.sql: 163b44c5c6d3dbab6e4fc7fc699a234b2347763d5ca5359a123da7f9981c3e85
 // 20261018040000_stable_notification_identity.sql: c66acb91112e4e5b56f997d92deca7b7c9d4b33508600207ec34da4cf31fc32f
+// 20261021010000_frontend_priority_contracts.sql: 85fbb6e3ff86a16dafbe142913f0db25bd4621e2afc7a27cfa8222e1106b52ed
+// 20261022010000_shared_login_protection.sql: ca248ef0cb34b93e73fd57aba9ecbec5e729335694c7d2284104deec852b40eb
 // Decimal wire values are strings; conversion to display numbers is explicit.
 export const databaseSchema = {
   alert_settings: {

@@ -9,6 +9,8 @@ function session() {
   return { access_token: token, refresh_token: 'test-refresh', expires_in: 3600, expires_at: now + 3600, token_type: 'bearer', user };
 }
 async function configured(page: Page) {
+  // No unhandled API request may reach a configured development backend.
+  await page.route('**/api/**', route => route.fulfill({status:503,json:{error:{message:'Service not configured in this authentication fixture'}}}));
   await page.route('**/src/lib/supabase.ts', async route => {
     const response = await route.fetch();
     const source = (await response.text()).replace(/const url = .*?;/, 'const url = "https://auth.test";').replace(/const key = .*?;/, 'const key = "test-publishable";');
@@ -38,25 +40,49 @@ async function login(page: Page) {
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
 }
 
+test('login throttling and protection outages keep the account closed and allow an explicit later retry', async ({ page }) => {
+  await configured(page);
+  let attempts = 0;
+  await page.route('**/api/auth/login', route => {
+    attempts++;
+    if (attempts === 1) return route.fulfill({ status: 429, headers: { 'Retry-After': '60' },
+      json: { error: { message: 'Too many login attempts. Try again in a minute.' } } });
+    if (attempts === 2) return route.fulfill({ status: 503,
+      json: { error: { message: 'Login protection is unavailable. Try again shortly.' } } });
+    return route.fulfill({ json: { session: session() } });
+  });
+  await login(page);
+  await expect(page.getByRole('alert')).toHaveText('Too many login attempts. Try again in a minute.');
+  await expect(page.locator('.workspace')).toHaveCount(0);
+  expect(attempts).toBe(1);
+  await page.getByRole('button', { name: 'Log in', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Login protection is unavailable. Try again shortly.');
+  await expect(page.locator('.workspace')).toHaveCount(0);
+  expect(attempts).toBe(2);
+  await page.getByRole('button', { name: 'Log in', exact: true }).click();
+  await expect(page.locator('.nav-identity').filter({ hasText: 'real-owner' })).toBeVisible();
+  expect(attempts).toBe(3);
+});
+
 test('configured login uses the real Owner profile, restores it and logs out without exposing sample business data', async ({ page }) => {
   await configured(page); await login(page);
-  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
+  await expect(page.locator('.nav-identity').filter({hasText:'real-owner'})).toBeVisible();
   await expect(page.locator('.nav-identity')).toContainText('Owner');
   await expect(page.getByRole('heading',{name:/Welcome,/})).toHaveCount(0);
   await expect(page.getByText('Sample data · resets on refresh', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toHaveCount(0);
   await page.reload();
-  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
+  await expect(page.locator('.nav-identity').filter({hasText:'real-owner'})).toBeVisible();
   await page.getByRole('button', { name: 'Log out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 });
 
 test('profile denial removes authenticated content and offers explicit retry/logout', async ({ page }) => {
   const policy = await configured(page); await login(page);
-  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
+  await expect(page.locator('.nav-identity').filter({hasText:'real-owner'})).toBeVisible();
   policy.deny(); await page.reload();
   await expect(page.getByRole('alert')).toContainText('Account inactive');
-  await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toHaveCount(0);
+  await expect(page.locator('.nav-identity').filter({hasText:'real-owner'})).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible();
 });
 
@@ -106,7 +132,7 @@ for (const callback of ['expired', 'missing-verifier', 'non-recovery', 'empty', 
   test(`${callback} callback cannot reuse an existing session as password-recovery proof`, async ({ page }) => {
     await configured(page);
     await login(page);
-    await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toBeVisible();
+    await expect(page.locator('.nav-identity').filter({hasText:'real-owner'})).toBeVisible();
     await page.evaluate(kind => {
       if (kind === 'expired' || kind === 'non-recovery') {
         localStorage.setItem('sb-auth-auth-token-code-verifier', JSON.stringify(`test-verifier${kind === 'expired' ? '/recovery' : ''}`));
@@ -119,7 +145,7 @@ for (const callback of ['expired', 'missing-verifier', 'non-recovery', 'empty', 
       ? '/auth/callback?error_code=otp_expired' : '/auth/callback?code=invalid-recovery-code');
     await expect(page.getByRole('alert')).toContainText('invalid or expired');
     await expect(page.getByRole('heading', { name: 'Choose a new password' })).toHaveCount(0);
-    await expect(page.locator('.nav-identity').filter({hasText:'Real Owner'})).toHaveCount(0);
+    await expect(page.locator('.nav-identity').filter({hasText:'real-owner'})).toHaveCount(0);
     await expect(page).toHaveURL('/');
   });
 }

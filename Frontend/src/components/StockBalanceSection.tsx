@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import InfoDisclosure from './InfoDisclosure';
 
 export default function StockBalanceSection({start,end,known,total,partial,note,children,methodNotes,preview=false}:{
   start:string;end:string;known:number;total:number;partial:number;note:string;children:ReactNode;methodNotes?:ReactNode;preview?:boolean;
@@ -6,7 +7,7 @@ export default function StockBalanceSection({start,end,known,total,partial,note,
   return <section className="ingredient-balances" aria-label="Ingredient usage and remaining percentages">
     <div className="report-section-heading"><div><h2>Ingredient usage / remaining stock</h2><p>{start} to {end} · full business days · all inventory categories</p></div>
       <span className="record-count">{known} of {total} balances available{partial>0?` · ${partial} with partial history`:''}</span></div>
-    <p className="report-note">{note}</p><ul className="balance-legend" aria-label="Stock balance legend">
+    <InfoDisclosure label="How ingredient balances are calculated"><p>{note}</p></InfoDisclosure><ul className="balance-legend" aria-label="Stock balance legend">
       <li><span className="balance-swatch balance-remaining" aria-hidden="true"/>Green · remaining stock</li><li><span className="balance-swatch balance-used" aria-hidden="true"/>Gold · used in orders</li>
       <li><span className="balance-swatch balance-removed" aria-hidden="true"/>Red / burgundy · removed stock</li><li><span className="balance-swatch baseline-unavailable" aria-hidden="true"/>Striped gray · balance unavailable</li></ul>
     {children}

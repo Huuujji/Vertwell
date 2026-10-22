@@ -24,7 +24,7 @@ test('P5 aggregate and movement data survive closing and reopening a disk databa
   const parent=fileURLToPath(new URL('../../../.review/',import.meta.url));await mkdir(parent,{recursive:true});
   const path=await mkdtemp(`${parent}p5-database-`);let disk=new PGlite(path);
   try {
-    await initialize(disk);await disk.query('begin');await inventoryScenarios[1]!.run(disk);await disk.query('commit');
+    await initialize(disk);await disk.query('begin');await inventoryScenarios.find(s=>s.name.startsWith('Retail aggregate'))!.run(disk);await disk.query('commit');
     const read=()=>disk.transaction(async tx=>{
       const owner=(await tx.query<{id:string}>("select id from public.profiles where role='Owner' limit 1")).rows[0]!.id;
       await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[owner]);await tx.query('set local role authenticated');

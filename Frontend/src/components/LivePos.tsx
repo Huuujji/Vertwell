@@ -1,4 +1,5 @@
 import CartSummary from './CartSummary';
+import { reportOperationalEvent } from '../lib/operations';
 import CartItem, { OrderItemCount } from './CartItem';
 import OrderReceiptDetails from './OrderReceiptDetails';
 import useCheckoutStock from './useCheckoutStock';
@@ -33,7 +34,7 @@ function componentSummary(values:unknown[]):string {
 }
 
 export default function LivePos({scope,active,role,name,onBusyChange,onUncertainChange,onSaved,onDirtyChange}:{onDirtyChange:(value:boolean)=>void;scope:string;active:boolean;role:Role;name:string;onBusyChange:(value:boolean)=>void;onUncertainChange:(value:boolean)=>void;onSaved:()=>void}) {
-  const [service]=useState(()=>createCheckoutData(apiRequest));
+  const [service]=useState(()=>createCheckoutData(apiRequest,reportOperationalEvent));
   const load=useCallback((signal:AbortSignal)=>service.catalogue(signal),[service]);
   const catalogue=useLiveResource<PosProduct[]>(scope,load,['catalogue']);
   const [cart,setCart]=useState<CheckoutLine[]>([]),[quote,setQuote]=useState<CheckoutQuote|null>(null);
@@ -110,13 +111,16 @@ export default function LivePos({scope,active,role,name,onBusyChange,onUncertain
       try{sessionStorage.setItem(recoveryKey,JSON.stringify({command,quote}));}
       catch{setPending(null);throw new Error('Checkout recovery cannot be saved in this browser. Enable session storage before recording payment.');}
       try{
-        const saved=await service.checkout(command);setReceipt(saved);setPending(null);setUncertain(false);setCart([]);setQuote(null);setStage(null);setGiven('');setReference('');
+        const saved=await service.checkout(command);
+        if(pending||uncertain||saved.replayed)reportOperationalEvent('checkout.reconciled');
+        setReceipt(saved);setPending(null);setUncertain(false);setCart([]);setQuote(null);setStage(null);setGiven('');setReference('');
         try{sessionStorage.removeItem(recoveryKey);}catch{/* A committed receipt stays successful. */}
         catalogue.reload();history.reload();onSaved();
       }catch(cause){
         // Only an explicit database rejection proves that nothing committed.
         const rejected=!pending&&cause instanceof ApiError&&['validation','conflict','forbidden','unauthorized'].includes(cause.kind);
         setUncertain(!rejected);if(rejected){setPending(null);sessionStorage.removeItem(recoveryKey);}
+        if(!rejected)reportOperationalEvent('checkout.unconfirmed');
         throw cause;
       }
     });

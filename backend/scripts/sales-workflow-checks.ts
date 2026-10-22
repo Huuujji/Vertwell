@@ -56,14 +56,14 @@ export const workflowScenarios:{name:string;run(db:DB):Promise<void>}[]=[
     const f=await workflowFixture(db),sale=await f.buy();
     const command=await f.review([sale.saleId],{countedCash:'22',openingCash:'10',additions:'5',removals:'3',refunds:'2',explanation:'Counted shortage accepted after receipt check'});
     await f.execute(command);const saved=(await f.read()).items.find((s:any)=>s.id===sale.saleId).review;
-    assert.equal(saved.outcome,'Reviewed with explained discrepancy');assert.equal(Number(saved.details.verified_cash),12);
+    assert.equal(saved.outcome,'Reviewed with discrepancy');assert.equal(Number(saved.details.verified_cash),12);
     assert.equal(Number(saved.details.expected_cash),14);assert.equal(saved.details.cashMovements.length,4);
     assert.deepEqual(saved.details.cashMovements.map((c:any)=>c.kind).sort(),['Addition','Opening','Refund','Removal']);
     assert.ok(saved.details.cashMovements.every((c:any)=>c.review_id===saved.id&&c.actor_id===f.actors.owner&&c.sale_id===null));
   }},
-  {name:'P7 rejects forged roles, totals, unverified IDs, invalid exact money, future/mixed/stale receipts and unexplained discrepancies',async run(db){
+  {name:'P7 rejects forged roles, totals, unverified IDs, invalid exact money, future/mixed/stale receipts',async run(db){
     const f=await workflowFixture(db),sale=await f.buy(),command=await f.review([sale.saleId]);
-    for(const patch of [{countedCash:'13'},{countedCash:'-1'},{countedCash:14},{countedCash:'14.001'},{verifiedGCash:null},
+    for(const patch of [{countedCash:'-1'},{countedCash:14},{countedCash:'14.001'},{verifiedGCash:null},
       {openingCash:'15'},{verifiedIds:[]},{verifiedIds:[sale.saleId,sale.saleId]},{date:'2099-12-31'},{date:'2026-02-30'},{expectedCash:'14'},{ownerId:f.actors.owner}])
       await workflowRejects(db,()=>f.execute({...command,review:{...command.review,...patch}}));
     await workflowRejects(db,()=>f.execute({...command,role:'Owner'}),'22023');

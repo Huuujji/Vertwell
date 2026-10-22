@@ -29,7 +29,8 @@ test('Users retains a rejected edit, blocks duplicate saves and closes only on s
   await expect.poll(() => page.evaluate(() => window.integration.calls)).toBe(2);
   await page.evaluate(() => window.integration.finish());
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('group', { name: 'Retained request draft account' })).toBeVisible();
+  await page.getByRole('group', { name: 'raven account', exact: true }).getByRole('button', { name: 'Manage', exact: true }).click();
+  await expect(page.getByLabel('Name', { exact: true })).toHaveValue('Retained request draft');
 });
 
 test('the add-user wizard preserves step-three passwords and fields after a rejected save', async ({ page }) => {
@@ -53,7 +54,8 @@ test('the add-user wizard preserves step-three passwords and fields after a reje
   await expect.poll(() => page.evaluate(() => window.integration.calls)).toBe(2);
   await page.evaluate(() => window.integration.finish());
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('group', { name: 'New sample person account' })).toBeVisible();
+  await page.getByRole('group', { name: 'new-person account', exact: true }).getByRole('button', { name: 'Manage', exact: true }).click();
+  await expect(page.getByLabel('Name', { exact: true })).toHaveValue('New sample person');
 });
 
 test('failed account deletion keeps the account and permits a deliberate retry', async ({ page }) => {

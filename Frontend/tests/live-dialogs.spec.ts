@@ -57,9 +57,9 @@ test('live options preserve drafts through events, Escape and navigation; shared
 test('account events update other sessions while open account edits retain their original revision', async ({page,browser}) => {
   await enter(page); await page.getByRole('button',{name:'Users',exact:true}).click();
   const context=await browser.newContext(),other=await context.newPage(); await enter(other); await other.getByRole('button',{name:'Users',exact:true}).click();
-  await page.getByRole('group',{name:'Test Staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click(); await page.getByLabel('Name',{exact:true}).fill('Unsaved staff name');
-  await other.getByRole('group',{name:'Test Staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click(); await other.getByLabel('Name',{exact:true}).fill('Saved staff name'); await other.getByRole('button',{name:'Save',exact:true}).click();
-  await expect(other.getByRole('group',{name:'Saved staff name account',exact:true})).toBeVisible(); await expect(page.getByLabel('Name',{exact:true})).toHaveValue('Unsaved staff name');
+  await page.getByRole('group',{name:'staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click(); await page.getByLabel('Name',{exact:true}).fill('Unsaved staff name');
+  await other.getByRole('group',{name:'staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click(); await other.getByLabel('Name',{exact:true}).fill('Saved staff name'); await other.getByRole('button',{name:'Save',exact:true}).click();
+  await other.getByRole('group',{name:'staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click(); await expect(other.getByLabel('Name',{exact:true})).toHaveValue('Saved staff name'); await expect(page.getByLabel('Name',{exact:true})).toHaveValue('Unsaved staff name');
   await page.getByRole('button',{name:'Save',exact:true}).click(); await expect(page.getByRole('alert')).toContainText(/changed|reload|review/i); await expect(page.getByLabel('Name',{exact:true})).toHaveValue('Unsaved staff name'); await context.close();
 });
 
