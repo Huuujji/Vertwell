@@ -138,6 +138,7 @@ async function businessTransport(run: (request: (path: string, method?: string, 
     }
     if (url.includes('/rpc/business_access')) return Response.json({profile:profile(),permissions:permissionMatrix[state.role],businessDate:'2026-10-17'});
     if (url.includes('/rpc/read_inventory')) return Response.json({version:1,tables:{},balances:[],revision:'0'});
+    if (url.includes('/rpc/inventory_command')) return Response.json({code:'22023'},{status:422});
     if (url.includes('/rpc/read_reports')) return Response.json({version:1,tables:{},businessDate:'2026-10-17'});
     if (url.includes('/rpc/read_notifications')) return Response.json({version:1,items:[],total:0,unread:0,snapshot:'empty',hasMore:false});
     if (url.includes('/rpc/set_notification_read')) return state.permissionRole==='Staff'?fail():Response.json({id:body.notification_id,revision:body.expected_revision,read:body.is_read});
@@ -167,12 +168,11 @@ async function businessTransport(run: (request: (path: string, method?: string, 
   try { await run(request,state); } finally { mocked.mock.restore(); }
 }
 
-test('every business route enforces the complete three-role matrix before returning data or a pending-service boundary', async () => {
+test('every business route enforces the complete three-role matrix before reading data or validating commands', async () => {
   await businessTransport(async (request,state) => {
     const routes: [string,string,string,number][] = [
-      ['GET','/dashboard','dashboard.read',501], ['GET','/inventory','inventory.read',200],
-      ['POST','/inventory','inventory.write',501], ['PATCH',`/inventory/${ids.staff}`,'inventory.write',501],
-      ['DELETE',`/inventory/${ids.staff}`,'inventory.write',501], ['GET','/reports','reports.read',200],
+      ['GET','/inventory','inventory.read',200], ['POST','/inventory/commands','inventory.write',422],
+      ['GET','/reports','reports.read',200],
       ['POST','/checkout','checkout.create',422], ['POST',`/sales/${ids.ownSale}/void-requests`,'void.request',422],
       ['POST',`/sales/${ids.ownSale}/void`,'sale.void',422], ['POST',`/sales/${ids.ownSale}/void-decision`,'void.decide',422],
       ['POST','/daily-sales-reviews','review.confirm',422], ['GET','/sales','sales.read',200],
@@ -271,9 +271,23 @@ test('a demotion between identity lookup and permission check takes effect immed
 });
 
 test('all new business routes require authentication even when called directly', async () => {
-  for (const [method,path] of [['GET','/access'],['GET','/sales'],['GET','/void-requests'],['GET','/pos/catalogue'],['POST','/pos/stock'],['GET','/inventory'],['GET','/reports'],['GET','/dashboard'],['PATCH','/alert-settings'],['POST','/checkout'],['POST','/daily-sales-reviews'],['POST',`/sales/${ids.ownSale}/void`],['GET','/auth/accounts']]) {
+  for (const [method,path] of [['GET','/access'],['GET','/sales'],['GET','/void-requests'],['GET','/pos/catalogue'],['POST','/pos/stock'],['GET','/inventory'],['POST','/inventory/commands'],['GET','/reports'],['PATCH','/alert-settings'],['POST','/checkout'],['POST','/daily-sales-reviews'],['POST',`/sales/${ids.ownSale}/void`],['GET','/auth/accounts']]) {
     assert.equal((await fetch(`${baseUrl}/api${path}`,{method})).status,401,`${method} ${path}`);
   }
+});
+
+test('obsolete placeholder endpoints return a non-mutating JSON 404 without provider calls', async () => {
+  await businessTransport(async (request,state) => {
+    for (const [method,path] of [['GET','/dashboard'],['POST','/inventory'],['PATCH',`/inventory/${ids.staff}`],['DELETE',`/inventory/${ids.staff}`]]) {
+      for (const authenticated of [false,true]) {
+        const response = authenticated ? await request(path!,method) : await fetch(`${baseUrl}/api${path}`,{method});
+        assert.equal(response.status,404,`${method} ${path}`);
+        assert.deepEqual(await response.json(),{error:{message:'Endpoint not found.'}});
+        assert.equal(response.headers.get('cache-control'),'no-store');
+      }
+    }
+    assert.equal(state.calls.length,0);
+  });
 });
 
 test('checkout routes forward only caller-scoped commands and never use Auth administration credentials',async()=>{

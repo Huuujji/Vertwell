@@ -11,7 +11,7 @@ export interface OperationalRecord {
 export interface MonitoringOptions { sink?: (record: OperationalRecord) => void; slowMs?: number }
 const known = new Set([
   '/api/health', '/api/health/ready', '/api/operations/client-events',
-  '/api/auth/login', '/api/auth/me', '/api/auth/accounts', '/api/access', '/api/dashboard',
+  '/api/auth/login', '/api/auth/me', '/api/auth/accounts', '/api/access',
   '/api/inventory', '/api/inventory/commands', '/api/inventory/images', '/api/inventory/image-urls',
   '/api/reports', '/api/sales-workflow', '/api/sales-workflow/commands', '/api/daily-sales-reviews',
   '/api/sales', '/api/void-requests', '/api/pos/catalogue', '/api/pos/checkout-catalogue', '/api/pos/image-urls',
@@ -20,7 +20,7 @@ const known = new Set([
 export function operationalRoute(url: string) {
   const path = url.split('?')[0]!.replace(/\/$/, '').toLowerCase();
   if (known.has(path)) return path;
-  for (const pattern of [/^\/api\/auth\/accounts\/[a-f0-9-]{36}$/, /^\/api\/inventory\/[a-f0-9-]{36}$/,
+  for (const pattern of [/^\/api\/auth\/accounts\/[a-f0-9-]{36}$/,
     /^\/api\/sales\/[a-f0-9-]{36}(?:\/(?:receipt|void-requests|void|void-decision))?$/, /^\/api\/notifications\/[a-f0-9-]{36}\/read$/]) {
     if (pattern.test(path)) return path.replace(/[a-f0-9-]{36}/, ':id');
   }

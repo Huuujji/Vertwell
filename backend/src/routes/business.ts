@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/require-auth.js';
-import { businessError, requirePermission, uuid, type BusinessAction } from '../lib/permissions.js';
+import { businessError, requirePermission, uuid } from '../lib/permissions.js';
 import { HttpError } from '../lib/http-error.js';
 
 export const businessRouter = Router();
@@ -173,16 +173,3 @@ businessRouter.patch('/alert-settings', requireAuth, requirePermission('alerts.w
   if (error) businessError(error);
   res.json({ settings: data });
 });
-
-// Reserve future command boundaries now. Authorization runs first, including
-// sale ownership/day checks, but no unfinished command can change any data.
-const pending: [string, string, BusinessAction, string?][] = [
-  ['get', '/dashboard', 'dashboard.read'],
-  ['post', '/inventory', 'inventory.write'], ['patch', '/inventory/:id', 'inventory.write'],
-  ['delete', '/inventory/:id', 'inventory.write'],
-];
-for (const [method, path, action, target] of pending) {
-  const register = method === 'get' ? businessRouter.get.bind(businessRouter) : method === 'patch' ? businessRouter.patch.bind(businessRouter)
-    : method === 'delete' ? businessRouter.delete.bind(businessRouter) : businessRouter.post.bind(businessRouter);
-  register(path, requireAuth, requirePermission(action, target), () => { throw new HttpError(501, 'This business service is awaiting data integration.'); });
-}

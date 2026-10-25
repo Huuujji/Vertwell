@@ -8,16 +8,18 @@ import { ViewState } from '../lib/view-state';
 import { signOut } from '../lib/auth';
 import { pageFromPath, pagePaths } from '../lib/page-paths';
 import Navigation, { type Page } from './Navigation';
-import Inventory from '../pages/Inventory';
-import Users from '../pages/Users';
+import { lazySection } from './LazySection';
 import { Actions, Modal } from './ui';
 import LivePos from './LivePos';
 import LiveSales from './LiveSales';
-import LiveReports from './LiveReports';
-import LiveDashboard from './LiveDashboard';
 import type { ReportFilters } from '../data/durable-reporting';
 import type { InventoryContext } from '../pages/Inventory';
 import type { AuditContext } from '../pages/SalesHistory';
+
+const Inventory = lazySection(() => import('../pages/Inventory'), 'Inventory');
+const Users = lazySection(() => import('../pages/Users'), 'Users');
+const LiveReports = lazySection(() => import('./LiveReports'), 'Reports');
+const LiveDashboard = lazySection(() => import('./LiveDashboard'), 'Dashboard');
 
 export default function ManagementWorkspace({identity}:{identity:IdentityResponse}) {
   const [service]=useState(()=>createManagementData(apiRequest));

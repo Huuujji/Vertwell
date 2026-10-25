@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.integration.json",
     "test:e2e": "playwright test",
+    "test:production": "playwright test --config playwright.production.config.ts",
     "test:unit": "node --import tsx --test tests/unit/*.test.ts",
     "typecheck:integration": "tsc -p tsconfig.integration.json"
   },
