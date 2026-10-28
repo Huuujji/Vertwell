@@ -22,6 +22,12 @@ export const env = {
   supabaseUrl: process.env.SUPABASE_URL?.trim() ?? '',
   supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ?? '',
   supabaseSecretKey: process.env.SUPABASE_SECRET_KEY?.trim() ?? '',
+  accountEmail: {
+    origin: process.env.ACCOUNT_EMAIL_ORIGIN ?? '',
+    apiKey: process.env.BREVO_API_KEY ?? '',
+    fromEmail: process.env.ACCOUNT_EMAIL_FROM ?? '',
+    replyToEmail: process.env.ACCOUNT_EMAIL_REPLY_TO ?? '',
+  },
 };
 
 export const isSupabaseConfigured = Boolean(env.supabaseUrl && env.supabasePublishableKey);

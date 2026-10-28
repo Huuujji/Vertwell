@@ -108,8 +108,8 @@ export function createManagementData(request: Request) {
       } else {
         try {
           const result=await request<{profile:ManagedAccount}>(`/api/auth/accounts/${account.id}`,{method:'PATCH',body:JSON.stringify({fullName:account.name,username:account.username,
-            role:account.role,active:account.active??true,updatedAt:current.updated_at})});
-          const source=data.source.map(row=>row.id===account.id?{...result.profile,email:row.email}:row);
+            role:account.role,updatedAt:account.updatedAt??current.updated_at})});
+          const source=data.source.map(row=>row.id===account.id?{...row,...result.profile,email:row.email}:row);
           return {source,accounts:mapAccounts(source)};
         }
         catch(cause) {
@@ -120,6 +120,24 @@ export function createManagementData(request: Request) {
         }
       }
       return this.accounts();
+    },
+    async deleteAccount(data:AccountsData,account:Account,operationId:string):Promise<AccountsData> {
+      if(!account.updatedAt) throw new ApiError('Reload the account before reviewing deletion.','conflict');
+      const path=`/api/auth/accounts/${account.id}` as const,body=JSON.stringify({operationId,updatedAt:account.updatedAt});
+      const completed=(value:unknown)=>Boolean(value&&typeof value==='object'&&
+        'status' in value&&value.status==='completed'&&'targetId' in value&&value.targetId===account.id&&
+        'operationId' in value&&value.operationId===operationId);
+      try {
+        const receipt=await request(path,{method:'DELETE',body});
+        if(!completed(receipt)) throw new ApiError('Account deletion is not confirmed. Retry the same request.','response');
+      } catch(cause) {
+        if(!(cause instanceof ApiError)||!['network','server','response'].includes(cause.kind)) throw cause;
+        // Read the original receipt; a missing list row never proves deletion.
+        const receipt=await request(`${path}/deletion-result`,{method:'POST',body}).catch(()=>null);
+        if(!completed(receipt)) throw cause;
+      }
+      const source=data.source.filter(row=>row.id!==account.id);
+      return {source,accounts:mapAccounts(source)};
     },
   };
 }

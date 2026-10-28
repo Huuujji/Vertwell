@@ -1,0 +1,2 @@
+# Keep the generated contract byte-identical to its deterministic generator.
+Frontend/src/lib/data/database.generated.ts text eol=lf

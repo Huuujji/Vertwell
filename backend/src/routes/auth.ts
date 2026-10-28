@@ -5,8 +5,24 @@ import { accountInput, currentProfile, databaseError, type Profile } from '../li
 import { getSupabaseAdminClient, createUserDatabaseClient } from '../lib/supabase.js';
 import { HttpError } from '../lib/http-error.js';
 import { requirePermission } from '../lib/permissions.js';
+import { completeAccountEmail, emailPolicy, sendAccountEmail } from '../lib/email-challenges.js';
+import { createLoginProtection } from '../lib/login-protection.js';
+import type { EmailDelivery } from '../lib/email-delivery.js';
+import { deleteManagedAccount, deletionInput } from '../lib/account-deletion.js';
 
-export const authRouter = Router();
+export function createAuthRouter(delivery?: EmailDelivery) {
+const authRouter = Router();
+
+authRouter.post('/email/request', createLoginProtection(), async (req, res) => {
+  const { email, purpose } = req.body ?? {};
+  if (Object.keys(req.body ?? {}).some(k => !['email','purpose'].includes(k)) || typeof email !== 'string' || email.length > 254 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !['verification','recovery'].includes(purpose)) throw new HttpError(422, 'Enter your account email and email purpose.');
+  await sendAccountEmail(email.trim().toLowerCase(), purpose, delivery);
+  res.json({ message: 'If this account is eligible, an email has been requested. Wait at least 60 seconds before requesting another.', policy: emailPolicy });
+});
+authRouter.post('/email/complete', createLoginProtection(), async (req, res) => {
+  res.json(await completeAccountEmail(req.body));
+});
 
 authRouter.post('/login', async (req, res) => {
   const { identifier, password } = req.body ?? {};
@@ -20,7 +36,19 @@ authRouter.post('/login', async (req, res) => {
   const client = createUserDatabaseClient('');
   const { data, error } = await client.auth.signInWithPassword({ email, password });
   if (error && (!error.status || [408, 429].includes(error.status) || error.status >= 500)) throw new HttpError(503, 'Authentication service is unavailable. Try again shortly.');
+  // A native unconfirmed-email result opens only the existing verification
+  // page. It grants no session, sends no email and never treats other login
+  // failures (wrong credentials, inactive accounts or outages) as pending.
+  const verificationRequired = () => res.status(403).json({ error: {
+    message: 'Verify your account email before signing in.', fields: { accountEmail: 'verification_required' },
+  } });
+  if (error?.code === 'email_not_confirmed') { verificationRequired(); return; }
   if (error || !data.session) throw new HttpError(401, 'Invalid login credentials.');
+  if (data.user?.app_metadata?.happyhentie_email_required === true && !data.user.email_confirmed_at) {
+    const { error: cleanupError } = await client.auth.signOut({ scope: 'local' });
+    if (cleanupError) throw new HttpError(503, 'Session cleanup could not be confirmed. Try again shortly.');
+    verificationRequired(); return;
+  }
   // Do not return a usable app session for an inactive/unprovisioned identity.
   try { await currentProfile(createUserDatabaseClient(data.session.access_token)); }
   catch (error) {
@@ -58,17 +86,26 @@ authRouter.post('/accounts', requireAuth, async (req, res) => {
     if (error) databaseError(error);
     return data;
   }
-  if (operationId) { const saved = await outcome(); if (saved) { res.json({ user: saved }); return; } }
+  function replay(saved: { emailVerification?: string }) {
+    // A replay does not send another email. Delivery of the original request is
+    // unknown; never turn an ambiguous response into a delivery claim.
+    res.json({ user: saved, verification: saved.emailVerification ?? 'existing', emailRequested: null });
+  }
+  if (operationId) { const saved = await outcome(); if (saved) { replay(saved); return; } }
   const { data, error } = await getSupabaseAdminClient().auth.admin.createUser({
-    email, password: input.password, email_confirm: true,
-    app_metadata: { vertwell_provision: { actor_id: actor.id, full_name: input.fullName, username: input.username, role: input.role, ...(operationId ? { operation_id: operationId } : {}) } },
+    email, password: input.password, email_confirm: false,
+    app_metadata: { happyhentie_email_required: true, vertwell_provision: { actor_id: actor.id, full_name: input.fullName, username: input.username, role: input.role, ...(operationId ? { operation_id: operationId } : {}) } },
   });
   if (error || !data.user) {
-    if (operationId) { const saved = await outcome(); if (saved) { res.json({ user: saved }); return; } }
+    if (operationId) { const saved = await outcome(); if (saved) { replay(saved); return; } }
     // Auth rolls back the user when its profile/audit trigger fails. Never echo provider internals.
     throw new HttpError(error?.status && error.status < 500 ? 422 : 409, 'Account creation could not be confirmed. Check current accounts, identifiers and permissions before retrying.');
   }
-  res.status(201).json({ user: { id: data.user.id, email: data.user.email } });
+  // A delivery failure must never undo a committed account or cause provisioning
+  // retries to create another identity. The recipient can explicitly resend.
+  let emailRequested = false;
+  try { emailRequested = await sendAccountEmail(email, 'verification', delivery); } catch { /* Account is safely pending. */ }
+  res.status(201).json({ user: { id: data.user.id, email: data.user.email }, verification: 'pending', emailRequested });
 });
 
 authRouter.patch('/accounts/:id', requireAuth, async (req, res) => {
@@ -77,8 +114,22 @@ authRouter.patch('/accounts/:id', requireAuth, async (req, res) => {
   const input = accountInput(req.body);
   const { data, error } = await res.locals.database.rpc('update_account', {
     target_id: req.params.id, expected_updated_at: input.updatedAt, full_name: input.fullName,
-    username: input.username, account_role: input.role, account_active: input.active,
+    username: input.username, account_role: input.role,
   });
   if (error) databaseError(error);
   res.json({ profile: data });
 });
+authRouter.delete('/accounts/:id', requireAuth, async (req, res) => {
+  if ((res.locals.profile as Profile).role === 'Staff') throw new HttpError(403, 'Account deletion is not permitted.');
+  const command = deletionInput(req.params.id, req.body);
+  res.json(await deleteManagedAccount(res.locals.database, getSupabaseAdminClient(), command));
+});
+authRouter.post('/accounts/:id/deletion-result', requireAuth, async (req, res) => {
+  if ((res.locals.profile as Profile).role === 'Staff') throw new HttpError(403, 'Account deletion is not permitted.');
+  const command = deletionInput(req.params.id, req.body);
+  const { data, error } = await res.locals.database.rpc('account_deletion_result', command).abortSignal(AbortSignal.timeout(5000));
+  if (error) databaseError(error);
+  res.json(data);
+});
+return authRouter;
+}

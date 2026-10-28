@@ -74,7 +74,7 @@ test('saved inventory, account, settings, checkout, request, decision, review, v
   await clear();await checkoutAs(db,f.actors.staff);await f.execute(await f.request(sale.saleId));
   await announced('vertwell:managers',['sales','reports']);await announced(`vertwell:user:${f.actors.staff}`,['sales']);
   await clear();const request=(await f.read()).items.find((row:any)=>row.id===sale.saleId).requests[0];
-  await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:request.id,approved:false,reason:'Checked original receipt'});
+  await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:request.id,approved:false,reasonId:'other',notes:'Checked original receipt'});
   await announced('vertwell:managers',['sales','reports']);await announced(`vertwell:user:${f.actors.staff}`,['sales']);
   await clear();await f.execute(await f.review([sale.saleId]));await announced('vertwell:managers',['sales','reports']);await announced(`vertwell:user:${f.actors.staff}`,['sales']);
   await clear();const physical=await f.physical();await checkoutAs(db,f.actors.owner);await f.execute(await f.voidCommand([sale.saleId]));

@@ -107,9 +107,8 @@ export default function ManagementWorkspace({identity}:{identity:IdentityRespons
           accountSource.current=saved;accounts.replace(saved);
           if(account.id===identity.profile.id) window.dispatchEvent(new Event('focus'));
         })}
-        onDelete={id=>mutate(async()=>{const current=accountSource.current;if(!current)throw new ApiError('Load accounts first.','unavailable');
-          const account=current.accounts.find(row=>row.id===id);if(!account)throw new ApiError('Account changed. Reload and review.','conflict');
-          const saved=await service.saveAccount(current,{...account,active:false});accountSource.current=saved;accounts.replace(saved);
+        onDelete={(account,operationId)=>mutate(async()=>{const current=accountSource.current;if(!current)throw new ApiError('Load accounts first.','unavailable');
+          const saved=await service.deleteAccount(current,account,operationId);accountSource.current=saved;accounts.replace(saved);
         })} notify={setToast} />}
       {(access.data?.services?.checkout===true||hasRecovery)&&<LivePos onDirtyChange={onDirty} role={role} name={identity.profile.username} scope={scope} active={effectivePage==='POS'} onBusyChange={onCheckoutBusy} onUncertainChange={onCheckoutUncertain} onSaved={()=>{inventory.reload();setSalesVersion(value=>value+1);}}/>}
       {salesReady&&<LiveSales scope={`${scope}:sales:${salesVersion}`} role={role} actor={identity.profile.username}

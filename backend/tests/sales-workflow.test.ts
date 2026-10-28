@@ -39,13 +39,23 @@ test('P7 reviews, adjustment evidence, repeated request decisions and operation 
     const command=await f.review([sale.saleId],{countedCash:'24',openingCash:'10'});await f.execute(command);
     await f.execute(await f.request(sale.saleId,'Original request'));
     let current=(await f.read()).items.find((s:any)=>s.id===sale.saleId);
-    await f.execute({operationId:crypto.randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:current.requests[0].id,approved:false,reason:'Original receipt checked'});
+    await f.execute({operationId:crypto.randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:current.requests[0].id,approved:false,reasonId:'other',notes:'Original receipt checked'});
     await f.execute(await f.request(sale.saleId,'Renewed evidence'));await f.execute(await f.voidCommand([sale.saleId]));
     current=(await f.read()).items.find((s:any)=>s.id===sale.saleId);assert.deepEqual(current.requests.map((r:any)=>r.status),['Rejected','Approved']);
+    const stockSale=(await f.read()).items.find((s:any)=>s.id===sale.saleId),item=stockSale.adjustableItems[0],usage=item.usage[0];
+    const missing={operationId:crypto.randomUUID(),kind:'stock.dispose',targets:[await f.target(sale.saleId)],reasonId:'refund_return',notes:'Reopen later return',dispositions:[{itemId:item.id,stockId:usage.stockId,quantityBase:'1',condition:'not_returned',evidence:'Customer still has original unit',resalePolicyConfirmed:false,facts:{foodOrBeverage:false,prepared:false,handedOver:true,returned:false,physicallyPresent:false,sellable:false,additionalConsumption:false}}]};
+    await f.execute(missing);const source=(await f.read()).items.find((s:any)=>s.id===sale.saleId).adjustments.dispositions[0];
+    const returned={...missing,operationId:crypto.randomUUID(),targets:[await f.target(sale.saleId)],dispositions:[{...missing.dispositions[0],sourceDispositionId:source.id,condition:'returned_sellable',resalePolicyConfirmed:true,facts:{...missing.dispositions[0]!.facts,returned:true,physicallyPresent:true,sellable:true}}]};
+    await f.execute(returned);
+    const payout={operationId:crypto.randomUUID(),kind:'refund.record',targets:[await f.target(sale.saleId)],reasonId:'refund_return',notes:'Persistent payout receipt',refund:{amount:'4',method:'Cash',reference:crypto.randomUUID(),paidAt:new Date().toISOString(),evidence:'Disposable paid receipt',paidConfirmed:true}};
+    await f.execute(payout);
     const saved=await f.read();await disk.query('commit');await disk.close();disk=new PGlite(path);
     await disk.query('begin');await checkoutAs(disk,f.actors.owner);
     assert.deepEqual(await checkoutValue(disk,'select public.read_sales_workflow(0,100) as value'),saved);
     const replay=await checkoutValue(disk,'select public.sales_workflow_command($1::jsonb) as value',[JSON.stringify(command)]);assert.equal(replay.replayed,true);
+    assert.equal((await checkoutValue(disk,'select public.sales_workflow_command($1::jsonb) as value',[JSON.stringify(returned)])).replayed,true);
+    assert.equal((await checkoutValue(disk,'select public.sales_workflow_command($1::jsonb) as value',[JSON.stringify(payout)])).replayed,true);
+    assert.deepEqual(await checkoutValue(disk,'select public.read_sales_workflow(0,100) as value'),saved);
     await disk.query('rollback');
   } finally {await disk.close();}
 });

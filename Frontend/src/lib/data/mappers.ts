@@ -25,7 +25,8 @@ export function mapAccounts(value: unknown): (Account & { active: boolean })[] {
     const profile = decodeRow('profiles', value), email = record(value).email;
     if (typeof email !== 'string') invalidResponse('missing authorized account email');
     return { id: profile.id, name: profile.full_name, username: profile.username, email,
-      role: choice(profile.role, roles), active: profile.active, createdAt: profile.created_at };
+      role: choice(profile.role, roles), active: profile.active, createdAt: profile.created_at, updatedAt: profile.updated_at,
+      ...(record(value).emailVerification===undefined?{}:{emailVerification:choice(String(record(value).emailVerification),['pending','verified','existing'] as const)}) };
   });
   index(accounts, account => account.id);
   return accounts.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)||b.id.localeCompare(a.id));

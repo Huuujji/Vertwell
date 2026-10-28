@@ -227,7 +227,7 @@ test('P7 commands preserve exact retry content and caller tokens; scoped aliases
 test('account creation and updates retain Owner-all/Admin-Staff restrictions and reject supplied actor fields', async () => {
   await businessTransport(async (request,state) => {
     const create = {fullName:'New Staff',username:'new-staff',role:'Staff',email:'staff@example.invalid',password:'Disposable-test-password'};
-    const update = {fullName:'Updated',username:'updated',role:'Staff',active:true,updatedAt:'2026-10-17T00:00:00Z'};
+    const update = {fullName:'Updated',username:'updated',role:'Staff',updatedAt:'2026-10-17T00:00:00Z'};
     state.role='Staff';
     assert.equal((await request('/auth/accounts','POST',create)).status,403);
     assert.equal((await request(`/auth/accounts/${ids.staff}`,'PATCH',update)).status,403);
@@ -241,6 +241,7 @@ test('account creation and updates retain Owner-all/Admin-Staff restrictions and
     assert.equal(created.body.app_metadata.vertwell_provision.actor_id,ids.actor);
     assert.equal(created.body.app_metadata.vertwell_provision.role,'Staff');
     state.role='Owner';
+    assert.equal((await request(`/auth/accounts/${ids.staff}`,'PATCH',{...update,active:false})).status,422);
     assert.equal((await request('/auth/accounts','POST',{...create,actorId:ids.staff})).status,422);
     assert.equal((await request(`/auth/accounts/${ids.staff}`,'PATCH',{...update,actorRole:'Owner'})).status,422);
     assert.equal((await request(`/auth/accounts/${ids.staff}`,'PATCH',{...update,role:'Admin'})).status,200);
@@ -308,7 +309,7 @@ test('nonretryable database conflicts return one scrubbed HTTP 409 for account, 
   await businessTransport(async (request,state) => {
     state.conflict=true;
     const writes:[string,string,unknown,string][]=[
-      ['PATCH',`/auth/accounts/${ids.staff}`,{fullName:'Staff',username:'staff',role:'Staff',active:true,updatedAt:'2026-10-17T00:00:00Z'},'update_account'],
+      ['PATCH',`/auth/accounts/${ids.staff}`,{fullName:'Staff',username:'staff',role:'Staff',updatedAt:'2026-10-17T00:00:00Z'},'update_account'],
       ['POST','/inventory/commands',{},'inventory_command'],
       ['PATCH','/alert-settings',{updatedAt:null,similarOrderThreshold:7,windowMinutes:3},'update_alert_settings'],
     ];

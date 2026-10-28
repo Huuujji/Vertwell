@@ -15,6 +15,7 @@ export default function LiveFinancialOverview({snapshot,ready,category,onReports
   const dates=valid?Array.from({length:span},(_,i)=>new Date(Date.parse(filters.start)+i*86400000).toISOString().slice(0,10)):[];
   return <section aria-label="Saved sales overview">
     {result?.error&&<p className="error" role="alert">{result.error}</p>}
+    {data&&<p>Selected event period: payments received {pesos(data.receivedFunds)} · Manual refunds recorded {data.refundedFunds===null?'Unavailable: mixed-order allocation missing':pesos(data.refundedFunds)} · Received less payouts {data.netReceivedFunds===null?'Unavailable: payout allocation missing':pesos(data.netReceivedFunds)}. Completed-sales revenue below uses current receipt status.</p>}
     <SalesOverview {...filters} today={today} category={filters.category} hobby={filters.category==='Hobby'} valid={valid} canOpenReport={ready} total={pesos(data?.total??0n)}
       days={dates.map(date=>{const day=data?.dailyTotals.find(day=>day.date===date);return {date,count:Number(data?.dailyValues.find(row=>row[0]===date)?.[1]??0),amount:pesos(day?.total??0n),height:Number(day?.total??0n)/maximum*280};})}
       onChange={(key,value)=>setFilters({...filters,[key]:value})} onReports={()=>{if(ready)onReports({...filters,scope:'Combined'});}}/>

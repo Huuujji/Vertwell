@@ -1,5 +1,35 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "noUnusedLocals": true, "noUnusedParameters": true },
-  "include": ["src", "tests/accessibility.spec.ts", "tests/unit", "playwright.config.ts", "playwright.production.config.ts", "tests/setup-server.ts", "tests/setup-production-server.ts", "tests/chunk-loading.spec.ts", "tests/fixtures/integration-harness.tsx", "tests/integration-preparation.spec.ts", "tests/account-only.spec.ts", "tests/authentication.spec.ts", "tests/management.spec.ts", "tests/checkout.spec.ts", "tests/sales-workflow.spec.ts", "tests/reports-live.spec.ts", "tests/live-updates.spec.ts", "tests/live-dialogs.spec.ts", "tests/notifications.spec.ts", "tests/fixtures/management-server.ts"]
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": [
+    "src",
+    "tests/accessibility.spec.ts",
+    "tests/unit",
+    "playwright.config.ts",
+    "playwright.production.config.ts",
+    "tests/setup-server.ts",
+    "tests/setup-production-server.ts",
+    "tests/chunk-loading.spec.ts",
+    "tests/fixtures/integration-harness.tsx",
+    "tests/integration-preparation.spec.ts",
+    "tests/account-only.spec.ts",
+    "tests/authentication.spec.ts",
+    "tests/verification.spec.ts",
+    "playwright.verification.config.ts",
+    "tests/account-deletion.spec.ts",
+    "playwright.account-deletion.config.ts",
+    "tests/management.spec.ts",
+    "tests/checkout.spec.ts",
+    "tests/sales-workflow.spec.ts",
+    "tests/reports-live.spec.ts",
+    "tests/live-updates.spec.ts",
+    "tests/live-dialogs.spec.ts",
+    "tests/notifications.spec.ts",
+    "tests/fixtures/management-server.ts",
+    "playwright.adjustment10.config.ts",
+    "tests/setup-adjustment10-production.ts"
+  ]
 }

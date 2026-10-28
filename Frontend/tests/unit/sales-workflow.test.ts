@@ -1,9 +1,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createSalesWorkflowData,decodeWorkflowResult,restoreWorkflowCommand,type WorkflowCommand } from '../../src/lib/data/sales-workflow';
+import { createSalesWorkflowData,decodeWorkflowResult,decodeRefundBalance,restoreWorkflowCommand,type WorkflowCommand } from '../../src/lib/data/sales-workflow';
 import { createApiClient } from '../../src/lib/api-client';
 const id='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000002';
 const command:WorkflowCommand={operationId:id,kind:'sale.void',targets:[{saleId:id,token:'a'.repeat(64)},{saleId:other,token:'b'.repeat(64)}],reason:'Exact approved set'};
+test('refund received-money projection fails closed for missing, partial or inconsistent evidence',()=>{
+ assert.equal(decodeRefundBalance(undefined),null);
+ const balance={paymentId:id,received:'14.00',method:'Cash',receivedAt:'2026-10-27T01:00:00Z',refunded:'4.00',remaining:'10.00'};
+ assert.deepEqual(decodeRefundBalance(balance),balance);
+ for(const patch of [{paymentId:null},{receivedAt:null},{method:null},{remaining:'14.00'},{remaining:null},{received:'14.001'},{refunded:'-1'}])assert.throws(()=>decodeRefundBalance({...balance,...patch}));
+ assert.equal(decodeRefundBalance({...balance,received:null,remaining:null})?.received,null);
+});
+test('manual-refund lost response retains exact payout evidence and operation without automatic retries',async()=>{
+ const c:WorkflowCommand={operationId:id,kind:'refund.record',targets:[{saleId:other,token:'a'.repeat(64)}],reasonId:'duplicate',notes:'Actual payment evidence',refund:{amount:'4.00',method:'Cash',reference:'Paid-8',paidAt:'2026-10-27T01:00:00Z',evidence:'Operator receipt',paidConfirmed:true}};
+ const bodies:string[]=[];const service=createSalesWorkflowData(createApiClient({fetcher:async(_url,options)=>{bodies.push(String(options?.body));if(bodies.length===1)throw new TypeError('Lost response');return Response.json({version:1,operationId:id,kind:'refund.record',replayed:true,results:[{saleId:other,outcome:'refunded'}]});}}));
+ await assert.rejects(()=>service.execute(c));assert.equal(bodies.length,1);assert.equal((await service.execute(restoreWorkflowCommand(JSON.parse(bodies[0]!)))).replayed,true);assert.equal(bodies[0],bodies[1]);
+ assert.throws(()=>decodeWorkflowResult({version:1,operationId:id,kind:'refund.record',replayed:false,results:[{saleId:other,outcome:'voided'}]},c));
+});
 test('workflow bulk results require every exact selected ID once and make stale/ineligible outcomes explicit',()=>{
   const result={version:1,operationId:id,kind:'sale.void',replayed:true,results:[{saleId:id,outcome:'voided'},{saleId:other,outcome:'stale'}]};
   assert.equal(decodeWorkflowResult(result,command).results[1]!.outcome,'stale');

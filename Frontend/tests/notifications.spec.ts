@@ -7,8 +7,8 @@ import { checkoutAs } from '../../backend/scripts/checkout-checks';
 
 test.describe.configure({timeout:90000});
 let api:Awaited<ReturnType<typeof managementServer>>,f:Awaited<ReturnType<typeof workflowFixture>>;
-const output=fileURLToPath(new URL('../../.review/p9-notifications/visuals/',import.meta.url));
-test.beforeEach(async()=>{api=await managementServer();await api.db.exec('begin');f=await workflowFixture(api.db);await api.db.exec('commit;reset role');});
+const output=fileURLToPath(new URL('../../../memory/backend/supabase/major-adjustments-evidence/2026-10-27-adjustment10/notifications/',import.meta.url));
+test.beforeEach(async({context})=>{await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:5180'?route.fallback():route.abort('blockedbyclient'));api=await managementServer();await api.db.exec('begin');f=await workflowFixture(api.db);await api.db.exec('commit;reset role');});
 test.afterEach(()=>api?.close());
 async function enter(page:Page,role:'Owner'|'Admin'|'Staff'='Owner'){
   await api.setup(page.context(),role);await api.restore(page,role);await expect(page.locator('.live-connection-status')).toHaveCount(0);

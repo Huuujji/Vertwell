@@ -11,6 +11,8 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   const { data, error } = await getSupabaseAuthClient().auth.getUser(token);
   if (error && (!error.status || [408, 429].includes(error.status) || error.status >= 500)) throw new HttpError(503, 'Authentication service is unavailable. Try again shortly.');
   if (error || !data.user) throw new HttpError(401, 'Invalid or expired access token.');
+  if (data.user.app_metadata?.happyhentie_email_required === true && !data.user.email_confirmed_at)
+    throw new HttpError(403, 'Verify your account email before accessing the shop.');
 
   res.locals.user = data.user;
   res.locals.accessToken = token;

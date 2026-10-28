@@ -4,7 +4,9 @@ import helmet from 'helmet';
 import { env } from './config/env.js';
 import { HttpError } from './lib/http-error.js';
 import { errorHandler } from './middleware/error-handler.js';
-import { authRouter } from './routes/auth.js';
+import { createAuthRouter } from './routes/auth.js';
+import type { EmailDelivery } from './lib/email-delivery.js';
+import { createBrevoEmailDelivery } from './lib/brevo-email-delivery.js';
 import { healthRouter } from './routes/health.js';
 import { businessRouter } from './routes/business.js';
 import { inventoryRouter } from './routes/inventory.js';
@@ -12,7 +14,7 @@ import { createLoginProtection } from './lib/login-protection.js';
 import { observeRequests, type MonitoringOptions } from './middleware/observe-requests.js';
 import { createOperationsRouter } from './routes/operations.js';
 
-export function createApp(monitoring: MonitoringOptions = {}) {
+export function createApp(monitoring: MonitoringOptions = {}, emailDelivery?: EmailDelivery) {
   const app = express();
   app.disable('x-powered-by');
   app.use('/api', observeRequests({ slowMs: env.slowRequestMs, ...monitoring }));
@@ -30,7 +32,7 @@ export function createApp(monitoring: MonitoringOptions = {}) {
   });
   app.use('/api/health', healthRouter);
   app.post('/api/auth/login', createLoginProtection());
-  app.use('/api/auth', authRouter);
+  app.use('/api/auth', createAuthRouter(emailDelivery));
   app.use('/api/operations', createOperationsRouter());
   app.use('/api', inventoryRouter);
   app.use('/api', businessRouter);
@@ -42,4 +44,4 @@ export function createApp(monitoring: MonitoringOptions = {}) {
 }
 
 // Vercel detects this default export; local development uses server.ts.
-export default createApp();
+export default createApp({}, createBrevoEmailDelivery(env.accountEmail));

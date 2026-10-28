@@ -64,7 +64,7 @@ test('rejected product writes retain fields, session focus preserves drafts, and
   await page.getByRole('button',{name:'Keep editing',exact:true}).click();await expect(page.getByLabel('Product Name',{exact:true})).toHaveValue('Retained Draft');
   expect(await api.read()).toEqual(before);
 });
-test('Users creates Auth/profile accounts, persists edits and deactivates with retained history; no preview code appears',async({page,browser})=>{
+test('Users creates Auth/profile accounts, persists edits and permanently deletes with retained history; no preview code appears',async({page,browser})=>{
   await api.setup(page.context());await api.login(page);await page.getByRole('button',{name:'Users',exact:true}).click();
   await page.getByRole('button',{name:'Add User',exact:true}).click();await page.getByLabel('Full Name',{exact:true}).fill('Persistent Staff');
   await page.getByLabel('Username',{exact:true}).fill('persistent-staff');await page.getByRole('button',{name:'Next',exact:true}).click();
@@ -74,9 +74,10 @@ test('Users creates Auth/profile accounts, persists edits and deactivates with r
   await page.getByRole('group',{name:'persistent-staff account',exact:true}).getByRole('button',{name:'Manage',exact:true}).click();await page.getByLabel('Name',{exact:true}).fill('Updated Staff');
   await page.getByRole('button',{name:'Save',exact:true}).click();await page.reload();await page.getByRole('button',{name:'Users',exact:true}).click();
   const row=page.getByRole('group',{name:'persistent-staff account',exact:true});await expect(row).toBeVisible();await row.getByRole('button',{name:'Manage',exact:true}).click();await expect(page.getByLabel('Name',{exact:true})).toHaveValue('Updated Staff');
-  await page.getByRole('button',{name:'Deactivate Account',exact:true}).click();await page.getByRole('button',{name:'Confirm deactivation',exact:true}).click();await expect(row).toContainText('Inactive');
+  await expect(page.getByLabel('Account status',{exact:true})).toHaveCount(0);
+  await page.getByRole('button',{name:'Delete Account',exact:true}).click();await page.getByRole('button',{name:'Confirm Delete Account',exact:true}).click();await expect(row).toHaveCount(0);
   const context=await browser.newContext();await api.setup(context,'Admin');const other=await context.newPage();await api.login(other,'Admin');await other.getByRole('button',{name:'Users',exact:true}).click();
-  await expect(other.getByRole('group',{name:'persistent-staff account',exact:true})).toContainText('Inactive');
+  await expect(other.getByRole('group',{name:'persistent-staff account',exact:true})).toHaveCount(0);
   await context.close();
 });
 test('Staff cannot enter management and direct invalid/denied API writes change no inventory data',async({page})=>{

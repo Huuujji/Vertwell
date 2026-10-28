@@ -2,10 +2,16 @@ import { useEffect } from 'react';
 import Login from './pages/Login';
 import { lazySection } from './components/LazySection';
 import AccountSession, { useAccountSession } from './components/AccountSession';
+import EmailChallenge from './pages/EmailChallenge';
 
 const AuthenticatedWorkspace = lazySection(() => import('./components/AuthenticatedWorkspace'), 'workspace');
 
 export default function App() {
+  if (window.location.pathname === '/auth/verify') return <EmailChallenge purpose="verification" />;
+  if (window.location.pathname === '/auth/recover') return <EmailChallenge purpose="recovery" />;
+  return <AccountApp />;
+}
+function AccountApp() {
   const session = useAccountSession();
   useEffect(() => {
     if (session.status !== 'anonymous') return;

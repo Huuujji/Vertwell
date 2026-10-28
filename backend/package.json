@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "npm run email:templates && tsc -p tsconfig.json",
+    "email:templates": "node scripts/build-account-email-templates.ts",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json",
-    "test": "node --import tsx --test tests/app.test.ts tests/login-protection.test.ts tests/operations.test.ts tests/database.test.ts tests/permissions.test.ts tests/inventory.test.ts tests/checkout.test.ts tests/sales-workflow.test.ts tests/reports.test.ts tests/live-updates.test.ts tests/notifications.test.ts",
+    "test": "npm run email:templates -- --check && node --import tsx --test tests/account-deletion.test.ts tests/email-delivery.test.ts tests/major-adjustments.test.ts tests/email-challenges.test.ts tests/pending-accounts.test.ts tests/app.test.ts tests/login-protection.test.ts tests/operations.test.ts tests/database.test.ts tests/permissions.test.ts tests/inventory.test.ts tests/checkout.test.ts tests/sales-workflow.test.ts tests/reports.test.ts tests/live-updates.test.ts tests/notifications.test.ts",
     "test:database": "node --import tsx --test tests/database.test.ts",
     "profile:native": "tsx scripts/profile-native.ts",
     "profile:mixed": "tsx scripts/profile-mixed.ts",

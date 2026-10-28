@@ -48,7 +48,7 @@ test('five repeated checkouts create one alert; exact retries deduplicate and ne
 });
 test('request decisions close the notification while preserving evidence, and a new request has its own unread identity',async()=>{
   const f=await requested(),item=(await feed()).items[0],target=await f.target(f.sale.saleId);
-  await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[target],requestId:item.evidence.requestId,approved:false,reason:'Payment and receipt checked'});
+  await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[target],requestId:item.evidence.requestId,approved:false,reasonId:'other',notes:'Payment and receipt checked'});
   assert.equal((await feed()).total,0);await workflowRejects(db,()=>mark(item),'PT409');
   await db.exec('reset role');const history=(await db.query<any>('select * from private.notification_versions where notification_id=$1 order by revision',[item.id])).rows;
   assert.equal(history.length,2);assert.equal(history[1].resolution,'Rejected');assert.deepEqual(history[0].evidence,history[1].evidence);

@@ -23,7 +23,7 @@ async function initialize(database: PGlite) {
 before(async () => {
   const files = (await readdir(new URL('migrations/', sqlRoot))).filter(name => name.endsWith('.sql')).sort();
   migrations = await Promise.all(files.map(name => readFile(new URL(`migrations/${name}`, sqlRoot), 'utf8')));
-  assert.equal(files.length, 19);
+  assert.equal(files.length, 29);
   db = new PGlite();
   await initialize(db);
 });
@@ -86,7 +86,7 @@ test('fresh migrations expose only scoped P4 reads and restricted functions, wit
   assert.deepEqual(grants.rows, ['alert_settings','payments','sale_item_modifiers','sale_items','sales','void_requests']
     .map(table_name => ({table_name,grantee:'authenticated',privilege_type:'SELECT'})));
   assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public'`), 25);
+    where n.nspname='public'`), 29);
   for (const role of ['anon', 'authenticated', 'service_role']) {
     assert.equal(await scalar(`select has_schema_privilege($1,'private','USAGE')`, [role]), role === 'authenticated');
     assert.equal(await scalar(`select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
@@ -466,9 +466,11 @@ test('profile commands enforce roles, own-account protection, revisions and atom
   await asActor(staff);
   await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Changed','changed','Staff',true)", /not permitted/, [staff]);
   await asActor(owner);
-  await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Owner','owner','Owner',false)", /signed-in/, [owner]);
+  await rejected("select update_account($1,(select updated_at from profiles where id=$1),'Owner','owner','Owner',false)", /managed internally/, [owner]);
   await rejected("select update_account($1,'2000-01-01','Changed','changed','Staff',true)", /changed/, [staff]);
-  await accountUpdate(staff,'Staff',false);
+  await rejected("select public.update_account($1,(select updated_at from profiles where id=$1),'Updated account','updated-account','Staff',false)",/managed internally/,[staff]);
+  // Trusted internal access restriction remains effective; no management action sets it.
+  await db.query('update public.profiles set active=false where id=$1',[staff]);
   await asActor(staff);
   await rejected('select current_profile()', /inactive/);
 });
@@ -480,8 +482,9 @@ test('last active Owner protection applies to direct writes and ownership handov
   await rejected('delete from profiles where id=$1', /append-only/, [owner]);
   const successor = await provision({actor_id:owner,full_name:'Real Owner',username:'real-owner',role:'Owner'});
   await asActor(successor);
-  await accountUpdate(owner,'Owner',false,'retired-owner');
-  assert.equal(await scalar('select active from profiles where id=$1',[owner]),false);
+  await accountUpdate(owner,'Admin',true,'previous-owner');
+  assert.equal(await scalar('select role from profiles where id=$1',[owner]),'Admin');
+  assert.equal(await scalar('select active from profiles where id=$1',[owner]),true);
   assert.equal(await scalar('select count(*)::int from audit_events where entity_id=$1',[owner]),1);
 });
 
@@ -516,7 +519,7 @@ test('retirement removes inactive accounts from managed lists while preserving p
   assert.deepEqual(await scalar('select to_jsonb(p) from public.profiles p where id=$1',[retired]),before);
   assert.equal(await scalar('select count(*)::int from public.audit_events'),audits);
   await rejected('update public.profiles set active=true where id=$1',/Retired account/,[retired]);
-  await rejected("select public.update_account($1,(select updated_at from public.profiles where id=$1),'Changed','changed','Staff',true)",/Retired account/,[retired]);
+  await rejected("select public.update_account($1,(select updated_at from public.profiles where id=$1),'Changed','changed','Staff',false)",/Retired account/,[retired]);
   await asActor(retired);
   await rejected('select public.current_profile()',/inactive/);
 });

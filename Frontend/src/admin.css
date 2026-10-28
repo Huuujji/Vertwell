@@ -318,3 +318,10 @@
   .admin-workspace .report-table { min-width: 0; }
   .admin-workspace .report-table th { color: #000; }
 }
+
+/* Keep the stock review heading reachable while quantity/fact entries scroll. */
+.admin-workspace .stock-disposition-modal[open] { display: flex; flex-direction: column; overflow: clip; }
+.admin-workspace .stock-disposition-modal .modal-header { flex-shrink: 0; }
+.admin-workspace .stock-disposition-modal .modal-body { overflow-y: auto; min-height: 0; overscroll-behavior: contain; overflow-wrap: anywhere; }
+.admin-workspace .stock-disposition-modal :is(fieldset, select, input, textarea) { min-width: 0; max-width: 100%; }
+.admin-workspace .stock-disposition-modal .actions { flex-wrap: wrap; }

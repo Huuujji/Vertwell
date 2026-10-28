@@ -19,8 +19,8 @@ export async function workflowFixture(db:DB) {
     const r=await f.checkout(c);await checkoutAs(db,f.actors.owner);return r;
   };
   const target=async(id:string)=>{const sale=(await read()).items.find((s:any)=>s.id===id);return {saleId:id,token:sale.token};};
-  const request=async(id:string,reason='Incorrect order entered')=>({operationId:randomUUID(),kind:'void.request',targets:[await target(id)],reason});
-  const voidCommand=async(ids:string[],reason='Duplicate transaction')=>({operationId:randomUUID(),kind:'sale.void',targets:await Promise.all(ids.map(target)),reason});
+  const request=async(id:string,reason='Incorrect order entered')=>({operationId:randomUUID(),kind:'void.request',targets:[await target(id)],reasonId:'other',notes:reason});
+  const voidCommand=async(ids:string[],reason='Duplicate transaction')=>({operationId:randomUUID(),kind:'sale.void',targets:await Promise.all(ids.map(target)),reasonId:'other',notes:reason});
   const review=async(ids:string[],overrides:any={})=>{
     const orders=(await read()).items.filter((s:any)=>ids.includes(s.id));
     return {operationId:randomUUID(),kind:'review.confirm',targets:await Promise.all(ids.map(target)),review:{date:orders[0].businessDate,
@@ -76,16 +76,17 @@ export const workflowScenarios:{name:string;run(db:DB):Promise<void>}[]=[
     const f=await workflowFixture(db),sale=await f.buy(),before=await f.physical();await checkoutAs(db,f.actors.staff);
     const first=await f.request(sale.saleId,'First mistaken entry');await f.execute(first);
     await checkoutAs(db,f.actors.admin);let current=(await f.read()).items.find((s:any)=>s.id===sale.saleId);
-    await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:current.requests[0].id,approved:false,reason:'Receipt is correct'});
+    await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:current.requests[0].id,approved:false,reasonId:'other',notes:'Receipt is correct'});
     await checkoutAs(db,f.actors.staff);const second=await f.request(sale.saleId,'Second supported request');await f.execute(second);
     await checkoutAs(db,f.actors.admin);current=(await f.read()).items.find((s:any)=>s.id===sale.saleId);
-    await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:current.requests.find((r:any)=>r.status==='Pending').id,approved:true,reason:'Approved after checking receipt'});
+    await f.execute({operationId:randomUUID(),kind:'void.decide',targets:[await f.target(sale.saleId)],requestId:current.requests.find((r:any)=>r.status==='Pending').id,approved:true,reasonId:'other',notes:'Approved after checking receipt'});
     current=(await f.read()).items.find((s:any)=>s.id===sale.saleId);
     assert.equal(current.status,'Voided');assert.equal(current.voidedRole,'Admin');assert.equal(current.voidReason,'Approved after checking receipt');
     assert.deepEqual(current.requests.map((r:any)=>r.status),['Rejected','Approved']);
     assert.equal(current.requests[0].reason,'First mistaken entry');assert.equal(current.requests[1].reason,'Second supported request');
     assert.ok(current.requests.every((r:any)=>r.reviewed_by===f.actors.admin&&r.requested_by===f.actors.staff));
-    assert.deepEqual(current.events.map((e:any)=>e.event_type),['Checkout recorded','Void requested','Void request rejected','Void requested','Void request approved','Sale voided']);
+    assert.equal(current.events.filter((e:any)=>e.event_type==='Sale adjustment recorded').length,4);
+    assert.deepEqual(current.events.filter((e:any)=>e.event_type!=='Sale adjustment recorded').map((e:any)=>e.event_type),['Checkout recorded','Void requested','Void request rejected','Void requested','Void request approved','Sale voided']);
     assert.deepEqual(await f.physical(),before);
   }},
   {name:'P7 Staff reads only own current-day sales/events and no other receipt IDs or review cash counts',async run(db){
@@ -96,8 +97,8 @@ export const workflowScenarios:{name:string;run(db:DB):Promise<void>}[]=[
     await db.query("update public.sales set occurred_at=occurred_at-interval '2 days' where id=$1",[old.saleId]);await db.query('alter table public.sales enable trigger sales_update_guard');
     await checkoutAs(db,f.actors.staff);const read=await f.read();assert.equal(read.items.length,1);assert.equal(read.items[0].id,own.saleId);
     assert.equal(read.items[0].review.details,null);assert.ok(!JSON.stringify(read).includes(other.saleId));
-    await workflowRejects(db,()=>f.execute({operationId:randomUUID(),kind:'void.request',targets:[{saleId:other.saleId,token:'a'.repeat(64)}],reason:'Cross account'}),'42501');
-    await workflowRejects(db,()=>f.execute({operationId:randomUUID(),kind:'void.request',targets:[{saleId:old.saleId,token:'a'.repeat(64)}],reason:'Old date'}),'42501');
+    await workflowRejects(db,()=>f.execute({operationId:randomUUID(),kind:'void.request',targets:[{saleId:other.saleId,token:'a'.repeat(64)}],reasonId:'other',notes:'Cross account'}),'42501');
+    await workflowRejects(db,()=>f.execute({operationId:randomUUID(),kind:'void.request',targets:[{saleId:old.saleId,token:'a'.repeat(64)}],reasonId:'other',notes:'Old date'}),'42501');
   }},
   {name:'P7 current roles, inactive/anonymous/service identities and direct table access cannot bypass commands',async run(db){
     const f=await workflowFixture(db),sale=await f.buy(),review=await f.review([sale.saleId]),voiding=await f.voidCommand([sale.saleId]);
@@ -132,7 +133,7 @@ export const workflowScenarios:{name:string;run(db:DB):Promise<void>}[]=[
     const f=await workflowFixture(db),sale=await f.buy();await checkoutAs(db,f.actors.staff);
     const request=await f.request(sale.saleId);await f.execute(request);
     await checkoutAs(db,f.actors.admin);const voiding=await f.voidCommand([sale.saleId]);await f.execute(voiding);
-    await workflowRejects(db,()=>f.execute({...voiding,reason:'Changed reason'}),'PT409');
+    await workflowRejects(db,()=>f.execute({...voiding,reasonId:'other',notes:'Changed reason'}),'PT409');
     await checkoutAs(db,f.actors.owner);await workflowRejects(db,()=>f.execute(voiding),'PT409');
     await db.query('reset role');await db.query('update private.checkout_state set enabled=false where singleton');
     await checkoutAs(db,f.actors.staff);assert.equal((await f.execute(request)).replayed,true);

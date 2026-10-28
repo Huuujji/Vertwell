@@ -123,6 +123,7 @@ async function verify(client: pg.Client) {
     where n.nspname='public' and r.rolname in ('anon','authenticated','service_role')
       and has_function_privilege(r.rolname,p.oid,'EXECUTE') order by p.proname,r.rolname`);
   const expectedFunctions = [
+    {proname:'account_deletion_result',rolname:'authenticated'},
     {proname:'account_login_email',rolname:'service_role'},
     {proname:'account_provisioning_result',rolname:'authenticated'},
     {proname:'authorize_business_action',rolname:'authenticated'},
@@ -131,7 +132,9 @@ async function verify(client: pg.Client) {
     {proname:'checkout',rolname:'authenticated'},
     {proname:'consume_login_attempt',rolname:'service_role'},
     {proname:'current_profile',rolname:'authenticated'},
+    {proname:'email_challenge',rolname:'service_role'},
     {proname:'inventory_command',rolname:'authenticated'},
+    {proname:'prepare_account_deletion',rolname:'authenticated'},
     {proname:'quote_checkout',rolname:'authenticated'},
     {proname:'read_business_sales',rolname:'authenticated'},
     {proname:'read_checkout_catalogue',rolname:'authenticated'},
@@ -146,6 +149,7 @@ async function verify(client: pg.Client) {
     {proname:'read_sales_workflow',rolname:'authenticated'},
     {proname:'sales_workflow_command',rolname:'authenticated'},
     {proname:'set_notification_read',rolname:'authenticated'},
+    {proname:'update_account',rolname:'authenticated'},
     {proname:'update_account',rolname:'authenticated'},
     {proname:'update_alert_settings',rolname:'authenticated'},
   ];

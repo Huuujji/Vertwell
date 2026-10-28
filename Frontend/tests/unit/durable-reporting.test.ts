@@ -120,3 +120,31 @@ test('P8 historical recipe/modifier consumption and original names survive later
   assert.match(row.join(' '),/Original recipe/);assert.match(row.join(' '),/Extra flour/);assert.match(row.join(' '),/Original flour/);assert.equal(row[3],'150');assert.equal(row[4],'g');
   const balance=r.balances.find(b=>b.item.id===ingredient.id)!;assert.equal(balance.display(balance.used),'0.15');assert.equal(balance.display(balance.closing),'9.85');
 });
+
+test('Adjustment 9 original Consumption reconciles after actual return; linked missing is resolved once across event days',async()=>{
+ await f.buy();const s=await snapshot(),line=s.tables.sale_items[0],usage=s.tables.sale_item_stock_usage[0],move=s.tables.stock_movements.find(m=>m.kind==='Consumption')!;
+ const root={id:crypto.randomUUID(),operation_id:crypto.randomUUID(),sale_item_id:line.id,stock_item_id:usage.stock_item_id,quantity_base:'1',condition:'not_returned' as const,evidence:'Missing at handover',occurred_at:s.generatedAt,actor_name:'Test Owner',actor_role:'Owner',sourceDispositionId:null,physicalFacts:null,allocations:[{source_movement_id:move.id,return_movement_id:null,quantity_base:'1',batch:null}]};
+ const returned={...root,id:crypto.randomUUID(),condition:'returned_sellable' as const,sourceDispositionId:root.id,evidence:'Later inspected return',allocations:[{...root.allocations[0],return_movement_id:crypto.randomUUID()}]};
+ s.adjustments=[{saleId:line.sale_id,evidence:{decisions:[],refunds:[],dispositions:[root,returned]}}];
+ s.tables.stock_movements.push({...move,id:returned.allocations[0].return_movement_id!,kind:'Return',quantity_base:'1'});
+ const r=buildDurableReport(s,filters(s.businessDate));assert.equal(r.balances[0].used,1000000n);assert.equal(r.balances[0].current,10000000n);assert.ok(!r.report.sections.at(-1)!.rows.some(row=>row[1]==='Usage / movement mismatch'));
+ const current=r.report.sections.find(s=>s.title.startsWith('Current disposition'))!;assert.match(current.rows[0][1],/Outstanding missing 0 pcs/);assert.match(current.rows[0][2],/resolved 1 pcs/);assert.equal(r.report.sections.find(s=>s.title.startsWith('Stock disposition'))!.rows.length,2);
+});
+
+test('Adjustment 9 mixed-order payout allocation is unavailable, full evidence retained and review aggregates never subtract twice',async()=>{
+ await f.buy('owner');const s=await snapshot(),line=s.tables.sale_items[0];s.tables.sale_items.push({...line,id:crypto.randomUUID(),category:'Food'});
+ const refund={id:crypto.randomUUID(),operation_id:crypto.randomUUID(),amount:'4.00',method:'Cash',reference:'PAYOUT-ONE',evidence:'Receipt',paid_at:s.generatedAt,recorded_at:s.generatedAt,actor_name:'Test Owner',actor_role:'Owner',status:'Manually recorded',providerVerified:false as const};
+ s.adjustments=[{saleId:line.sale_id,evidence:{decisions:[],dispositions:[],refunds:[refund]}}];
+ const all=buildDurableReport(s,filters(s.businessDate));assert.equal(all.refundedFunds,400n);assert.equal(all.netReceivedFunds,1000n);assert.equal(all.total,1400n);
+ const filtered=buildDurableReport(s,filters(s.businessDate,{category:'Hobby'}));assert.equal(filtered.refundedFunds,null);assert.equal(filtered.netReceivedFunds,null);assert.match(filtered.report.sections.find(s=>s.title.startsWith('Manual refunds'))!.rows[0].join(' '),/PAYOUT-ONE/);assert.ok(filtered.report.sections.at(-1)!.rows.some(row=>row[1]==='Payout allocation unavailable'));
+ // An older source sale is excluded from transactions; its payout stays in the actual payout period.
+ Object.assign(s.tables.sales[0],{occurred_at:'2020-01-01T00:00:00Z'});const later=buildDurableReport(s,filters(s.businessDate));assert.equal(later.orderCount,0);assert.equal(later.refundedFunds,400n);
+});
+
+test('Adjustment 9 missing or zero-value purchased allocations are disclosed or fail closed instead of assigning all money to Food',async()=>{
+ await f.buy('owner');const s=await snapshot();Object.assign(s.tables.sale_items[0],{unit_price:'0.00'});
+ assert.throws(()=>buildDurableReport(s,filters(s.businessDate,{category:'Hobby'})),/category allocation unavailable/);
+ assert.equal(buildDurableReport(s,filters(s.businessDate)).total,1400n);
+ s.tables.sale_item_stock_usage=[];s.tables.sale_items=[];
+ const r=buildDurableReport(s,filters(s.businessDate,{category:'Hobby'}));assert.ok(r.report.sections.at(-1)!.rows.some(row=>row[1]==='Category allocation unavailable'));
+});

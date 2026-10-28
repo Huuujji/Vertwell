@@ -3,10 +3,10 @@ export interface ReportDocument { title: string; range: string; generated: strin
 export function saveBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob), link = document.createElement('a'); link.href = url; link.download = filename; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+export const csvCell = (value: string) => `"${/^[\s\uFEFF]*[=+\-@]/u.test(value) || /^[\t\r\n]/.test(value) ? "'" : ''}${value.replaceAll('"', '""')}"`;
 export function downloadCsv(report: ReportDocument, filename: string) {
-  const escape = (value: string) => `"${/^[=+\-@\t\r]/.test(value) ? "'" : ''}${value.replaceAll('"', '""')}"`;
   const rows = [[report.title], [report.range], [report.generated], ...report.notes.map(note => [note]), ...report.sections.flatMap(section => [[section.title], section.headings, ...section.rows, []])];
-  saveBlob(new Blob(['\uFEFF', rows.map(row => row.map(escape).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), filename);
+  saveBlob(new Blob(['\uFEFF', rows.map(row => row.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), filename);
 }
 let fontData: Promise<string> | undefined;
 async function reportFont() {

@@ -43,12 +43,13 @@ test('login and recovery preserve keyboard order, password state, named fields a
   await page.keyboard.press('Space');
   await expect(page.getByLabel('Password', { exact: true })).toHaveAttribute('type', 'password');
   await page.keyboard.press('Tab'); await expect(page.getByRole('button', { name: 'Forgot password?', exact: true })).toBeFocused();
+  await expect(page.getByRole('link', { name: 'Verify account email with code or link', exact: true })).toHaveCount(0);
   await page.keyboard.press('Tab'); await expect(page.getByRole('button', { name: 'Log in', exact: true })).toBeFocused();
   await page.keyboard.press('Enter'); await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.locator('.workspace')).toHaveCount(0);
   await page.getByRole('button', { name: 'Forgot password?', exact: true }).focus(); await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Reset your password', exact: true })).toBeFocused();
-  await page.keyboard.press('Tab'); await expect(page.getByLabel('Email', { exact: true })).toBeFocused();
+  await page.keyboard.press('Tab'); await expect(page.getByLabel('Account email', { exact: true })).toBeFocused();
   await page.setViewportSize({ width: 320, height: 568 }); await contained(page);
 });
 

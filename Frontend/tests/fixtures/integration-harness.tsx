@@ -49,7 +49,7 @@ function Harness() {
   return <ViewState.Provider value={state.current}><div className="workspace admin-workspace"><main className="workspace-main">
     {location.search.includes('users') ? <Users accounts={accounts} role="Owner" actorId="angel"
       onSave={async (account: Account) => { await gate(); setAccounts(current => [...current.filter(row => row.id !== account.id), account]); window.integration.saved++; }}
-      onDelete={async id => { await gate(); setAccounts(current => current.filter(row => row.id !== id)); window.integration.saved++; }} notify={setNotice} />
+      onDelete={async account => { await gate(); setAccounts(current => current.filter(row => row.id !== account.id)); window.integration.saved++; }} notify={setNotice} />
       : location.search.includes('resource') ? <ResourceHarness /> : <Inventory templates={[]} onSaveTemplate={() => {}} onRemoveTemplate={() => {}}
         items={stock} products={products} actor="Angel (Owner)" onDirtyChange={dirty}
         onLeave={action => { if (window.integration.dirty) setDiscard(() => action); else action(); }} onUpdate={update} onAddIngredient={update}

@@ -12,7 +12,7 @@ export type InventoryTable = typeof inventoryTables[number];
 export type InventorySnapshot = { version: 1; businessDate: string; tables: { [T in InventoryTable]: Row<T>[] };
   balances: { batch_id: string; quantity_base: string }[]; revision?: string;
   edits?: { entity_type: string; entity_id: string; actor_name: string; actor_role: string; occurred_at: string }[] };
-export type ManagedAccount = Row<'profiles'> & { email: string }; // email supplied by authorized Auth administration
+export type ManagedAccount = Row<'profiles'> & { email: string; emailVerification?: 'pending'|'verified'|'existing' }; // trusted authorized projection
 
 export function invalidResponse(detail: string): never {
   throw new ApiError(`Invalid data response: ${detail}.`, 'response');

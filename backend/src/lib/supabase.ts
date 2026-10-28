@@ -20,6 +20,7 @@ export function getSupabaseAdminClient(): SupabaseClient {
   getSupabaseAuthClient();
   if (!env.supabaseSecretKey) throw new HttpError(503, 'Server account provisioning is not configured.');
   adminClient ??= createClient(env.supabaseUrl, env.supabaseSecretKey, {
+    global: { fetch: authBoundedFetch },
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
   return adminClient;

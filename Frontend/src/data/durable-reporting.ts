@@ -3,6 +3,7 @@ import type { ReportDocument,ReportSection } from '../lib/report-export';
 import type { SalesCategory } from './reporting';
 import { scaledDecimal } from '../lib/data/decimal';
 import { invalidResponse } from '../lib/data/contracts';
+import { stockConditions, describePhysicalFacts } from '../lib/data/sale-adjustments';
 
 export type ReportFilters={start:string;end:string;startTime:string;endTime:string;category:SalesCategory;scope:'Sales'|'Inventory usage'|'Combined'};
 const sum=(values:bigint[])=>values.reduce((a,b)=>a+b,0n);
@@ -56,7 +57,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
   const share=(s:typeof t.sales[number],value:string)=>{
     const total=cents(value);if(f.category==='All categories')return total;
     const own=orderLines(s.id),sub=sum(own.map(l=>cents(l.unit_price)*BigInt(l.quantity)));
-    if(sub===0n)return f.category==='Hobby'?0n:total;
+    if(sub===0n){if(total!==0n)invalidResponse('category allocation unavailable: recorded purchased line value is zero');return 0n;}
     const hobby=sum(own.filter(l=>l.category==='Hobby').map(l=>cents(l.unit_price)*BigInt(l.quantity)));
     const allocated=(total*hobby+sub/2n)/sub;return f.category==='Hobby'?allocated:total-allocated;
   };
@@ -67,6 +68,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
   const digital=sum(completed.filter(s=>payment(s.id)?.method==='GCash').map(s=>share(s,s.total)));
   const allocatedSubtotal=(s:typeof t.sales[number])=>f.category==='All categories'?cents(s.subtotal):sum(orderLines(s.id).filter(l=>matches(l.category)).map(l=>cents(l.unit_price)*BigInt(l.quantity)));
   const exceptions:string[][]=[];
+  if(f.category!=='All categories')for(const sale of timed.filter(s=>!orderLines(s.id).length))exceptions.push([sale.order_number,'Category allocation unavailable','Purchased items are missing. This receipt cannot be assigned to the selected category; use All categories to review its recorded total.']);
   for(const s of (f.scope==='Inventory usage'?timed:sales)) {
     if(!orderLines(s.id).length)exceptions.push([s.order_number,'Missing purchased items','Category allocation and product usage are unknown.']);
     if(s.stock_committed!==true||s.usage_complete!==true)exceptions.push([s.order_number,'Incomplete stock history','Consumption snapshots are incomplete or stock commitment is unknown.']);
@@ -123,7 +125,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
       ...t.stock_movements.filter(m=>m.sale_item_id===l.id).map(m=>batches.get(m.batch_id)!.stock_item_id)]);
     for(const id of stockIds){
       const recorded=sum(t.sale_item_stock_usage.filter(u=>u.sale_item_id===l.id&&u.stock_item_id===id).map(u=>n(u.quantity_base)));
-      const deducted=-sum(t.stock_movements.filter(m=>m.sale_item_id===l.id&&batches.get(m.batch_id)!.stock_item_id===id).map(m=>n(m.quantity_base)));
+      const deducted=-sum(t.stock_movements.filter(m=>m.kind==='Consumption'&&m.sale_item_id===l.id&&batches.get(m.batch_id)!.stock_item_id===id).map(m=>n(m.quantity_base)));
       if(recorded!==deducted)exceptions.push([s.order_number,'Usage / movement mismatch',`${l.name}: purchased usage and recorded deduction differ for ${stocks.get(id)!.name}.`]);
     }
   }
@@ -139,6 +141,46 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
   const usageTotals=new Map<string,{name:string;sku:string;unit:string;q:bigint}>();
   for(const u of stockUsage){const key=`${u.stock_item_id}:${u.sku}:${u.unit_code}`,v=usageTotals.get(key)??{name:u.name,sku:u.sku,unit:u.unit_code,q:0n};v.q+=n(u.quantity_base);usageTotals.set(key,v);}
   const reviewIds=new Set(t.daily_sales_review_items.filter(i=>selectedIds.has(i.sale_id)).map(i=>i.review_id));
+  const adjustments=snapshot.adjustments??[];
+  const relevant=(saleId:string)=>f.category==='All categories'||orderLines(saleId).some(l=>matches(l.category));
+  const refunds=adjustments.flatMap(a=>a.evidence.refunds.map(r=>({...r,saleId:a.saleId}))).filter(r=>within(r.paid_at)&&relevant(r.saleId));
+  const dispositions=adjustments.flatMap(a=>a.evidence.dispositions.map(d=>({...d,saleId:a.saleId}))).filter(d=>onDays(d.occurred_at));
+  const decisions=adjustments.flatMap(a=>a.evidence.decisions.map(d=>({...d,saleId:a.saleId}))).filter(d=>within(d.occurredAt)&&relevant(d.saleId));
+  const unallocatedRefunds=refunds.filter(r=>f.category!=='All categories'&&orderLines(r.saleId).some(l=>!matches(l.category)));
+  const refundedFunds=snapshot.adjustments===undefined||unallocatedRefunds.length?null:sum(refunds.map(r=>cents(r.amount)));
+  const receivedFunds=sum(t.payments.filter(p=>within(p.recorded_at)&&relevant(p.sale_id)).map(p=>share(allSales.get(p.sale_id)!,p.amount)));
+  const netReceivedFunds=refundedFunds===null?null:receivedFunds-refundedFunds;
+  const payoutValue=refundedFunds===null?'Unavailable: adjustment evidence or mixed-order payout allocation missing':pesos(refundedFunds);
+  if(unallocatedRefunds.length)exceptions.push(['Mixed orders','Payout allocation unavailable','Full-receipt payout evidence is retained. No category payout or net-money amount is inferred from sale prices.']);
+  const adjustmentSections:ReportSection[]=[
+    section('Money received and manual refunds · event period',['Metric','Amount'],[
+      ['Original received payments in this period, including pending and voided receipts',pesos(receivedFunds)],
+      ['Actual manual payouts recorded for this period',payoutValue],['Received less recorded manual payouts',netReceivedFunds===null?'Unavailable: adjustment evidence or payout allocation missing':pesos(netReceivedFunds)]]),
+    section('Sale corrections and submitted commands · event period',['Order / operation','Action / reason','Notes','Actor / decision time'],decisions.map(d=>[
+      `${saleLabel(d.saleId)}\nSale ${d.saleId}\nOriginal sale ${stamp(allSales.get(d.saleId)!.occurred_at)}\n${d.operationId}`,`${d.kind}\n${d.reasonLabel} (${d.reasonId})\nSubmitted command; actual request decisions and current receipt status shown separately`,d.notes||'—',`${d.actorName} (${d.actorRole})\nActor ${d.actorId}\n${stamp(d.occurredAt)}`])),
+    section('Manual refunds · actual payout evidence',['Order / operation','Amount / method','Reference / status','Paid / recorded / actor','Evidence'],refunds.map(r=>[
+      `${saleLabel(r.saleId)}\nSale ${r.saleId}\nOriginal sale ${stamp(allSales.get(r.saleId)!.occurred_at)}\nRefund ${r.id}\nOperation ${r.operation_id}`,`${pesos(cents(r.amount))}\n${r.method}`,`${r.reference}\n${r.status}\nNo provider transfer performed`,
+      `${stamp(r.paid_at)} paid\n${stamp(r.recorded_at)} recorded\n${r.actor_name} (${r.actor_role})\nActor ${r.actor_id??'Historical ID unavailable'}`,`${r.evidence}\nPayment ${r.payment_id??'Historical link unavailable'}\nCash movement ${r.cash_movement_id??(r.method==='Cash'?'Link unavailable':'Not applicable')}\nFull receipt amount; category allocation ${unallocatedRefunds.some(u=>u.id===r.id)?'unavailable':'not required'}`])),
+  ];
+  const dispositionSection=section('Stock disposition · event days; original deductions retained',['Order / purchased item / stock','Condition / quantity','Physical adjustment','Evidence / actor / operation'],dispositions.map(d=>{
+    const line=lines.get(d.sale_item_id),usage=t.sale_item_stock_usage.find(u=>u.sale_item_id===d.sale_item_id&&u.stock_item_id===d.stock_item_id);
+    if(!line||!usage)invalidResponse('disposition original snapshot');
+    const restored=sum(d.allocations.filter(a=>a.return_movement_id!==null).map(a=>n(a.quantity_base)));
+    return [`${saleLabel(d.saleId)}\nSale ${d.saleId}\nOriginal sale ${stamp(allSales.get(d.saleId)!.occurred_at)}\nItem ${line.id} · ${line.name}\n${usage.name} / ${usage.sku}\nDisposition ${d.id}\nPrior missing ${d.sourceDispositionId??'Not a later return'}`,`${stockConditions[d.condition]}\n${qty(n(d.quantity_base),usage.unit_code)} ${usage.unit_code}`,
+      `${qty(restored,usage.unit_code)} ${usage.unit_code} restored\n${d.condition==='waste'?'Waste classification; no second deduction':'No new consumption'}\n${d.allocations.map(a=>`Source ${a.source_movement_id}${a.return_movement_id?` → Return ${a.return_movement_id}`:''}`).join('\n')}`,
+      `${d.evidence}\n${describePhysicalFacts(d.physicalFacts)}\n${d.actor_name} (${d.actor_role})\nActor ${d.actor_id??'Historical ID unavailable'}\n${stamp(d.occurred_at)}\n${d.operation_id}`];
+  }));
+  // Resolve linked missing evidence against the complete snapshot, including later days.
+  const allDispositions=adjustments.flatMap(a=>a.evidence.dispositions.map(d=>({...d,saleId:a.saleId})));
+  const currentDispositionSection=section('Current disposition evidence · snapshot; not warehouse balances',['Order / source','Current classification / quantity','Resolution / custody limits'],allDispositions.filter(d=>d.condition==='not_returned'||d.condition==='returned_unsellable').map(d=>{
+    const usage=t.sale_item_stock_usage.find(u=>u.sale_item_id===d.sale_item_id&&u.stock_item_id===d.stock_item_id);
+    if(!usage)invalidResponse('disposition original snapshot');
+    const children=allDispositions.filter(c=>c.sourceDispositionId===d.id);
+    const resolved=sum(children.map(c=>n(c.quantity_base))),remaining=n(d.quantity_base)-resolved;
+    if(remaining<0n)invalidResponse('linked return quantity');
+    return [saleLabel(d.saleId)+'\n'+d.id,d.condition==='not_returned'?'Outstanding missing '+qty(remaining,usage.unit_code)+' '+usage.unit_code:'Damaged / unsellable custody evidence '+qty(n(d.quantity_base),usage.unit_code)+' '+usage.unit_code,
+      d.condition==='not_returned'?'Original '+qty(n(d.quantity_base),usage.unit_code)+'; resolved '+qty(resolved,usage.unit_code)+' '+usage.unit_code+'\n'+children.map(c=>c.id).join('\n'):'Recorded custody at event time; subsequent custody balance unavailable. Not sellable stock or a newly reconciled warehouse balance.'];
+  }));
   const reviews=t.daily_sales_reviews.filter(r=>reviewIds.has(r.id)).sort((a,b)=>b.reviewed_at.localeCompare(a.reviewed_at)||b.id.localeCompare(a.id));
   const financial:ReportSection[]=[
     section('Sales summary',['Metric','Value'],[
@@ -161,8 +203,8 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
       `${r.outcome}\n${r.explanation||'No review note entered'}\n${t.daily_sales_review_items.filter(i=>i.review_id===r.id).map(i=>`${saleLabel(i.sale_id)} (${i.sale_id}); receipt verified: ${i.receipt_verified}; amount ${pesos(cents(i.verified_amount))}`).join('\n')}`])),
     section('Recorded cash adjustments',['Review / order','Type / amount','Actor / time','Reason'],t.cash_movements.filter(c=>c.review_id?reviewIds.has(c.review_id):c.sale_id?selectedIds.has(c.sale_id):within(c.occurred_at)).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)||b.id.localeCompare(a.id)).map(c=>[
       c.review_id??(c.sale_id?saleLabel(c.sale_id):'Independent movement'),`${c.kind}\n${pesos(cents(c.amount))}`,`${c.actor_name} (${c.actor_role})\n${stamp(c.occurred_at)}`,c.reason])),
-    section('Void requests and decisions',['Order / status','Requester / time / reason','Decision actor / time','Decision reason'],t.void_requests.filter(v=>selectedIds.has(v.sale_id)).sort((a,b)=>b.requested_at.localeCompare(a.requested_at)||b.id.localeCompare(a.id)).map(v=>[
-      `${saleLabel(v.sale_id)}\n${v.status}`,`${v.requested_name} (${v.requested_role})\n${stamp(v.requested_at)}\n${v.reason}`,v.reviewed_at?`${v.reviewed_name} (${v.reviewed_role})\n${stamp(v.reviewed_at)}`:'Awaiting decision',v.decision_reason??'—'])),
+    section('Void requests and decisions',['Order / status','Requester / time / reason','Decision actor / time','Decision reason'],t.void_requests.filter(v=>relevant(v.sale_id)&&(selectedIds.has(v.sale_id)||within(v.requested_at)||Boolean(v.reviewed_at&&within(v.reviewed_at)))).sort((a,b)=>b.requested_at.localeCompare(a.requested_at)||b.id.localeCompare(a.id)).map(v=>[
+      `${saleLabel(v.sale_id)}\nSale ${v.sale_id}\nRequest ${v.id}\n${v.status}`,`${v.requested_name} (${v.requested_role})\n${stamp(v.requested_at)}\nActor ${v.requested_by}\n${v.reason}`,v.reviewed_at?`${v.reviewed_name} (${v.reviewed_role})\n${stamp(v.reviewed_at)}\nActor ${v.reviewed_by}`:'Awaiting decision',v.decision_reason??'—'])),
   ];
   const inventory:ReportSection[]=[
     section('Needs attention · current stock',['Item / SKU','Usable / unit','Reorder threshold','Batch expiry / availability'],balances.filter(b=>b.attention).map(b=>[
@@ -179,8 +221,8 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
     section(`Stocks remaining · current on hand (${snapshot.businessDate})`,['Item / SKU','Physical / usable','Unit','Threshold / availability'],balances.map(b=>[
       `${b.item.name} / ${b.sku}${b.item.archived_at?' · Archived':''}`,`${b.display(b.current)} physical\n${b.display(b.usable)} usable`,b.unit,
       `${b.display(n(b.item.threshold_base))} reorder\n${b.item.archived_at?'Archived':b.usable===0n?'Out of usable stock':b.usable<=n(b.item.threshold_base)?'Low Stock':'Available'}`])),
-    section('Stock movements · full business days',['Date / batch / item / SKU','Movement / quantity / unit','Order / actor','Reason'],t.stock_movements.filter(m=>onDays(m.occurred_at)).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)||b.id.localeCompare(a.id)).map(m=>[
-      `${stamp(m.occurred_at)}\n${m.batch_id}\n${m.stock_name} / ${m.stock_sku}`,`${m.kind}\n${qty(n(m.quantity_base),m.unit_code)} ${m.unit_code}`,
+    section('Stock movements · full business days',['Date / batch / item / SKU','Movement / quantity / unit','Order / actor','Reason'],t.stock_movements.filter(m=>(m.business_date??day(m.occurred_at))>=f.start&&(m.business_date??day(m.occurred_at))<=f.end).sort((a,b)=>b.occurred_at.localeCompare(a.occurred_at)||b.id.localeCompare(a.id)).map(m=>[
+      `${stamp(m.occurred_at)}\nBusiness date ${m.business_date??day(m.occurred_at)}\n${m.batch_id}\n${m.stock_name} / ${m.stock_sku}`,`${m.kind}\n${qty(n(m.quantity_base),m.unit_code)} ${m.unit_code}`,
       `${m.sale_item_id?saleLabel(lines.get(m.sale_item_id)?.sale_id??''):''}\n${m.actor_name} (${m.actor_role})`,m.reason])),
     section('Current stock batches and expiry',['Item / SKU / batch','Physical / usable','Manufactured / expires','Availability'],[...t.stock_batches].sort((a,b)=>b.received_at.localeCompare(a.received_at)||b.id.localeCompare(a.id)).map(b=>{
       const item=stocks.get(b.stock_item_id)!,q=sum(t.stock_movements.filter(m=>m.batch_id===b.id).map(m=>n(m.quantity_base)));
@@ -194,13 +236,17 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
       ...(f.scope!=='Inventory usage'?['Completed revenue excludes Pending / Voided receipts. Received payment and Owner review are separate. Totals use recorded prices and tax.',
         'Sales category applies to purchased parent products; mixed-category bundle components are not allocated separately. Mixed-order amounts allocate recorded cents by purchased line value.',
         'Payment rows and Daily Sales Review sets retain ORIGINAL receipt amounts and complete included orders, even when they span categories or the time filter. Do not add review totals to filtered revenue.',
-        'GCash reference entry and manual Owner receipt checks are not payment-provider verification. A void does not return stock or refund a payment.']:[]),
+        'GCash reference entry and manual Owner receipt checks are not payment-provider verification. Sale corrections, physical disposition and actual manual payouts are separate linked events.',
+        'Completed revenue uses current receipt status and original prices. Received less manual payouts uses payment/payout event times, including refunds of older sales; it is not added to completed revenue. Full-receipt refund evidence is shown for matching categories. Mixed-order category payout and net-money amounts are unavailable without recorded allocations; sale proportions cannot establish payout allocations.',
+        'Daily-review Refund entries are reconciliation evidence, not another sale-linked payout. Do not add review adjustments to the manual-refund ledger or subtract the same payout twice.']:[]),
       ...(f.scope!=='Sales'?[`Stock covers all categories and full business days ${f.start} to ${f.end}; sales and purchased usage use the selected times.`,
         'Opening + receipts + other inflows - consumption - removals / wastage - other outflows = period closing. Other movements include explicit corrections, returns, transfers and later batch openings.',
         'Percentages use verified opening plus inflows for each SKU/unit. Partial history names the covered dates; earlier stock is unknown. Missing openings show Baseline unavailable.',
         `Current physical / usable quantities are as of snapshot ${stamp(snapshot.generatedAt)}. Expired / unsellable stock remains physical until an explicit removal. Archived records remain in history.`,
-        'Consumption includes paid / fulfilled Pending and voided sales with committed stock. Owner review never consumes stock again. No current recipe is applied to historical sales.']:[]),
-    ],sections:[...(f.scope!=='Inventory usage'?financial:[]),...(f.scope!=='Sales'?inventory:[]),section('Exceptions and missing history',['Receipt / item','Exception','Explanation'],exceptions.filter(row=>f.scope!=='Sales'||!['Baseline unavailable','Usage / movement mismatch'].includes(row[1])))]};
+        'Consumption includes paid / fulfilled Pending and voided sales with committed stock. Owner review never consumes stock again. No current recipe is applied to historical sales.',
+        'Disposition history uses event days; current missing evidence resolves linked later returns across the full snapshot, independent of the period. Damaged custody is event evidence, not a warehouse or sellable balance. Disposition rows classify original consumed quantities. Waste adds no second deduction. Returns appear as dated inflows linked to original movements; expired or unsellable batches stay unusable. No stock-loss money valuation is invented.']:[]),
+      ...(snapshot.adjustments===undefined?['New adjustment evidence is unavailable until the reviewed additive migration is applied.']:[]),
+    ],sections:[...(f.scope!=='Inventory usage'?[...financial,...adjustmentSections]:[]),...(f.scope!=='Sales'?[...inventory,dispositionSection,currentDispositionSection]:[]),section('Exceptions and missing history',['Receipt / item','Exception','Explanation'],exceptions.filter(row=>f.scope!=='Sales'||!['Baseline unavailable','Usage / movement mismatch'].includes(row[1])))]};
   const dailyValues=[...new Set(sales.map(s=>s.business_date??day(s.occurred_at)))].sort().map(date=>{
     const orders=completed.filter(s=>(s.business_date??day(s.occurred_at))===date);
     return [date,String(orders.length),pesos(sum(orders.map(s=>share(s,s.total)))),
@@ -208,7 +254,7 @@ export function buildDurableReport(snapshot:ReportSnapshot,f:ReportFilters) {
       pesos(sum(orders.filter(s=>payment(s.id)?.method==='GCash').map(s=>share(s,s.total))))];
   });
   const dailyTotals=dailyValues.map(([date])=>({date,total:sum(completed.filter(s=>(s.business_date??day(s.occurred_at))===date).map(s=>share(s,s.total)))}));
-  return {report,balances,total,cash,digital,orderCount:sales.length,completedCount:completed.length,dailyValues,dailyTotals,
+  return {report,balances,total,cash,digital,receivedFunds,refundedFunds,netReceivedFunds,orderCount:sales.length,completedCount:completed.length,dailyValues,dailyTotals,
     pendingCount:sales.filter(s=>s.status==='Pending').length,voidedCount:sales.filter(s=>s.status==='Voided').length,
     pendingPaid:sum(sales.filter(s=>s.status==='Pending'&&s.payment_state==='Received').map(s=>share(s,s.total)))};
 }

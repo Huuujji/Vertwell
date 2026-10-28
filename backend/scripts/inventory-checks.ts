@@ -183,7 +183,7 @@ export const inventoryScenarios: {name:string;run(db: DB):Promise<void>}[] = [
     const before=await scalar(db,'select count(*)::int as value from auth.users');
     await reject(db,()=>db.query('insert into auth.users(id,email,raw_app_meta_data) values($1,$2,$3)',[randomUUID(),`other-${expected.email}`,JSON.stringify({...metadata,vertwell_provision:{...metadata.vertwell_provision,username:`other-${id}`}})]));
     assert.equal(await scalar(db,'select count(*)::int as value from auth.users'),before);
-    await as(db,f.actors.owner);assert.deepEqual(await scalar(db,'select public.account_provisioning_result($1,$2) as value',[op,JSON.stringify(expected)]),{id,email:expected.email});
+    await as(db,f.actors.owner);assert.deepEqual(await scalar(db,'select public.account_provisioning_result($1,$2) as value',[op,JSON.stringify(expected)]),{id,email:expected.email,emailVerification:'existing'});
     await as(db,f.actors.admin);await reject(db,()=>scalar(db,'select public.account_provisioning_result($1,$2) as value',[op,JSON.stringify(expected)]));
   }},
   {name:'Removing or reusing configuration IDs cannot hijack another product or fixed bundle choices',async run(db) {

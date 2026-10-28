@@ -4,7 +4,7 @@ export interface AuthProfile { id: string; full_name: string; username: string; 
 export interface IdentityResponse { user: { id: string; email?: string }; profile: AuthProfile }
 export type AuthState = { status: 'loading' | 'anonymous' | 'recovery' | 'error'; message?: string } | { status: 'authenticated'; identity: IdentityResponse };
 
-export const invalidRecoveryMessage = 'This recovery link is invalid or expired. Request a new reset link in this browser.';
+export const invalidRecoveryMessage = 'This recovery link is invalid or expired. Request a fresh recovery email from the login page.';
 
 export async function exchangeRecoveryCode(client: SupabaseClient, code: string, flowId?: string) {
   let recoveredToken: string | undefined;
@@ -44,7 +44,7 @@ export function observeSession(client: SupabaseClient, lookup: (token: string, s
     current = session;
     if (event === 'PASSWORD_RECOVERY') recovery = true;
     if (event === 'SIGNED_OUT') recovery = false;
-    if (!session) { verifiedId=undefined; publish(recovery && event !== 'SIGNED_OUT' ? { status: 'error', message: 'This recovery link is invalid or expired. Request a new reset link.' } : { status: 'anonymous' }); return; }
+    if (!session) { verifiedId=undefined; publish(recovery && event !== 'SIGNED_OUT' ? { status: 'error', message: invalidRecoveryMessage } : { status: 'anonymous' }); return; }
     // Background checks keep an authenticated editor mounted.
     if (!recovery && verifiedId!==session.user.id) publish({ status: 'loading' });
     try {

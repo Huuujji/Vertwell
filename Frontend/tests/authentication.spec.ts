@@ -3,6 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 const id = '00000000-0000-4000-8000-000000000001';
 const user = { id, email: 'owner@example.invalid', aud: 'authenticated', role: 'authenticated',
   app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-10-17T00:00:00Z' };
+const recoveryEvidence = process.env.VERTWELL_RECOVERY_UI_EVIDENCE;
 function session() {
   const now = Math.floor(Date.now() / 1000);
   const token = `${Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')}.${Buffer.from(JSON.stringify({ sub: id, exp: now + 3600, iat: now, aud: 'authenticated', role: 'authenticated' })).toString('base64url')}.test-signature`;
@@ -86,18 +87,75 @@ test('profile denial removes authenticated content and offers explicit retry/log
   await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible();
 });
 
-test('configured recovery sends a callback link and never offers the sample verification code', async ({ page }) => {
-  await configured(page); await page.goto('/');
+test('configured recovery requests the purpose-bound code/link flow and retains invalid legacy callback protection', async ({ page }) => {
+  await configured(page);
+  await page.route('**/api/auth/email/request',route=>route.fulfill({json:{message:'Synthetic recovery request accepted'}}));
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'Verify account email with code or link' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Forgot password?', exact: true }).click();
-  await page.getByLabel('Email', { exact: true }).fill(user.email);
-  const request = page.waitForRequest(request => request.url().includes('/recover'));
-  await page.getByRole('button', { name: 'Send reset link', exact: true }).click();
-  expect((await request).url()).toContain(encodeURIComponent('/auth/callback'));
-  await expect(page.getByRole('status')).toContainText('If this account exists');
-  await expect(page.getByLabel('Verification code')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Reset your password' })).toBeFocused();
+  if (recoveryEvidence) {
+    await page.screenshot({path:`${recoveryEvidence}/forgot-password-desktop.png`,fullPage:true});
+    await page.setViewportSize({width:320,height:740});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+    await page.screenshot({path:`${recoveryEvidence}/forgot-password-320.png`,fullPage:true});
+    await page.setViewportSize({width:1280,height:720});
+  }
+  await expect(page.getByRole('link', { name: 'Recover with an email code or link' })).toHaveCount(0);
+  await expect(page).toHaveTitle('Reset your password | HappyHentie');
+  await page.getByRole('button', { name: 'Back to login', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeFocused();
+  await page.getByRole('button', { name: 'Forgot password?', exact: true }).click();
+  await page.getByLabel('Account email', { exact: true }).fill(user.email);
+  const request = page.waitForRequest(request => request.url().endsWith('/api/auth/email/request'));
+  await page.getByRole('button', { name: 'Send recovery email', exact: true }).click();
+  expect((await request).postDataJSON()).toEqual({email:user.email,purpose:'recovery'});
+  await expect(page).toHaveURL('/auth/recover');
+  await expect(page.getByRole('heading', { name: 'Choose a new password' })).toBeFocused();
+  await expect(page.getByLabel('Email code', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('New password', { exact: true })).toBeVisible();
+  await expect(page.getByText('Enter the newest recovery code and choose a new password, OR open the link in that email.', { exact: false })).toBeVisible();
+  await page.getByRole('link', { name: 'Return to HappyHentie' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await page.goto('/auth/callback?error=access_denied&error_description=expired');
   await expect(page.getByRole('alert')).toContainText('invalid or expired');
   await expect(page).toHaveURL('/');
+});
+
+test('forgot password validates the email and handles uncertain delivery without automatic retry or false confirmation', async ({page})=>{
+  await configured(page);let requests=0;
+  await page.route('**/api/auth/email/request',route=>{requests++;return route.fulfill({status:503,json:{error:{message:'Email delivery could not be confirmed. If an email arrives, its code or link may still work. Wait before requesting another.'}}});});
+  await page.goto('/');await page.getByRole('button',{name:'Forgot password?',exact:true}).click();
+  await page.getByRole('button',{name:'Send recovery email',exact:true}).click();
+  await expect(page.getByLabel('Account email',{exact:true})).toHaveAttribute('aria-invalid','true');expect(requests).toBe(0);
+  await page.getByLabel('Account email',{exact:true}).fill(user.email);
+  await page.getByRole('button',{name:'Send recovery email',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('Email delivery could not be confirmed');
+  await expect(page).toHaveTitle('Error: Reset your password | HappyHentie');
+  await expect(page.getByRole('heading',{name:'Reset your password'})).toBeVisible();
+  await expect(page.getByLabel('Account email',{exact:true})).toHaveValue(user.email);
+  await expect(page.getByRole('status')).toHaveCount(0);expect(requests).toBe(1);
+  await page.getByRole('button',{name:'Back to login',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Welcome back'})).toBeFocused();
+});
+
+test('pending sign-in opens existing verification code entry without sending another email', async ({ page }) => {
+  await configured(page);
+  let sends = 0;
+  await page.route('**/api/auth/email/request', route => { sends++; return route.fulfill({ json: {} }); });
+  await page.route('**/api/auth/login', route => route.fulfill({ status: 403, json: { error: {
+    message: 'Verify your account email before signing in.', fields: { accountEmail: 'verification_required' },
+  } } }));
+  await login(page);
+  await expect(page).toHaveURL('/auth/verify');
+  await expect(page.getByRole('heading', { name: 'Enter your verification code' })).toBeFocused();
+  await expect(page.getByLabel('Account email', { exact: true }).first()).toBeVisible();
+  await expect(page.getByLabel('Email code', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('New password', { exact: true })).toHaveCount(0);
+  await expect(page.locator('.workspace')).toHaveCount(0);
+  expect(sends).toBe(0);
+  await page.getByRole('link', { name: 'Return to HappyHentie' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 });
 
 test('PKCE recovery callback changes the actual SDK password and signs out', async ({ page }) => {
@@ -107,10 +165,15 @@ test('PKCE recovery callback changes the actual SDK password and signs out', asy
   await page.addInitScript(() => localStorage.setItem('sb-auth-auth-token-code-verifier', JSON.stringify('test-verifier/recovery')));
   await page.goto('/auth/callback?code=test-recovery-code');
   await expect(page.getByRole('heading', { name: 'Choose a new password' })).toBeVisible();
+  await expect(page).toHaveTitle('Choose a new password | HappyHentie');
+  if (recoveryEvidence) await page.screenshot({path:`${recoveryEvidence}/legacy-recovery-form-desktop.png`,fullPage:true});
+  await page.getByRole('button',{name:'Show passwords',exact:true}).click();
+  await expect(page.getByLabel('New password',{exact:true})).toHaveAttribute('type','text');
+  await page.getByRole('button',{name:'Hide passwords',exact:true}).click();
   await page.getByLabel('New password', { exact: true }).fill('Changed-password-123');
   await page.getByLabel('Confirm password', { exact: true }).fill('Changed-password-123');
   const update = page.waitForRequest(request => request.url().includes('/auth/v1/user') && request.method() === 'PUT');
-  await page.getByRole('button', { name: 'Change Password', exact: true }).click();
+  await page.getByRole('button', { name: 'Change password', exact: true }).click();
   expect((await update).postDataJSON().password).toBe('Changed-password-123');
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Password changed. Sign in with your new password.');

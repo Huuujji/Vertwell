@@ -6,8 +6,8 @@ import { checkoutFixture,checkoutAs,checkoutValue } from '../../backend/scripts/
 
 test.describe.configure({mode:'serial',timeout:60000});
 let api:Awaited<ReturnType<typeof managementServer>>, fixture:Awaited<ReturnType<typeof checkoutFixture>>;
-const output=fileURLToPath(new URL('../../../.review/october-18-p8a-browser/',import.meta.url));
-test.beforeEach(async()=>{api=await managementServer();await api.db.query('begin');fixture=await checkoutFixture(api.db);await api.db.query('commit');await api.db.query('reset role');await mkdir(output,{recursive:true});});
+const output=fileURLToPath(new URL('../../../memory/backend/supabase/major-adjustments-evidence/2026-10-27-adjustment10/live-updates/',import.meta.url));
+test.beforeEach(async({context})=>{await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:5180'?route.fallback():route.abort('blockedbyclient'));api=await managementServer();await api.db.query('begin');fixture=await checkoutFixture(api.db);await api.db.query('commit');await api.db.query('reset role');await mkdir(output,{recursive:true});});
 test.afterEach(()=>api?.close());
 async function enter(page:Page,role:'Owner'|'Admin'|'Staff'='Owner'){
   await api.setup(page.context(),role);await api.restore(page,role);
