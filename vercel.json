@@ -5,7 +5,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "Frontend/dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/api(/.*)?", "destination": "/api/index" },
     { "source": "/:path((?!api(?:/|$)).*)", "destination": "/index.html" }
   ]
 }
